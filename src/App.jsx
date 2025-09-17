@@ -50,24 +50,12 @@ function App() {
 			</nav>
 
 			{/* Hero Section - Premium Design */}
-			<section className="relative min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 overflow-hidden">
-				{/* Background Pattern */}
-				<div className="absolute inset-0 opacity-5">
-					<div className="absolute inset-0" style={{
-						backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-					}}></div>
-				</div>
-
-				{/* Floating Elements */}
-				<div className="absolute top-20 left-10 w-20 h-20 bg-gradient-to-br from-ocean-200/20 to-transparent rounded-full blur-xl animate-pulse"></div>
-				<div className="absolute bottom-32 right-16 w-32 h-32 bg-gradient-to-br from-purple-200/15 to-transparent rounded-full blur-2xl animate-pulse" style={{ animationDelay: '2s' }}></div>
-				<div className="absolute top-1/3 right-10 w-16 h-16 bg-gradient-to-br from-blue-200/25 to-transparent rounded-full blur-lg animate-pulse" style={{ animationDelay: '4s' }}></div>
-
+			<section className="relative bg-gradient-to-br from-slate-50 via-white to-slate-100 overflow-hidden">
 				<div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-					<div className="min-h-screen flex items-center">
+					<div className="relative min-h-[85vh] flex items-center">
 						<div className="grid lg:grid-cols-12 gap-8 lg:gap-16 items-center w-full">
 							{/* Left Content */}
-							<div className="lg:col-span-7 space-y-8">
+							<div className="lg:col-span-6 space-y-8">
 								{/* Badge */}
 								<div className="inline-flex items-center px-4 py-2 bg-white/80 backdrop-blur-sm border border-slate-200 rounded-full text-xs font-medium text-slate-700 shadow-sm">
 									<div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
@@ -82,11 +70,11 @@ function App() {
 											Соломкина
 										</span>
 									</h1>
-									<div className="flex flex-wrap items-center gap-4 text-lg text-slate-600 font-medium">
+									<div className="flex flex-wrap items-center gap-x-4 text-lg text-slate-600 font-medium">
 										<span>Специалист метода P-DTR</span>
-										<div className="w-1.5 h-1.5 bg-slate-400 rounded-full"></div>
+										<div className="w-1.5 h-1.5 bg-ocean-600 rounded-full"></div>
 										<span>Неврология</span>
-										<div className="w-1.5 h-1.5 bg-slate-400 rounded-full"></div>
+										<div className="w-1.5 h-1.5 bg-ocean-600 rounded-full"></div>
 										<span>Реабилитация</span>
 									</div>
 								</div>
@@ -99,9 +87,22 @@ function App() {
 									</p>
 								</div>
 							</div>
+
+							{/* Right Content - Background Image */}
+							<div
+								className="absolute bottom-0 right-[-80px] bg-cover bg-center bg-no-repeat w-[800px] h-[800px]"
+								style={{
+									backgroundImage: "url('/src/assets/images/070925-234.png')"
+								}}
+							>
+							</div>
 						</div>
 					</div>
 				</div>
+			</section>
+
+			<section className="bg-ocean-600 min-h-[20vh]">
+
 			</section>
 
 			{/* About Me Section - commented out */}
