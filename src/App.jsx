@@ -52,7 +52,7 @@ function App() {
 			{/* Hero Section - Premium Design */}
 			<section className="relative bg-gradient-to-br from-slate-50 via-white to-slate-100 overflow-hidden">
 				<div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-					<div className="relative min-h-[85vh] flex items-center">
+					<div className="relative min-h-[90vh] flex items-center">
 						<div className="grid lg:grid-cols-12 gap-8 lg:gap-16 items-center w-full">
 							{/* Left Content */}
 							<div className="lg:col-span-6 space-y-8">
@@ -89,12 +89,45 @@ function App() {
 							</div>
 
 							{/* Right Content - Background Image */}
-							<div
-								className="absolute bottom-0 right-[-80px] bg-cover bg-center bg-no-repeat w-[800px] h-[800px]"
-								style={{
-									backgroundImage: "url('/src/assets/images/070925-234.png')"
-								}}
-							>
+							<div className="absolute bottom-0 right-[-120px] w-[800px] h-[800px]">
+								{/* Multiple Glow Layers for Enhanced Effect */}
+
+								{/* Outermost glow - largest and most diffuse */}
+								<div
+									className="absolute inset-0 bg-cover bg-center bg-no-repeat blur-xl opacity-5 scale-115"
+									style={{
+										backgroundImage: "url('/src/assets/images/070925-234.png')"
+									}}
+								></div>
+
+								{/* Middle glow - medium blur */}
+								<div
+									className="absolute inset-0 bg-cover bg-center bg-no-repeat blur-xl opacity-20 scale-115"
+									style={{
+										backgroundImage: "url('/src/assets/images/070925-234.png')"
+									}}
+								></div>
+
+								{/* Inner glow - subtle blur */}
+								<div
+									className="absolute inset-0 bg-cover bg-center bg-no-repeat blur-xl opacity-15 scale-115"
+									style={{
+										backgroundImage: "url('/src/assets/images/070925-234.png')"
+									}}
+								></div>
+
+								{/* Colored glow layers */}
+								<div className="absolute inset-0 bg-gradient-radial from-ocean-600/15 via-ocean-600/15 to-transparent blur-3xl scale-120"></div>
+								<div className="absolute bottom-0 inset-0 bg-gradient-radial from-ocean-600/15 via-ocean-300/15 to-transparent blur-2xl scale-115"></div>
+
+								{/* Main Image */}
+								<div
+									className="relative z-10 bg-cover bg-center bg-no-repeat w-full h-full"
+									style={{
+										backgroundImage: "url('/src/assets/images/070925-234.png')"
+									}}
+								>
+								</div>
 							</div>
 						</div>
 					</div>

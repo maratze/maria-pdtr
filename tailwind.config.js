@@ -23,6 +23,9 @@ export default {
 			fontFamily: {
 				'sans': ['Inter', 'system-ui', 'sans-serif'],
 			},
+			backgroundImage: {
+				'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+			},
 			animation: {
 				'fade-in': 'fadeIn 0.8s ease-in-out',
 				'slide-up': 'slideUp 0.8s ease-out',
