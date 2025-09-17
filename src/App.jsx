@@ -1,4 +1,6 @@
 import React from 'react'
+import { Link } from 'react-router-dom';
+import Logo from './components/Logo';
 import './App.css'
 
 function App() {
@@ -7,39 +9,36 @@ function App() {
 			{/* Fixed Navigation */}
 			<nav className="fixed top-0 left-0 right-0 z-50">
 				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-					<div className="flex items-center justify-between h-16">
+					<div className="flex items-center justify-between h-20">
 						{/* Logo */}
 						<div className="flex-shrink-0">
-							{/* <a href="#" className="text-lg font-bold text-ocean-600">
-								Мария Соломкина
-							</a> */}
+							<Logo />
 						</div>
-
 						{/* Navigation Links */}
 						<div className="hidden md:flex items-center space-x-4">
-							<a href="#about" className="text-sm text-slate-600 hover:text-ocean-600 transition-colors duration-200 font-medium">
+							<a href="#about" className="text-sm text-slate-600 hover:text-ocean-600 transition-colors duration-200 font-medium uppercase">
 								Обо мне
 							</a>
-							<a href="#method" className="text-sm text-slate-600 hover:text-ocean-600 transition-colors duration-200 font-medium">
+							<a href="#method" className="text-sm text-slate-600 hover:text-ocean-600 transition-colors duration-200 font-medium uppercase">
 								P-DTR метод
 							</a>
-							<a href="#services" className="text-sm text-slate-600 hover:text-ocean-600 transition-colors duration-200 font-medium">
+							<a href="#services" className="text-sm text-slate-600 hover:text-ocean-600 transition-colors duration-200 font-medium uppercase">
 								Услуги
 							</a>
-							<a href="#testimonials" className="text-sm text-slate-600 hover:text-ocean-600 transition-colors duration-200 font-medium">
+							<a href="#testimonials" className="text-sm text-slate-600 hover:text-ocean-600 transition-colors duration-200 font-medium uppercase">
 								Отзывы
 							</a>
-							<a href="#formats" className="text-sm text-slate-600 hover:text-ocean-600 transition-colors duration-200 font-medium">
+							<a href="#formats" className="text-sm text-slate-600 hover:text-ocean-600 transition-colors duration-200 font-medium uppercase">
 								Форматы
 							</a>
-							<a href="#contacts" className="text-sm text-slate-600 hover:text-ocean-600 transition-colors duration-200 font-medium">
+							<a href="#contacts" className="text-sm text-slate-600 hover:text-ocean-600 transition-colors duration-200 font-medium uppercase">
 								Контакты
 							</a>
 						</div>
 
 						{/* CTA Button */}
 						<div className="flex-shrink-0">
-							<button className="bg-ocean-600 text-white px-6 py-2.5 rounded-full hover:bg-ocean-700 transition-colors duration-200 text-sm flex items-center gap-2.5">
+							<button className="bg-ocean-600 text-white px-5 py-2.5 rounded-full hover:bg-ocean-700 transition-colors duration-200 text-sm flex items-center gap-2">
 								<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
 									<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
 								</svg>
