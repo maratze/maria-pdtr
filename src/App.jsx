@@ -38,7 +38,7 @@ function App() {
 
 						{/* CTA Button */}
 						<div className="flex-shrink-0">
-							<button className="bg-ocean-600 text-white px-5 py-2.5 rounded-full hover:bg-ocean-700 transition-colors duration-200 text-sm flex items-center gap-2">
+							<button className="bg-ocean-600 text-white px-6 py-2.5 rounded-full hover:bg-ocean-700 transition-colors duration-200 text-sm flex items-center gap-2 uppercase">
 								<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
 									<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
 								</svg>
