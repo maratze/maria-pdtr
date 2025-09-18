@@ -1,40 +1,74 @@
 import React from 'react'
-import { HiOutlineBeaker, HiOutlineLightBulb } from 'react-icons/hi'
+import {
+	HiOutlineBeaker,
+	HiOutlineLightBulb,
+	HiOutlineCalendar,
+	HiOutlineAcademicCap,
+	HiOutlineHeart,
+	HiOutlineCheckCircle
+} from 'react-icons/hi'
 
 function KeyAchievements() {
+	const stats = [
+		{ number: "3+", text: "года в P-DTR" },
+		{ number: "15+", text: "семинаров" },
+		{ number: "100+", text: "здоровых клиентов" }
+	]
+
+	const achievements = [
+		{
+			icon: HiOutlineBeaker,
+			text: "Активная научно-исследовательская работа",
+			highlight: null
+		},
+		{
+			icon: HiOutlineLightBulb,
+			text: "Экспертиза в психоэмоциональной коррекции",
+			highlight: null
+		},
+		{
+			icon: HiOutlineCheckCircle,
+			text: "Сертифицированный специалист P-DTR",
+			highlight: null
+		}
+	]
+
 	return (
 		<div className="space-y-4">
-			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-				<div className="bg-white backdrop-blur-sm border border-ocean-600/20 rounded-2xl p-4 sm:p-5 text-center hover:shadow-lg hover:border-ocean-600/35 transform hover:-translate-y-1 transition-all duration-300 min-h-[110px] flex flex-col justify-center">
-					<div className="text-2xl sm:text-3xl font-medium text-ocean-600 leading-none">3+</div>
-					<div className="text-xs sm:text-sm text-slate-600 font-medium leading-tight">года в P-DTR</div>
-				</div>
-
-				<div className="bg-white backdrop-blur-sm border border-ocean-600/20 rounded-2xl p-4 sm:p-5 text-center hover:shadow-lg hover:border-ocean-600/35 transform hover:-translate-y-1 transition-all duration-300 min-h-[110px] flex flex-col justify-center">
-					<div className="text-2xl sm:text-3xl font-medium text-ocean-600 mb-2 leading-none">15+</div>
-					<div className="text-xs sm:text-sm text-slate-600 font-medium leading-tight">семинаров</div>
-				</div>
-
-				<div className="bg-white backdrop-blur-sm border border-ocean-600/20 rounded-2xl p-4 sm:p-5 text-center hover:shadow-lg hover:border-ocean-600/35 transform hover:-translate-y-1 transition-all duration-300 min-h-[110px] flex flex-col justify-center sm:col-span-2 lg:col-span-1">
-					<div className="text-2xl sm:text-3xl font-medium text-ocean-600 mb-2 leading-tight">100+</div>
-					<div className="text-xs sm:text-sm text-slate-600 font-medium leading-tight">здоровых клиентов</div>
-				</div>
+			{/* Статистика в одну строку */}
+			<div className="inline-flex flex-wrap gap-6 py-3 px-4 bg-ocean-100/50 rounded-xl border border-ocean-600/25">
+				{stats.map((stat, index) => {
+					return (
+						<div key={index} className="flex items-center gap-2">
+							<span className="flex items-center gap-1 text-md text-slate-700">
+								<span className="text-ocean-600 font-medium">{stat.number}</span>
+								<span>{stat.text}</span>
+							</span>
+						</div>
+					)
+				})}
 			</div>
 
-			<div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-				<div className="bg-white backdrop-blur-sm border border-ocean-600/20 rounded-2xl p-4 sm:p-5 text-center hover:shadow-lg hover:border-ocean-600/35 transform hover:-translate-y-1 transition-all duration-300 min-h-[110px] flex flex-col justify-center">
-					<div className="text-ocean-600 mb-3 flex justify-center">
-						<HiOutlineBeaker className="text-4xl sm:text-5xl lg:text-6xl stroke-1" />
-					</div>
-					<div className="text-xs sm:text-sm text-slate-600 font-medium leading-tight">научно-исследовательская работа</div>
-				</div>
-
-				<div className="bg-white backdrop-blur-sm border border-ocean-600/20 rounded-2xl p-4 sm:p-5 text-center hover:shadow-lg hover:border-ocean-600/35 transform hover:-translate-y-1 transition-all duration-300 min-h-[110px] flex flex-col justify-center">
-					<div className="text-ocean-600 mb-3 flex justify-center">
-						<HiOutlineLightBulb className="text-4xl sm:text-5xl lg:text-6xl stroke-1" />
-					</div>
-					<div className="text-xs sm:text-sm text-slate-600 font-medium leading-tight">психоэмоциональная коррекция</div>
-				</div>
+			{/* Остальные достижения */}
+			<div className="space-y-2">
+				{achievements.map((achievement, index) => {
+					const IconComponent = achievement.icon
+					return (
+						<div
+							key={index}
+							className="flex items-center gap-3 py-2 hover:bg-ocean-50/30 rounded-lg transition-colors duration-200"
+						>
+							<div className="flex-shrink-0">
+								<IconComponent className="text-lg text-ocean-600" />
+							</div>
+							<div className="flex-1">
+								<p className="text-md text-slate-700 leading-snug">
+									{achievement.text}
+								</p>
+							</div>
+						</div>
+					)
+				})}
 			</div>
 		</div>
 	)
