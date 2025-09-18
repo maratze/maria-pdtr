@@ -13,12 +13,12 @@ function Hero() {
 				<div className="relative min-h-screen flex items-center">
 					<div className="grid lg:grid-cols-12 gap-8 lg:gap-16 items-center w-full">
 
-						<div className="lg:col-span-6 space-y-8">
+						<div className="lg:col-span-6 space-y-8 z-20">
 							<Badge />
 							<MainHeading />
 							<Description />
 							<KeyAchievements />
-							<ProfessionalActivities />
+							{/* <ProfessionalActivities /> */}
 						</div>
 
 						<HeroImage />
