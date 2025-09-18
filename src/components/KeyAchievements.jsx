@@ -40,10 +40,10 @@ function KeyAchievements() {
 				{stats.map((stat, index) => {
 					return (
 						<div key={index} className="text-center group">
-							<div className="text-3xl sm:text-4xl font-medium text-ocean-600 leading-none">
+							<div className="text-3xl sm:text-4xl font-medium text-ocean-300 leading-none">
 								{stat.number}
 							</div>
-							<div className="text-sm text-slate-600">
+							<div className="text-sm text-slate-300">
 								{stat.text}
 							</div>
 						</div>
@@ -58,13 +58,13 @@ function KeyAchievements() {
 					return (
 						<div
 							key={index}
-							className="flex items-center gap-3 py-2 hover:bg-ocean-50/30 rounded-lg transition-colors duration-200"
+							className="flex items-center gap-3 py-2 hover:bg-white/10 rounded-lg transition-colors duration-200"
 						>
 							<div className="flex-shrink-0">
-								<IconComponent className="text-lg text-ocean-600" />
+								<IconComponent className="text-lg text-ocean-300" />
 							</div>
 							<div className="flex-1">
-								<p className="text-md text-slate-700 leading-snug">
+								<p className="text-md text-slate-200 leading-snug">
 									{achievement.text}
 								</p>
 							</div>

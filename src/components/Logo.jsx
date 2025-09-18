@@ -5,10 +5,10 @@ const Logo = ({ className = "" }) => {
 	return (
 		<Link
 			to="/"
-			className={`flex items-center gap-3 text-lg font-bold text-ocean-600 ${className}`}
+			className={`flex items-center gap-3 text-lg font-bold text-white hover:text-ocean-300 transition-colors duration-300 ${className}`}
 			aria-label="Главная"
 		>
-			<svg className="w-[90px] fill-ocean-600" xmlns="http://www.w3.org/2000/svg" id="Layer_2" data-name="Layer 2" viewBox="0 0 950.98 274.81">
+			<svg className="w-[90px] fill-white hover:fill-ocean-300 transition-colors duration-300" xmlns="http://www.w3.org/2000/svg" id="Layer_2" data-name="Layer 2" viewBox="0 0 950.98 274.81">
 				<g id="Layer_1-2" data-name="Layer 1">
 					<g>
 						<path class="cls-1" d="m355.54,10.76c13.04,0,24.9,3.18,35.58,9.53,10.68,6.35,19.22,14.89,25.63,25.63,6.41,10.74,9.61,22.62,9.61,35.66s-3.2,24.9-9.61,35.58c-6.41,10.68-14.95,19.22-25.63,25.63-10.68,6.41-22.54,9.61-35.58,9.61h-51.6v122.41h-19.22v-141.63h70.81c14.27,0,26.44-5.03,36.5-15.09,10.06-10.06,15.09-22.23,15.09-36.5s-5.03-26.47-15.09-36.59c-10.06-10.12-22.23-15.18-36.5-15.18h-70.81V10.76h70.81Z" />
