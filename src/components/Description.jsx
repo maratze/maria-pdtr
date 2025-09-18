@@ -3,7 +3,7 @@ import React from 'react'
 function Description() {
 	return (
 		<div className="max-w-2xl">
-			<p className="text-md text-slate-700 leading-relaxed font-light">
+			<p className="text-md text-slate-700 leading-relaxed">
 				<span className="font-medium text-ocean-600">Инновационный подход</span> к восстановлению здоровья через работу с нервной системой.
 				Комплексное решение для хронической боли, стресса и неврологических нарушений.
 			</p>

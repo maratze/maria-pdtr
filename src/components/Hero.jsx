@@ -11,18 +11,15 @@ function Hero() {
 		<section className="relative bg-gradient-to-br from-slate-50 via-white to-slate-100 overflow-hidden">
 			<div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 				<div className="relative min-h-screen flex items-center">
-					<div className="grid lg:grid-cols-12 gap-8 lg:gap-16 items-center w-full">
-
-						<div className="lg:col-span-6 space-y-8 z-20">
-							<Badge />
-							<MainHeading />
-							<Description />
-							<KeyAchievements />
-							{/* <ProfessionalActivities /> */}
-						</div>
-
-						<HeroImage />
+					<div className="max-w-[570px] space-y-8 z-20">
+						<Badge />
+						<MainHeading />
+						<Description />
+						<KeyAchievements />
+						{/* <ProfessionalActivities /> */}
 					</div>
+
+					<HeroImage />
 				</div>
 			</div>
 		</section>
