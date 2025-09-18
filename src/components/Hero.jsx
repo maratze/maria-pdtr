@@ -25,8 +25,7 @@ function Hero() {
 						className="w-full h-full"
 						style={{
 							backgroundImage: `radial-gradient(circle, rgba(59, 130, 246, 0.3) 1px, transparent 1px)`,
-							backgroundSize: '50px 50px',
-							animation: 'float 6s ease-in-out infinite'
+							backgroundSize: '50px 50px'
 						}}
 					></div>
 				</div>
@@ -39,12 +38,7 @@ function Hero() {
 				</div>
 			</div>
 
-			<style jsx>{`
-				@keyframes float {
-					0%, 100% { transform: translateY(0px) rotate(0deg); }
-					50% { transform: translateY(-20px) rotate(180deg); }
-				}
-			`}</style>
+
 
 			<div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10">
 				<div className="relative min-h-screen flex items-center">
