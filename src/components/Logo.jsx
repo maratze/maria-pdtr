@@ -8,48 +8,21 @@ const Logo = ({ className = "" }) => {
 			className={`flex items-center gap-3 text-lg font-bold text-ocean-600 ${className}`}
 			aria-label="Главная"
 		>
-			<svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-				{/* Outer circle with gradient */}
-				<defs>
-					<linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-						<stop offset="0%" stopColor="#0ea5e9" />
-						<stop offset="100%" stopColor="#0284c7" />
-					</linearGradient>
-					<radialGradient id="innerGradient" cx="50%" cy="50%" r="50%">
-						<stop offset="0%" stopColor="#ffffff" stopOpacity="0.9" />
-						<stop offset="100%" stopColor="#e0f2fe" stopOpacity="0.6" />
-					</radialGradient>
-				</defs>
-
-				{/* Main circle */}
-				<circle cx="18" cy="18" r="16" fill="url(#innerGradient)" stroke="url(#logoGradient)" strokeWidth="2" />
-
-				{/* Central design - stylized brain/neural network */}
-				<g transform="translate(18, 18)">
-					{/* Central node */}
-					<circle cx="0" cy="0" r="2.5" fill="url(#logoGradient)" />
-
-					{/* Neural connections */}
-					<path d="M-8 -6 Q-4 -3 0 0" stroke="#0ea5e9" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-					<path d="M8 -6 Q4 -3 0 0" stroke="#0ea5e9" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-					<path d="M-8 6 Q-4 3 0 0" stroke="#0ea5e9" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-					<path d="M8 6 Q4 3 0 0" stroke="#0ea5e9" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-					<path d="M0 -8 Q0 -4 0 0" stroke="#0ea5e9" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-					<path d="M0 8 Q0 4 0 0" stroke="#0ea5e9" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-
-					{/* Outer nodes */}
-					<circle cx="-8" cy="-6" r="1.5" fill="#0284c7" />
-					<circle cx="8" cy="-6" r="1.5" fill="#0284c7" />
-					<circle cx="-8" cy="6" r="1.5" fill="#0284c7" />
-					<circle cx="8" cy="6" r="1.5" fill="#0284c7" />
-					<circle cx="0" cy="-8" r="1.5" fill="#0284c7" />
-					<circle cx="0" cy="8" r="1.5" fill="#0284c7" />
+			<svg className="w-[90px] fill-ocean-600" xmlns="http://www.w3.org/2000/svg" id="Layer_2" data-name="Layer 2" viewBox="0 0 950.98 274.81">
+				<g id="Layer_1-2" data-name="Layer 1">
+					<g>
+						<path class="cls-1" d="m355.54,10.76c13.04,0,24.9,3.18,35.58,9.53,10.68,6.35,19.22,14.89,25.63,25.63,6.41,10.74,9.61,22.62,9.61,35.66s-3.2,24.9-9.61,35.58c-6.41,10.68-14.95,19.22-25.63,25.63-10.68,6.41-22.54,9.61-35.58,9.61h-51.6v122.41h-19.22v-141.63h70.81c14.27,0,26.44-5.03,36.5-15.09,10.06-10.06,15.09-22.23,15.09-36.5s-5.03-26.47-15.09-36.59c-10.06-10.12-22.23-15.18-36.5-15.18h-70.81V10.76h70.81Z" />
+						<path class="cls-1" d="m463.62,29.82h-9.61V10.76h9.61c17.65,0,34.48,3.32,50.5,9.95,16.01,6.63,30.32,16.19,42.91,28.66,12.48,12.59,22.03,26.89,28.66,42.91,6.63,16.02,9.95,32.85,9.95,50.5s-3.32,34.48-9.95,50.5c-6.63,16.02-16.19,30.32-28.66,42.91-12.59,12.48-26.89,22.03-42.91,28.66-16.02,6.63-32.86,9.95-50.5,9.95h-9.61v-19.05h9.61c20.68,0,39.57-5.08,56.66-15.26,17.08-10.17,30.71-23.8,40.88-40.89,10.18-17.09,15.26-36.02,15.26-56.82s-5.09-39.73-15.26-56.82c-10.17-17.09-23.8-30.71-40.88-40.89-17.09-10.17-35.97-15.26-56.66-15.26Z" />
+						<path class="cls-1" d="m715.54,274.81V29.82h-122.41V10.76h141.63v264.04h-19.22Z" />
+						<path class="cls-1" d="m120.87,45.17V0h-13.38v45.17C47.64,48.65,0,98.44,0,159.16s51.22,114.18,114.18,114.18,114.18-51.22,114.18-114.18-47.64-110.51-107.49-113.98Zm-6.69,220.17c-58.55,0-106.18-47.63-106.18-106.18S52.05,56.65,107.49,53.19v130.98h13.38V53.19c55.44,3.46,99.49,49.66,99.49,105.97s-47.63,106.18-106.18,106.18Z" />
+						<path class="cls-1" d="m880.16,152.4c13.04,0,24.9-3.2,35.58-9.61,10.68-6.41,19.22-14.95,25.63-25.63,6.41-10.68,9.61-22.54,9.61-35.58s-3.2-24.93-9.61-35.66c-6.41-10.73-14.95-19.28-25.63-25.63-10.68-6.35-22.54-9.53-35.58-9.53h-57.35l9.18-9.18h-15.83l-18.65,18.65,18.65,18.65h15.83l-9.07-9.07h57.24c14.27,0,26.44,5.06,36.5,15.18,10.06,10.12,15.09,22.31,15.09,36.59s-5.03,26.45-15.09,36.5c-10.06,10.06-22.23,15.09-36.5,15.09h-70.81v9.61l9.27,9.61,118.53,122.41,13.83-13.32-105.72-109.09h34.9Z" />
+					</g>
 				</g>
 			</svg>
-			<div className="flex flex-col">
-				<span className="text-lg font-bold leading-tight">M.S.</span>
-				<span className="text-xs font-medium text-ocean-500 -mt-1">P-DTR</span>
-			</div>
+			{/* <div className="flex flex-col">
+				<span className="text-lg font-bold leading-tight">P-DTR</span>
+				<span className="text-xs font-medium text-ocean-500 -mt-1">MARIA SOLOMKINA</span>
+			</div> */}
 		</Link>
 	)
 }
