@@ -11,7 +11,7 @@ function Hero() {
 		<section className="relative bg-gradient-to-br from-slate-50 via-white to-slate-100 overflow-hidden">
 			<div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 				<div className="relative min-h-screen flex items-center">
-					<div className="max-w-[570px] space-y-8 z-20">
+					<div className="max-w-[500px] space-y-8 z-20">
 						<Badge />
 						<MainHeading />
 						<Description />
