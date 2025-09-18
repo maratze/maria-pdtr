@@ -34,23 +34,25 @@ function KeyAchievements() {
 	]
 
 	return (
-		<div className="space-y-4">
-			{/* Статистика в одну строку */}
-			<div className="inline-flex flex-wrap gap-6 py-3 px-4 bg-ocean-100/50 rounded-xl border border-ocean-600/25">
+		<div className="space-y-6">
+			{/* Статистика - акцентный блок */}
+			<div className="flex flex-wrap justify-start gap-8 sm:gap-12">
 				{stats.map((stat, index) => {
 					return (
-						<div key={index} className="flex items-center gap-2">
-							<span className="flex items-center gap-1 text-md text-slate-700">
-								<span className="text-ocean-600 font-medium">{stat.number}</span>
-								<span>{stat.text}</span>
-							</span>
+						<div key={index} className="text-center group">
+							<div className="text-3xl sm:text-4xl font-medium text-ocean-600 leading-none">
+								{stat.number}
+							</div>
+							<div className="text-sm text-slate-600">
+								{stat.text}
+							</div>
 						</div>
 					)
 				})}
 			</div>
 
 			{/* Остальные достижения */}
-			<div className="space-y-2">
+			<div>
 				{achievements.map((achievement, index) => {
 					const IconComponent = achievement.icon
 					return (
