@@ -110,42 +110,42 @@ function Navigation() {
 						<div className="flex flex-col items-center space-y-4">
 							<a
 								href="#about"
-								className="text-sm text-white hover:text-ocean-300 transition-all duration-300 font-medium uppercase tracking-wide py-3 text-center"
+								className="text-md text-white hover:text-ocean-300 transition-all duration-300 font-medium uppercase tracking-wide py-3 text-center"
 								onClick={() => setIsMobileMenuOpen(false)}
 							>
 								Обо мне
 							</a>
 							<a
 								href="#method"
-								className="text-sm text-white hover:text-ocean-300 transition-all duration-300 font-medium uppercase tracking-wide py-3 text-center"
+								className="text-md text-white hover:text-ocean-300 transition-all duration-300 font-medium uppercase tracking-wide py-3 text-center"
 								onClick={() => setIsMobileMenuOpen(false)}
 							>
 								P-DTR метод
 							</a>
 							<a
 								href="#services"
-								className="text-sm text-white hover:text-ocean-300 transition-all duration-300 font-medium uppercase tracking-wide py-3 text-center"
+								className="text-md text-white hover:text-ocean-300 transition-all duration-300 font-medium uppercase tracking-wide py-3 text-center"
 								onClick={() => setIsMobileMenuOpen(false)}
 							>
 								Услуги
 							</a>
 							<a
 								href="#testimonials"
-								className="text-sm text-white hover:text-ocean-300 transition-all duration-300 font-medium uppercase tracking-wide py-3 text-center"
+								className="text-md text-white hover:text-ocean-300 transition-all duration-300 font-medium uppercase tracking-wide py-3 text-center"
 								onClick={() => setIsMobileMenuOpen(false)}
 							>
 								Отзывы
 							</a>
 							<a
 								href="#formats"
-								className="text-sm text-white hover:text-ocean-300 transition-all duration-300 font-medium uppercase tracking-wide py-3 text-center"
+								className="text-md text-white hover:text-ocean-300 transition-all duration-300 font-medium uppercase tracking-wide py-3 text-center"
 								onClick={() => setIsMobileMenuOpen(false)}
 							>
 								Форматы
 							</a>
 							<a
 								href="#contacts"
-								className="text-sm text-white hover:text-ocean-300 transition-all duration-300 font-medium uppercase tracking-wide py-3 text-center"
+								className="text-md text-white hover:text-ocean-300 transition-all duration-300 font-medium uppercase tracking-wide py-3 text-center"
 								onClick={() => setIsMobileMenuOpen(false)}
 							>
 								Контакты

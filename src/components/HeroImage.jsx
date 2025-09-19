@@ -2,7 +2,7 @@ import React from 'react'
 
 function HeroImage() {
 	return (
-		<div className="absolute bottom-0 right-[-120px] w-[800px] h-[800px] z-10">
+		<div className="absolute bottom-0 md:left-[40%] md:w-[660px] md:h-[660px] lg:left-[40%] lg:w-[800px] lg:h-[800px] z-10">
 			{/* Multiple Glow Layers for Enhanced Effect */}
 
 			{/* Outermost glow - largest and most diffuse */}

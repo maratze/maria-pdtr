@@ -36,14 +36,14 @@ function KeyAchievements() {
 	return (
 		<div className="space-y-6">
 			{/* Статистика - акцентный блок */}
-			<div className="flex flex-wrap justify-start gap-8 sm:gap-12">
+			<div className="flex flex-wrap justify-start gap-4 lg:gap-8">
 				{stats.map((stat, index) => {
 					return (
 						<div key={index} className="text-center group">
 							<div className="text-3xl sm:text-4xl font-medium text-ocean-300 leading-none">
 								{stat.number}
 							</div>
-							<div className="text-sm text-slate-300">
+							<div className="text-sm text-slate-200">
 								{stat.text}
 							</div>
 						</div>
