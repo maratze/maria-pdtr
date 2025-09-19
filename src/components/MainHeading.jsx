@@ -2,8 +2,8 @@ import React from 'react'
 
 function MainHeading() {
 	return (
-		<div className="space-y-8">
-			<h1 className="flex gap-2 lg:block text-5xl lg:text-7xl font-bold text-white leading-tight tracking-tight">
+		<div className="space-y-6 sm:space-y-8">
+			<h1 className="min-[500px]:flex gap-3 lg:block text-5xl lg:text-7xl font-bold text-white tracking-tight">
 				<span className="block">Мария</span>
 				<span className="block bg-gradient-to-r from-blue-300 to-ocean-600 bg-clip-text text-transparent">
 					Соломкина
