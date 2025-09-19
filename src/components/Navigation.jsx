@@ -19,6 +19,20 @@ function Navigation() {
 		}
 	}, [])
 
+	// Block body scroll when mobile menu is open
+	useEffect(() => {
+		if (isMobileMenuOpen) {
+			document.body.style.overflow = 'hidden'
+		} else {
+			document.body.style.overflow = 'unset'
+		}
+
+		// Cleanup on unmount
+		return () => {
+			document.body.style.overflow = 'unset'
+		}
+	}, [isMobileMenuOpen])
+
 	return (
 		<nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-100 border-b ${isScrolled ? 'backdrop-blur-md bg-slate-900/80 border-white/10' : 'border-transparent'} ${isMobileMenuOpen ? 'max-[999px]:backdrop-blur-md' : ''}`}>
 			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
