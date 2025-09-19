@@ -5,7 +5,7 @@ function MainHeading() {
 		<div className="space-y-8">
 			<h1 className="flex gap-2 lg:block text-5xl lg:text-7xl font-bold text-white leading-tight tracking-tight">
 				<span className="block">Мария</span>
-				<span className="block bg-gradient-to-r from-ocean-300 to-blue-400 bg-clip-text text-transparent">
+				<span className="block bg-gradient-to-r from-blue-300 to-ocean-600 bg-clip-text text-transparent">
 					Соломкина
 				</span>
 			</h1>

@@ -58,7 +58,7 @@ function KeyAchievements() {
 					return (
 						<div
 							key={index}
-							className="flex items-center gap-3 py-2 rounded-lg transition-colors duration-200"
+							className="flex items-center gap-3 py-1 rounded-lg transition-colors duration-200"
 						>
 							<div className="flex-shrink-0">
 								<IconComponent className="text-xl text-ocean-300" />
