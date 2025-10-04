@@ -175,7 +175,7 @@ const PDTRMethod = () => {
 			title: "Преимущества P-DTR",
 			content: (
 				<div>
-					<div className="grid gap-4">
+					<div className="grid gap-4 md:grid-cols-2">
 						<div className="bg-ocean-50 p-4 rounded-lg">
 							<h4 className="font-semibold text-ocean-600 mb-2">Быстрые результаты</h4>
 							<p className="text-sm">Многие клиенты отмечают улучшения уже после первого сеанса</p>
@@ -221,7 +221,7 @@ const PDTRMethod = () => {
 					</h2>
 
 					{/* Описание */}
-					<p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed mb-8">
+					<p className="text-md md:text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed mb-8">
 						Инновационный подход к восстановлению здоровья через работу с нервной системой.
 						<span className="text-ocean-600 font-medium"> Быстрые результаты без побочных эффектов.</span>
 					</p>
