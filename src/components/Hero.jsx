@@ -40,7 +40,7 @@ function Hero() {
 
 			<div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10">
 				<div className="relative flex items-baseline justify-self-center md:justify-self-stretch lg:items-center pt-32 pb-4 md:py-40">
-					<div className="max-w-[500px] space-y-6 sm:space-y-8 z-30 relative">
+					<div className="max-w-full md:max-w-[500px] space-y-6 sm:space-y-8 z-30 relative">
 						<Badge />
 						<MainHeading />
 						<Description />
