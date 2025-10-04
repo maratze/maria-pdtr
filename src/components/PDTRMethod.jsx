@@ -170,31 +170,6 @@ const PDTRMethod = () => {
 					</div>
 				</div>
 			)
-		},
-		{
-			title: "Преимущества P-DTR",
-			content: (
-				<div>
-					<div className="grid gap-4 md:grid-cols-2">
-						<div className="bg-ocean-50 p-4 rounded-lg">
-							<h4 className="font-semibold text-ocean-600 mb-2">Быстрые результаты</h4>
-							<p className="text-sm">Многие клиенты отмечают улучшения уже после первого сеанса</p>
-						</div>
-						<div className="bg-ocean-50 p-4 rounded-lg">
-							<h4 className="font-semibold text-ocean-600 mb-2">Работа с первопричиной</h4>
-							<p className="text-sm">Метод находит и устраняет корень проблемы, а не только симптомы</p>
-						</div>
-						<div className="bg-ocean-50 p-4 rounded-lg">
-							<h4 className="font-semibold text-ocean-600 mb-2">Безопасность</h4>
-							<p className="text-sm">Неинвазивный подход без побочных эффектов</p>
-						</div>
-						<div className="bg-ocean-50 p-4 rounded-lg">
-							<h4 className="font-semibold text-ocean-600 mb-2">Индивидуальный подход</h4>
-							<p className="text-sm">Каждый сеанс адаптируется под конкретные потребности клиента</p>
-						</div>
-					</div>
-				</div>
-			)
 		}
 	];
 
@@ -208,7 +183,7 @@ const PDTRMethod = () => {
 			</div>
 
 			<div className="max-w-5xl mx-auto px-6 relative z-10">
-				<div className="text-center mb-12 md:mb-16">
+				<div className="text-center mb-8 md:mb-12">
 					{/* Бейдж */}
 					<div className="inline-flex items-center px-4 py-2 bg-ocean-100 text-ocean-600 rounded-full text-sm font-medium mb-4">
 						<div className="w-1.5 h-1.5 bg-ocean-500 rounded-full mr-2"></div>
@@ -238,13 +213,15 @@ const PDTRMethod = () => {
 
 				{/* Блок преимуществ P-DTR */}
 				<div className="mt-16 md:mt-20">
+					<h2 className="text-2xl font-medium text-center text-gray-900 mb-8">Главные преимущества</h2>
+
 					<div className="grid gap-6 md:grid-cols-2 lg:gap-8">
 						{/* Решение эмоциональных проблем */}
 						<div className="group relative bg-white/80 backdrop-blur-sm p-8 rounded-xl border border-gray-100 shadow-md hover:shadow-xl transition-all duration-500 hover:-translate-y-1 overflow-hidden">
 							<div className="relative">
 								<div className="flex items-start gap-5 mb-6">
 									<div className="flex-shrink-0">
-										<svg className="w-8 h-8 text-ocean-600 group-hover:scale-105 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<svg className="w-8 h-8 text-ocean-500 group-hover:scale-105 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 											<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
 										</svg>
 									</div>
@@ -273,7 +250,7 @@ const PDTRMethod = () => {
 							<div className="relative">
 								<div className="flex items-start gap-5 mb-6">
 									<div className="flex-shrink-0">
-										<svg className="w-8 h-8 text-emerald-600 group-hover:scale-105 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<svg className="w-8 h-8 text-emerald-500 group-hover:scale-105 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 											<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
 										</svg>
 									</div>
@@ -286,11 +263,11 @@ const PDTRMethod = () => {
 								</div>
 								<div className="text-gray-700 text-sm leading-relaxed space-y-3">
 									<div className="flex items-start gap-3">
-										<div className="w-1.5 h-1.5 bg-ocean-500 rounded-full mt-2 flex-shrink-0"></div>
+										<div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mt-2 flex-shrink-0"></div>
 										<p>Устранение энергозатратных программ в работе нервной системы для повышения общей функциональности организма.</p>
 									</div>
 									<div className="flex items-start gap-3">
-										<div className="w-1.5 h-1.5 bg-ocean-500 rounded-full mt-2 flex-shrink-0"></div>
+										<div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mt-2 flex-shrink-0"></div>
 										<p>Улучшение координации, концентрации внимания, качества сна. Оптимизация работы всех систем организма для достижения пикового состояния.</p>
 									</div>
 								</div>
@@ -302,7 +279,7 @@ const PDTRMethod = () => {
 							<div className="relative">
 								<div className="flex items-start gap-5 mb-6">
 									<div className="flex-shrink-0">
-										<svg className="w-8 h-8 text-amber-600 group-hover:scale-105 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<svg className="w-8 h-8 text-amber-500 group-hover:scale-105 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 											<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
 										</svg>
 									</div>
@@ -315,11 +292,11 @@ const PDTRMethod = () => {
 								</div>
 								<div className="text-gray-700 text-sm leading-relaxed space-y-3">
 									<div className="flex items-start gap-3">
-										<div className="w-1.5 h-1.5 bg-ocean-500 rounded-full mt-2 flex-shrink-0"></div>
+										<div className="w-1.5 h-1.5 bg-amber-500 rounded-full mt-2 flex-shrink-0"></div>
 										<p>Комплексный подход к уменьшению хронической и острой боли различной этиологии через работу с нервной системой.</p>
 									</div>
 									<div className="flex items-start gap-3">
-										<div className="w-1.5 h-1.5 bg-ocean-500 rounded-full mt-2 flex-shrink-0"></div>
+										<div className="w-1.5 h-1.5 bg-amber-500 rounded-full mt-2 flex-shrink-0"></div>
 										<p>Восстановление правильных двигательных паттернов, снятие мышечных зажимов и напряжений. Долговременный эффект без медикаментов.</p>
 									</div>
 								</div>
@@ -331,7 +308,7 @@ const PDTRMethod = () => {
 							<div className="relative">
 								<div className="flex items-start gap-5 mb-6">
 									<div className="flex-shrink-0">
-										<svg className="w-8 h-8 text-violet-600 group-hover:scale-105 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<svg className="w-8 h-8 text-violet-500 group-hover:scale-105 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 											<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
 										</svg>
 									</div>
@@ -344,11 +321,11 @@ const PDTRMethod = () => {
 								</div>
 								<div className="text-gray-700 text-sm leading-relaxed space-y-3">
 									<div className="flex items-start gap-3">
-										<div className="w-1.5 h-1.5 bg-ocean-500 rounded-full mt-2 flex-shrink-0"></div>
+										<div className="w-1.5 h-1.5 bg-violet-500 rounded-full mt-2 flex-shrink-0"></div>
 										<p>Борьба с хронической усталостью, апатией и преддепрессивными состояниями через нормализацию работы нервной системы.</p>
 									</div>
 									<div className="flex items-start gap-3">
-										<div className="w-1.5 h-1.5 bg-ocean-500 rounded-full mt-2 flex-shrink-0"></div>
+										<div className="w-1.5 h-1.5 bg-violet-500 rounded-full mt-2 flex-shrink-0"></div>
 										<p>Активация естественных энергетических резервов организма. Улучшение качества отдыха и восстановления для стабильного уровня энергии.</p>
 									</div>
 								</div>
