@@ -40,7 +40,7 @@ function KeyAchievements() {
 				{stats.map((stat, index) => {
 					return (
 						<div key={index} className="min-[420px]:text-center group">
-							<div className="flex justify-center text-3xl sm:text-4xl font-medium text-ocean-300 leading-none">
+							<div className="flex justify-center text-3xl sm:text-4xl font-medium text-ocean-400 leading-none">
 								{stat.number}
 							</div>
 							<div className="text-sm text-slate-200">
@@ -61,7 +61,7 @@ function KeyAchievements() {
 							className="flex items-center gap-3 py-1 rounded-lg transition-colors duration-200"
 						>
 							<div className="flex-shrink-0">
-								<IconComponent className="text-xl text-ocean-300" />
+								<IconComponent className="text-xl text-ocean-400" />
 							</div>
 							<div className="flex-1">
 								<p className="text-md text-slate-200 leading-snug">

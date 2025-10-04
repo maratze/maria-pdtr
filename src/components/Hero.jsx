@@ -8,7 +8,7 @@ import HeroImage from './HeroImage'
 
 function Hero() {
 	return (
-		<section className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-ocean-900 overflow-hidden">
+		<section id="about" className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-ocean-900 overflow-hidden">
 			{/* Анимированный фон с геометрическими фигурами */}
 			<div className="absolute inset-0">
 				{/* Основной градиент */}
