@@ -83,27 +83,48 @@ const PDTRMethod = () => {
 			title: "Какие проблемы решает?",
 			content: (
 				<div>
-					<div className="grid md:grid-cols-2 gap-4">
-						<div>
-							<h4 className="font-semibold mb-2 text-ocean-500">Физические проблемы:</h4>
-							<ul className="list-disc list-inside space-y-1 text-sm">
-								<li>Хроническая и острая боль</li>
-								<li>Мигрени и головные боли</li>
-								<li>Боли в спине, шее, суставах</li>
-								<li>Последствия травм</li>
-								<li>Нарушения координации</li>
-							</ul>
-						</div>
-						<div>
-							<h4 className="font-semibold mb-2 text-ocean-500">Эмоциональные проблемы:</h4>
-							<ul className="list-disc list-inside space-y-1 text-sm">
-								<li>Хронический стресс</li>
-								<li>Фобии и страхи</li>
-								<li>Эмоциональные блоки</li>
-								<li>Психосоматические расстройства</li>
-								<li>Низкий уровень энергии</li>
-							</ul>
-						</div>
+					<div className="mb-6">
+						<p className="mb-4 text-gray-600">P-DTR эффективен при лечении широкого спектра проблем, включая:</p>
+						<ul className="space-y-3">
+							<li className="flex items-start gap-3">
+								<div className="w-1.5 h-1.5 bg-ocean-500 rounded-full mt-2 flex-shrink-0"></div>
+								<p>Острые эмоциональные состояния, расстройства адаптации</p>
+							</li>
+							<li className="flex items-start gap-3">
+								<div className="w-1.5 h-1.5 bg-ocean-500 rounded-full mt-2 flex-shrink-0"></div>
+								<p>Проработка страхов, фобий</p>
+							</li>
+							<li className="flex items-start gap-3">
+								<div className="w-1.5 h-1.5 bg-ocean-500 rounded-full mt-2 flex-shrink-0"></div>
+								<p>Заболевания позвоночника и суставов (остеохондроз, межпозвонковые грыжи, артриты и др.)</p>
+							</li>
+							<li className="flex items-start gap-3">
+								<div className="w-1.5 h-1.5 bg-ocean-500 rounded-full mt-2 flex-shrink-0"></div>
+								<p>Последствия травм и операций</p>
+							</li>
+							<li className="flex items-start gap-3">
+								<div className="w-1.5 h-1.5 bg-ocean-500 rounded-full mt-2 flex-shrink-0"></div>
+								<p>Неврологические нарушения (головные боли, вегето-сосудистая дистония)</p>
+							</li>
+							<li className="flex items-start gap-3">
+								<div className="w-1.5 h-1.5 bg-ocean-500 rounded-full mt-2 flex-shrink-0"></div>
+								<p>Болезни внутренних органов</p>
+							</li>
+							<li className="flex items-start gap-3">
+								<div className="w-1.5 h-1.5 bg-ocean-500 rounded-full mt-2 flex-shrink-0"></div>
+								<p>Проблемы у детей (последствия родовых травм, сколиоз и др.)</p>
+							</li>
+							<li className="flex items-start gap-3">
+								<div className="w-1.5 h-1.5 bg-ocean-500 rounded-full mt-2 flex-shrink-0"></div>
+								<p>Гинекологические и урологические проблемы</p>
+							</li>
+						</ul>
+					</div>
+					<div className="bg-ocean-50 p-4 rounded-lg">
+						<p className="text-sm text-ocean-700">
+							<strong>Важно:</strong> P-DTR работает не только с симптомами, но и с первопричиной проблем,
+							обеспечивая комплексный подход к восстановлению здоровья.
+						</p>
 					</div>
 				</div>
 			)
@@ -116,16 +137,37 @@ const PDTRMethod = () => {
 						Метод P-DTR подходит людям различного возраста и с разными запросами:
 					</p>
 					<ul className="list-disc list-inside space-y-2">
-						<li>Взрослым с хроническими болями и дискомфортом</li>
-						<li>Детям с нарушениями развития и поведенческими проблемами</li>
-						<li>Спортсменам для улучшения производительности</li>
-						<li>Людям, пережившим травмы и стресс</li>
-						<li>Тем, кто хочет улучшить общее самочувствие и энергию</li>
+						<li className="flex items-start gap-3">
+							<div className="w-1.5 h-1.5 bg-ocean-500 rounded-full mt-2 flex-shrink-0"></div>
+							<p>Взрослым с хроническими болями и дискомфортом</p>
+						</li>
+
+						<li className="flex items-start gap-3">
+							<div className="w-1.5 h-1.5 bg-ocean-500 rounded-full mt-2 flex-shrink-0"></div>
+							<p>Детям с нарушениями развития и поведенческими проблемами</p>
+						</li>
+						<li className="flex items-start gap-3">
+							<div className="w-1.5 h-1.5 bg-ocean-500 rounded-full mt-2 flex-shrink-0"></div>
+							<p>Спортсменам для улучшения производительности</p>
+						</li>
+						<li className="flex items-start gap-3">
+							<div className="w-1.5 h-1.5 bg-ocean-500 rounded-full mt-2 flex-shrink-0"></div>
+							<p>Людям, пережившим травмы и стресс</p>
+						</li>
+						<li className="flex items-start gap-3">
+							<div className="w-1.5 h-1.5 bg-ocean-500 rounded-full mt-2 flex-shrink-0"></div>
+							<p>Тем, кто хочет улучшить общее самочувствие и энергию</p>
+						</li>
 					</ul>
 					<p className="mt-4 text-sm text-gray-600">
 						Метод безопасен и может применяться как самостоятельно, так и в комплексе
 						с другими видами терапии.
 					</p>
+					<div className="bg-ocean-50 p-4 rounded-lg mt-6">
+						<p className="text-sm text-ocean-700">
+							<strong>Важно:</strong> Не подходит в двух основных случаях - врожденные и органические изменения. Рекомендуется проконсультироваться со специалистом.
+						</p>
+					</div>
 				</div>
 			)
 		},
@@ -169,7 +211,7 @@ const PDTRMethod = () => {
 				<div className="text-center mb-12 md:mb-16">
 					{/* Бейдж */}
 					<div className="inline-flex items-center px-4 py-2 bg-ocean-100 text-ocean-600 rounded-full text-sm font-medium mb-4">
-						<div className="w-2 h-2 bg-ocean-500 rounded-full mr-2"></div>
+						<div className="w-1.5 h-1.5 bg-ocean-500 rounded-full mr-2"></div>
 						Инновационная нейротерапия
 					</div>
 
@@ -187,7 +229,7 @@ const PDTRMethod = () => {
 					{/* Декоративная линия */}
 					<div className="flex items-center justify-center mt-6 mb-2">
 						<div className="h-px bg-gradient-to-r from-transparent via-ocean-500 to-transparent w-32"></div>
-						<div className="mx-4 w-2 h-2 bg-ocean-500 rounded-full"></div>
+						<div className="mx-4 w-1.5 h-1.5 bg-ocean-500 rounded-full"></div>
 						<div className="h-px bg-gradient-to-r from-transparent via-ocean-500 to-transparent w-32"></div>
 					</div>
 				</div>
