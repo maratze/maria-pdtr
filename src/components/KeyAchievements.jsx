@@ -36,7 +36,7 @@ function KeyAchievements() {
 	return (
 		<div className="space-y-6">
 			{/* Статистика - акцентный блок */}
-			<div className="flex flex-row flex-wrap justify-center min-[420px]:justify-start gap-4 lg:gap-8">
+			<div className="flex flex-row flex-wrap justify-around min-[420px]:justify-start gap-4 lg:gap-8">
 				{stats.map((stat, index) => {
 					return (
 						<div key={index} className="min-[420px]:text-center group">
