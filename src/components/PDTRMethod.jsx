@@ -7,7 +7,7 @@ const PDTRMethod = () => {
 			title: "Что такое P-DTR?",
 			content: (
 				<div>
-					<div className="mb-6">
+					<div className="mb-6 text-[15px]">
 						<h4 className="font-medium text-ocean-600 mb-3">Суть метода</h4>
 						<ul className="space-y-3">
 							<li className="flex items-start gap-3">
@@ -34,7 +34,7 @@ const PDTRMethod = () => {
 						</ul>
 					</div>
 					<div className="bg-ocean-50 p-4 rounded-lg">
-						<p className="text-sm text-ocean-700">
+						<p className="text-sm text-ocean-700 text-[15px]">
 							<strong>P-DTR</strong> (Proprioceptive Deep Tendon Reflex) — это революционный подход
 							к восстановлению здоровья через коррекцию нарушений в работе нервной системы.
 						</p>
@@ -43,10 +43,10 @@ const PDTRMethod = () => {
 			)
 		},
 		{
-			title: "Как работает метод?",
+			title: "Как работает P-DTR?",
 			content: (
 				<div>
-					<div className="mb-6">
+					<div className="mb-6 text-[15px]">
 						<ul className="space-y-3">
 							<li className="flex items-start gap-3">
 								<p>
@@ -71,7 +71,7 @@ const PDTRMethod = () => {
 						</ul>
 					</div>
 					<div className="bg-ocean-50 p-4 rounded-lg">
-						<p className="text-sm text-ocean-700">
+						<p className="text-sm text-ocean-700 text-[15px]">
 							<strong>Ключевой момент:</strong> P-DTR работает на уровне рефлексов, восстанавливая
 							правильную связь между рецепторами и центральной нервной системой.
 						</p>
@@ -83,7 +83,7 @@ const PDTRMethod = () => {
 			title: "Какие проблемы решает?",
 			content: (
 				<div>
-					<div className="mb-6">
+					<div className="mb-6 text-[15px]">
 						<p className="mb-4 text-gray-600">P-DTR эффективен при лечении широкого спектра проблем, включая:</p>
 						<ul className="space-y-3">
 							<li className="flex items-start gap-3">
@@ -121,7 +121,7 @@ const PDTRMethod = () => {
 						</ul>
 					</div>
 					<div className="bg-ocean-50 p-4 rounded-lg">
-						<p className="text-sm text-ocean-700">
+						<p className="text-sm text-ocean-700 text-[15px]">
 							<strong>Важно:</strong> P-DTR работает не только с симптомами, но и с первопричиной проблем,
 							обеспечивая комплексный подход к восстановлению здоровья.
 						</p>
@@ -133,10 +133,10 @@ const PDTRMethod = () => {
 			title: "Кому подходит?",
 			content: (
 				<div>
-					<p className="mb-4">
+					<p className="mb-6 text-[15px]">
 						Метод P-DTR подходит людям различного возраста и с разными запросами:
 					</p>
-					<ul className="list-disc list-inside space-y-2">
+					<ul className="list-disc list-inside space-y-2 text-[15px]">
 						<li className="flex items-start gap-3">
 							<div className="w-1.5 h-1.5 bg-ocean-500 rounded-full mt-2 flex-shrink-0"></div>
 							<p>Взрослым с хроническими болями и дискомфортом</p>
@@ -159,12 +159,12 @@ const PDTRMethod = () => {
 							<p>Тем, кто хочет улучшить общее самочувствие и энергию</p>
 						</li>
 					</ul>
-					<p className="mt-4 text-sm text-gray-600">
+					<p className="mt-4 text-sm text-gray-600 text-[15px]">
 						Метод безопасен и может применяться как самостоятельно, так и в комплексе
 						с другими видами терапии.
 					</p>
 					<div className="bg-ocean-50 p-4 rounded-lg mt-6">
-						<p className="text-sm text-ocean-700">
+						<p className="text-sm text-ocean-700 text-[15px]">
 							<strong>Важно:</strong> Не подходит в двух основных случаях - врожденные и органические изменения. Рекомендуется проконсультироваться со специалистом.
 						</p>
 					</div>
@@ -213,7 +213,7 @@ const PDTRMethod = () => {
 
 				{/* Блок преимуществ P-DTR */}
 				<div className="mt-16 md:mt-20">
-					<h2 className="text-2xl font-medium text-center text-gray-900 mb-8">Главные преимущества</h2>
+					<h2 className="text-2xl md:text-3xl font-medium text-center text-gray-900 mb-8">Главные преимущества</h2>
 
 					<div className="grid gap-6 md:grid-cols-2 lg:gap-8">
 						{/* Решение эмоциональных проблем */}
@@ -233,11 +233,11 @@ const PDTRMethod = () => {
 									</div>
 								</div>
 								<div className="text-gray-700 text-sm leading-relaxed space-y-3">
-									<div className="flex items-start gap-3">
+									<div className="flex items-start gap-3 text-[15px]">
 										<div className="w-1.5 h-1.5 bg-ocean-500 rounded-full mt-2 flex-shrink-0"></div>
 										<p>Интеграция P-DTR с психотерапией для достижения максимальных результатов. Эффективная коррекция острых состояний: утрата, расставание, конфликты.</p>
 									</div>
-									<div className="flex items-start gap-3">
+									<div className="flex items-start gap-3 text-[15px]">
 										<div className="w-1.5 h-1.5 bg-ocean-500 rounded-full mt-2 flex-shrink-0"></div>
 										<p>Работа с хроническими проблемами: фобии, страхи, иррациональное поведение. Восстановление эмоционального баланса и психологического комфорта.</p>
 									</div>
@@ -262,11 +262,11 @@ const PDTRMethod = () => {
 									</div>
 								</div>
 								<div className="text-gray-700 text-sm leading-relaxed space-y-3">
-									<div className="flex items-start gap-3">
+									<div className="flex items-start gap-3 text-[15px]">
 										<div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mt-2 flex-shrink-0"></div>
 										<p>Устранение энергозатратных программ в работе нервной системы для повышения общей функциональности организма.</p>
 									</div>
-									<div className="flex items-start gap-3">
+									<div className="flex items-start gap-3 text-[15px]">
 										<div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mt-2 flex-shrink-0"></div>
 										<p>Улучшение координации, концентрации внимания, качества сна. Оптимизация работы всех систем организма для достижения пикового состояния.</p>
 									</div>
@@ -291,11 +291,11 @@ const PDTRMethod = () => {
 									</div>
 								</div>
 								<div className="text-gray-700 text-sm leading-relaxed space-y-3">
-									<div className="flex items-start gap-3">
+									<div className="flex items-start gap-3 text-[15px]">
 										<div className="w-1.5 h-1.5 bg-amber-500 rounded-full mt-2 flex-shrink-0"></div>
 										<p>Комплексный подход к уменьшению хронической и острой боли различной этиологии через работу с нервной системой.</p>
 									</div>
-									<div className="flex items-start gap-3">
+									<div className="flex items-start gap-3 text-[15px]">
 										<div className="w-1.5 h-1.5 bg-amber-500 rounded-full mt-2 flex-shrink-0"></div>
 										<p>Восстановление правильных двигательных паттернов, снятие мышечных зажимов и напряжений. Долговременный эффект без медикаментов.</p>
 									</div>
@@ -320,11 +320,11 @@ const PDTRMethod = () => {
 									</div>
 								</div>
 								<div className="text-gray-700 text-sm leading-relaxed space-y-3">
-									<div className="flex items-start gap-3">
+									<div className="flex items-start gap-3 text-[15px]">
 										<div className="w-1.5 h-1.5 bg-violet-500 rounded-full mt-2 flex-shrink-0"></div>
 										<p>Борьба с хронической усталостью, апатией и преддепрессивными состояниями через нормализацию работы нервной системы.</p>
 									</div>
-									<div className="flex items-start gap-3">
+									<div className="flex items-start gap-3 text-[15px]">
 										<div className="w-1.5 h-1.5 bg-violet-500 rounded-full mt-2 flex-shrink-0"></div>
 										<p>Активация естественных энергетических резервов организма. Улучшение качества отдыха и восстановления для стабильного уровня энергии.</p>
 									</div>
