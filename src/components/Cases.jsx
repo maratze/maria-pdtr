@@ -46,14 +46,42 @@ const Cases = () => {
 	]
 
 	return (
-		<section id="cases" className="py-16 lg:py-24 bg-white">
-			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+		<section id="cases" className="relative py-16 lg:py-24 bg-gradient-to-br from-slate-800 via-slate-700 to-ocean-800 overflow-hidden">
+			{/* Декоративный фон в стиле Hero */}
+			<div className="absolute inset-0">
+				{/* Основной градиент */}
+				<div className="absolute inset-0 bg-gradient-to-br from-ocean-600/10 via-transparent to-slate-900/30"></div>
+
+				{/* Статичные круги */}
+				<div className="absolute top-1/4 right-1/4 w-96 h-96 bg-ocean-400/5 rounded-full blur-3xl"></div>
+				<div className="absolute bottom-1/3 left-1/4 w-80 h-80 bg-blue-400/5 rounded-full blur-3xl"></div>
+				<div className="absolute top-2/3 right-1/3 w-64 h-64 bg-cyan-400/5 rounded-full blur-3xl"></div>
+
+				{/* Сетка точек */}
+				<div className="absolute inset-0 opacity-20">
+					<div
+						className="w-full h-full"
+						style={{
+							backgroundImage: `radial-gradient(circle, rgba(59, 130, 246, 0.2) 1px, transparent 1px)`,
+							backgroundSize: '60px 60px'
+						}}
+					></div>
+				</div>
+
+				{/* Диагональные линии */}
+				<div className="absolute inset-0">
+					<div className="absolute top-1/4 left-0 w-full h-px bg-gradient-to-r from-transparent via-ocean-400/20 to-transparent transform rotate-6 origin-left"></div>
+					<div className="absolute top-2/3 left-0 w-full h-px bg-gradient-to-r from-transparent via-blue-400/15 to-transparent transform -rotate-3 origin-left"></div>
+				</div>
+			</div>
+
+			<div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10">
 				{/* Header */}
 				<div className="text-center mb-16">
-					<h2 className="text-3xl md:text-4xl lg:text-5xl font-medium text-ocean-600 mb-6">
+					<h2 className="text-3xl md:text-4xl lg:text-5xl font-medium text-white mb-6">
 						Кейсы из практики
 					</h2>
-					<p className="text-md md:text-lg text-slate-600 max-w-3xl mx-auto">
+					<p className="text-md md:text-lg text-slate-300 max-w-3xl mx-auto">
 						Реальные истории пациентов, которые восстановили здоровье с помощью P-DTR метода
 					</p>
 				</div>
@@ -64,19 +92,19 @@ const Cases = () => {
 						<div key={caseItem.id} className={`flex flex-col lg:flex-row items-start gap-8 lg:gap-12 ${index % 2 === 1 ? 'lg:flex-row-reverse' : ''}`}>
 							{/* Case Number & Duration */}
 							<div className="flex-shrink-0 lg:w-48">
-								<div className="bg-ocean-50 rounded-2xl p-6 text-center">
+								<div className="bg-white/90 backdrop-blur-sm border border-ocean-200/50 rounded-2xl p-6 text-center hover:bg-white transition-all duration-300 shadow-lg">
 									<div className="text-4xl font-medium text-ocean-600 mb-2">
 										{String(caseItem.id).padStart(2, '0')}
 									</div>
-									<div className="text-sm text-ocean-800 font-medium">
+									<div className="text-sm text-ocean-700 font-medium">
 										{caseItem.duration}
 									</div>
 								</div>
 							</div>
 
 							{/* Case Content */}
-							<div className="flex-1 bg-slate-50 rounded-2xl p-6 lg:p-8">
-								<h3 className="text-xl lg:text-2xl font-medium text-slate-900 mb-6">
+							<div className="flex-1 bg-white/95 backdrop-blur-sm border border-ocean-200/50 rounded-2xl p-6 lg:p-8 hover:bg-white transition-all duration-300 shadow-lg">
+								<h3 className="text-xl lg:text-2xl font-medium text-slate-800 mb-6">
 									{caseItem.title}
 								</h3>
 
@@ -88,9 +116,9 @@ const Cases = () => {
 										</h4>
 										<div
 											className="text-slate-700 leading-relaxed"
-											dangerouslySetInnerHTML={{ 
-												__html: expandedCases[caseItem.id] 
-													? caseItem.problem 
+											dangerouslySetInnerHTML={{
+												__html: expandedCases[caseItem.id]
+													? caseItem.problem
 													: truncateText(removeHtmlTags(caseItem.problem), 120)
 											}}
 										/>
@@ -103,9 +131,9 @@ const Cases = () => {
 										</h4>
 										<div
 											className="text-slate-700 leading-relaxed"
-											dangerouslySetInnerHTML={{ 
-												__html: expandedCases[caseItem.id] 
-													? caseItem.solution 
+											dangerouslySetInnerHTML={{
+												__html: expandedCases[caseItem.id]
+													? caseItem.solution
 													: truncateText(removeHtmlTags(caseItem.solution), 120)
 											}}
 										/>
@@ -118,9 +146,9 @@ const Cases = () => {
 										</h4>
 										<div
 											className="text-slate-700 leading-relaxed"
-											dangerouslySetInnerHTML={{ 
-												__html: expandedCases[caseItem.id] 
-													? caseItem.result 
+											dangerouslySetInnerHTML={{
+												__html: expandedCases[caseItem.id]
+													? caseItem.result
 													: truncateText(removeHtmlTags(caseItem.result), 120)
 											}}
 										/>
@@ -157,13 +185,13 @@ const Cases = () => {
 
 				{/* CTA */}
 				<div className="text-center mt-16">
-					<p className="text-slate-600 mb-6">
+					<p className="text-slate-300 mb-6">
 						Хотите получить такой же результат?
 					</p>
 					<a
 						href="https://t.me/maria_pdtr"
 						target="_blank"
-						className="inline-flex items-center gap-2 bg-ocean-600 text-white px-8 py-4 rounded-full hover:bg-ocean-700 transition-all duration-300 font-medium shadow-lg hover:shadow-ocean-500/25"
+						className="inline-flex items-center gap-2 bg-ocean-600 text-white px-8 py-4 rounded-full hover:bg-ocean-500 transition-all duration-300 font-medium shadow-lg hover:shadow-ocean-500/25"
 					>
 						<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
