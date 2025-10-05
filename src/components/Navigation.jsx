@@ -71,10 +71,13 @@ function Navigation() {
 							P-DTR метод
 						</a>
 						<a href="#cases" onClick={(e) => handleSmoothScroll(e, 'cases')} className="text-sm text-white hover:text-ocean-300 transition-all duration-300 font-medium uppercase tracking-wide">
-							Кейсы и отзывы
+							Кейсы
+						</a>
+						<a href="#testimonials" onClick={(e) => handleSmoothScroll(e, 'testimonials')} className="text-sm text-white hover:text-ocean-300 transition-all duration-300 font-medium uppercase tracking-wide">
+							Отзывы
 						</a>
 						<a href="#services" onClick={(e) => handleSmoothScroll(e, 'services')} className="text-sm text-white hover:text-ocean-300 transition-all duration-300 font-medium uppercase tracking-wide">
-							Расписание и прайс
+							Услуги
 						</a>
 						<a href="#contacts" onClick={(e) => handleSmoothScroll(e, 'contacts')} className="text-sm text-white hover:text-ocean-300 transition-all duration-300 font-medium uppercase tracking-wide">
 							Контакты
@@ -140,11 +143,11 @@ function Navigation() {
 								P-DTR метод
 							</a>
 							<a
-								href="#services"
+								href="#cases"
 								className="text-md text-white hover:text-ocean-300 transition-all duration-300 font-medium uppercase tracking-wide py-3 text-center"
-								onClick={(e) => handleSmoothScroll(e, 'services')}
+								onClick={(e) => handleSmoothScroll(e, 'cases')}
 							>
-								Услуги
+								Кейсы
 							</a>
 							<a
 								href="#testimonials"
@@ -154,11 +157,11 @@ function Navigation() {
 								Отзывы
 							</a>
 							<a
-								href="#formats"
+								href="#services"
 								className="text-md text-white hover:text-ocean-300 transition-all duration-300 font-medium uppercase tracking-wide py-3 text-center"
-								onClick={(e) => handleSmoothScroll(e, 'formats')}
+								onClick={(e) => handleSmoothScroll(e, 'services')}
 							>
-								Форматы
+								Услуги
 							</a>
 							<a
 								href="#contacts"

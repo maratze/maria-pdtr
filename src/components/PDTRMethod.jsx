@@ -191,7 +191,7 @@ const PDTRMethod = () => {
 					</div>
 
 					{/* Главный заголовок */}
-					<h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-ocean-600 mb-4 leading-tight">
+					<h2 className="text-3xl md:text-4xl lg:text-5xl font-medium text-ocean-600 mb-4 leading-tight">
 						Метод P-DTR
 					</h2>
 
@@ -213,7 +213,7 @@ const PDTRMethod = () => {
 
 				{/* Блок преимуществ P-DTR */}
 				<div className="mt-8 sm:mt-16 md:mt-20">
-					<h2 className="text-xl sm:text-2xl md:text-3xl font-medium text-center text-gray-900 mb-8">Главные преимущества</h2>
+					<h2 className="text-2xl lg:text-3xl font-medium text-ocean-600 text-center mb-8">Главные преимущества</h2>
 
 					<div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:gap-8">
 						{/* Решение эмоциональных проблем */}
