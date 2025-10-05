@@ -1,6 +1,23 @@
-import React from 'react'
+import React, { useState } from 'react'
 
 const Cases = () => {
+	const [expandedCases, setExpandedCases] = useState({})
+
+	const toggleCase = (caseId) => {
+		setExpandedCases(prev => ({
+			...prev,
+			[caseId]: !prev[caseId]
+		}))
+	}
+
+	const truncateText = (text, limit = 150) => {
+		if (text.length <= limit) return text
+		return text.substring(0, limit) + '...'
+	}
+
+	const removeHtmlTags = (str) => {
+		return str.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
+	}
 	const cases = [
 		{
 			id: 1,
@@ -71,7 +88,11 @@ const Cases = () => {
 										</h4>
 										<div
 											className="text-slate-700 leading-relaxed"
-											dangerouslySetInnerHTML={{ __html: caseItem.problem }}
+											dangerouslySetInnerHTML={{ 
+												__html: expandedCases[caseItem.id] 
+													? caseItem.problem 
+													: truncateText(removeHtmlTags(caseItem.problem), 120)
+											}}
 										/>
 									</div>
 
@@ -82,7 +103,11 @@ const Cases = () => {
 										</h4>
 										<div
 											className="text-slate-700 leading-relaxed"
-											dangerouslySetInnerHTML={{ __html: caseItem.solution }}
+											dangerouslySetInnerHTML={{ 
+												__html: expandedCases[caseItem.id] 
+													? caseItem.solution 
+													: truncateText(removeHtmlTags(caseItem.solution), 120)
+											}}
 										/>
 									</div>
 
@@ -93,8 +118,36 @@ const Cases = () => {
 										</h4>
 										<div
 											className="text-slate-700 leading-relaxed"
-											dangerouslySetInnerHTML={{ __html: caseItem.result }}
+											dangerouslySetInnerHTML={{ 
+												__html: expandedCases[caseItem.id] 
+													? caseItem.result 
+													: truncateText(removeHtmlTags(caseItem.result), 120)
+											}}
 										/>
+									</div>
+
+									{/* Expand/Collapse Button */}
+									<div className="pt-4 border-t border-slate-200">
+										<button
+											onClick={() => toggleCase(caseItem.id)}
+											className="inline-flex items-center gap-2 text-ocean-600 hover:text-ocean-700 font-medium text-sm transition-colors duration-200"
+										>
+											{expandedCases[caseItem.id] ? (
+												<>
+													<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+														<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+													</svg>
+													Свернуть
+												</>
+											) : (
+												<>
+													<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+														<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+													</svg>
+													Читать подробнее
+												</>
+											)}
+										</button>
 									</div>
 								</div>
 							</div>
