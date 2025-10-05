@@ -5,11 +5,31 @@ function Navigation() {
 	const [isScrolled, setIsScrolled] = useState(false)
 	const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
+	// Smooth scroll to section
+	const handleSmoothScroll = (e, targetId) => {
+		e.preventDefault()
+		const targetElement = document.getElementById(targetId)
+		if (targetElement) {
+			const elementPosition = targetElement.offsetTop
+			const offsetPosition = elementPosition - 80 // Subtract header height
+
+			window.scrollTo({
+				top: offsetPosition,
+				behavior: 'smooth'
+			})
+		}
+		// Close mobile menu if open
+		setIsMobileMenuOpen(false)
+	}
+
 	useEffect(() => {
 		const handleScroll = () => {
 			const scrollTop = window.scrollY
 			setIsScrolled(scrollTop > 50)
 		}
+
+		// Check initial scroll position
+		handleScroll()
 
 		window.addEventListener('scroll', handleScroll)
 
@@ -44,22 +64,22 @@ function Navigation() {
 
 					{/* Desktop Navigation Links */}
 					<div className="hidden min-[1000px]:flex items-center space-x-6">
-						<a href="#about" className="text-sm text-white hover:text-ocean-300 transition-all duration-300 font-medium uppercase tracking-wide">
+						<a href="#about" onClick={(e) => handleSmoothScroll(e, 'about')} className="text-sm text-white hover:text-ocean-300 transition-all duration-300 font-medium uppercase tracking-wide">
 							Обо мне
 						</a>
-						<a href="#method" className="text-sm text-white hover:text-ocean-300 transition-all duration-300 font-medium uppercase tracking-wide">
+						<a href="#method" onClick={(e) => handleSmoothScroll(e, 'method')} className="text-sm text-white hover:text-ocean-300 transition-all duration-300 font-medium uppercase tracking-wide">
 							P-DTR метод
 						</a>
-						<a href="#services" className="text-sm text-white hover:text-ocean-300 transition-all duration-300 font-medium uppercase tracking-wide">
+						<a href="#cases" onClick={(e) => handleSmoothScroll(e, 'cases')} className="text-sm text-white hover:text-ocean-300 transition-all duration-300 font-medium uppercase tracking-wide">
+							Кейсы
+						</a>
+						<a href="#services" onClick={(e) => handleSmoothScroll(e, 'services')} className="text-sm text-white hover:text-ocean-300 transition-all duration-300 font-medium uppercase tracking-wide">
 							Услуги
 						</a>
-						<a href="#testimonials" className="text-sm text-white hover:text-ocean-300 transition-all duration-300 font-medium uppercase tracking-wide">
+						<a href="#testimonials" onClick={(e) => handleSmoothScroll(e, 'testimonials')} className="text-sm text-white hover:text-ocean-300 transition-all duration-300 font-medium uppercase tracking-wide">
 							Отзывы
 						</a>
-						<a href="#formats" className="text-sm text-white hover:text-ocean-300 transition-all duration-300 font-medium uppercase tracking-wide">
-							Форматы
-						</a>
-						<a href="#contacts" className="text-sm text-white hover:text-ocean-300 transition-all duration-300 font-medium uppercase tracking-wide">
+						<a href="#contacts" onClick={(e) => handleSmoothScroll(e, 'contacts')} className="text-sm text-white hover:text-ocean-300 transition-all duration-300 font-medium uppercase tracking-wide">
 							Контакты
 						</a>
 					</div>
@@ -111,42 +131,42 @@ function Navigation() {
 							<a
 								href="#about"
 								className="text-md text-white hover:text-ocean-300 transition-all duration-300 font-medium uppercase tracking-wide py-3 text-center"
-								onClick={() => setIsMobileMenuOpen(false)}
+								onClick={(e) => handleSmoothScroll(e, 'about')}
 							>
 								Обо мне
 							</a>
 							<a
 								href="#method"
 								className="text-md text-white hover:text-ocean-300 transition-all duration-300 font-medium uppercase tracking-wide py-3 text-center"
-								onClick={() => setIsMobileMenuOpen(false)}
+								onClick={(e) => handleSmoothScroll(e, 'method')}
 							>
 								P-DTR метод
 							</a>
 							<a
 								href="#services"
 								className="text-md text-white hover:text-ocean-300 transition-all duration-300 font-medium uppercase tracking-wide py-3 text-center"
-								onClick={() => setIsMobileMenuOpen(false)}
+								onClick={(e) => handleSmoothScroll(e, 'services')}
 							>
 								Услуги
 							</a>
 							<a
 								href="#testimonials"
 								className="text-md text-white hover:text-ocean-300 transition-all duration-300 font-medium uppercase tracking-wide py-3 text-center"
-								onClick={() => setIsMobileMenuOpen(false)}
+								onClick={(e) => handleSmoothScroll(e, 'testimonials')}
 							>
 								Отзывы
 							</a>
 							<a
 								href="#formats"
 								className="text-md text-white hover:text-ocean-300 transition-all duration-300 font-medium uppercase tracking-wide py-3 text-center"
-								onClick={() => setIsMobileMenuOpen(false)}
+								onClick={(e) => handleSmoothScroll(e, 'formats')}
 							>
 								Форматы
 							</a>
 							<a
 								href="#contacts"
 								className="text-md text-white hover:text-ocean-300 transition-all duration-300 font-medium uppercase tracking-wide py-3 text-center"
-								onClick={() => setIsMobileMenuOpen(false)}
+								onClick={(e) => handleSmoothScroll(e, 'contacts')}
 							>
 								Контакты
 							</a>

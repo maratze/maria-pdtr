@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 const AccordionItem = ({ title, children, isOpen, onToggle, isFirst, isLast }) => {
 	return (
-		<div className={`group relative bg-white border-b border-gray-200 last:border-b-0 overflow-hidden transition-all duration-300 ${isOpen ? 'shadow-md border-ocean-200' : 'shadow-sm hover:shadow-md hover:border-gray-300'
+		<div className={`group relative bg-white border-b border-gray-200 last:border-b-0 overflow-hidden transition-all duration-300 ${isOpen ? 'shadow-md border-ocean-200' : 'shadow-sm hover:shadow-md'
 			}`}>
 			{/* Левый акцентный бар */}
 			<div className={`absolute left-0 top-0 bottom-0 w-1 transition-all duration-300 ${isOpen ? 'bg-ocean-500' : 'bg-transparent'
