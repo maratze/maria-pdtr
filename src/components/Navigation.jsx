@@ -71,13 +71,10 @@ function Navigation() {
 							P-DTR метод
 						</a>
 						<a href="#cases" onClick={(e) => handleSmoothScroll(e, 'cases')} className="text-sm text-white hover:text-ocean-300 transition-all duration-300 font-medium uppercase tracking-wide">
-							Кейсы
+							Кейсы и отзывы
 						</a>
 						<a href="#services" onClick={(e) => handleSmoothScroll(e, 'services')} className="text-sm text-white hover:text-ocean-300 transition-all duration-300 font-medium uppercase tracking-wide">
-							Услуги
-						</a>
-						<a href="#testimonials" onClick={(e) => handleSmoothScroll(e, 'testimonials')} className="text-sm text-white hover:text-ocean-300 transition-all duration-300 font-medium uppercase tracking-wide">
-							Отзывы
+							Расписание и прайс
 						</a>
 						<a href="#contacts" onClick={(e) => handleSmoothScroll(e, 'contacts')} className="text-sm text-white hover:text-ocean-300 transition-all duration-300 font-medium uppercase tracking-wide">
 							Контакты
