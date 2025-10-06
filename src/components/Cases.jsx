@@ -87,9 +87,9 @@ const Cases = () => {
 				</div>
 
 				{/* Cases Grid */}
-				<div className="space-y-8 lg:space-y-12">
+				<div className="space-y-4 lg:space-y-8">
 					{cases.map((caseItem, index) => (
-						<div key={caseItem.id} className={`flex flex-col lg:flex-row items-start gap-8 lg:gap-12 ${index % 2 === 1 ? 'lg:flex-row-reverse' : ''}`}>
+						<div key={caseItem.id} className={`flex flex-col lg:flex-row items-start gap-4 lg:gap-8 ${index % 2 === 1 ? 'lg:flex-row-reverse' : ''}`}>
 							{/* Case Number & Duration */}
 							<div className="flex-shrink-0 lg:w-48">
 								<div className="bg-white/90 backdrop-blur-sm border border-ocean-200/50 rounded-2xl p-6 text-center hover:bg-white transition-all duration-300 shadow-lg">
