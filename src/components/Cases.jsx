@@ -305,11 +305,11 @@ const Cases = () => {
 			{selectedCase && (
 				<div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" onClick={closeModal}>
 					<div
-						className="bg-white rounded-2xl max-w-4xl max-h-[90vh] overflow-auto"
+						className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] flex flex-col"
 						onClick={(e) => e.stopPropagation()}
 					>
-						{/* Modal Header */}
-						<div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between rounded-t-2xl">
+						{/* Modal Header - фиксированная шапка */}
+						<div className="flex-shrink-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between rounded-t-2xl">
 							<div className="flex items-center gap-4">
 								<div className="w-12 h-12 bg-ocean-600 text-white rounded-xl flex items-center justify-center text-lg font-medium">
 									{String(selectedCase.id).padStart(2, '0')}
@@ -333,8 +333,8 @@ const Cases = () => {
 							</button>
 						</div>
 
-						{/* Modal Content */}
-						<div className="p-6 space-y-8">
+						{/* Modal Content - скроллируемая область */}
+						<div className="flex-1 overflow-auto p-6 space-y-8 rounded-b-2xl">
 							{/* Problem */}
 							<div>
 								<h4 className="text-lg font-semibold text-red-600 mb-3">
