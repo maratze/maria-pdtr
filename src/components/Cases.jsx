@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 
 const Cases = () => {
 	const [currentSlide, setCurrentSlide] = useState(0) // Логический индекс для точек навигации
-	const [position, setPosition] = useState(3) // Физическая позиция в расширенном массиве (начинаем с первой копии)
+	const [position, setPosition] = useState(3) // Физическая позиция (начинаем со второй копии)
 	const [selectedCase, setSelectedCase] = useState(null)
 	const [isHovered, setIsHovered] = useState(false)
 	const [isTransitioning, setIsTransitioning] = useState(false)
@@ -11,29 +11,19 @@ const Cases = () => {
 	const nextSlide = () => {
 		if (isTransitioning) return
 		setIsTransitioning(true)
-		setIsManualNavigation(true)
 
 		setPosition(prev => prev + 1)
-		setCurrentSlide(prev => (prev + 1) % cases.length)
 
-		setTimeout(() => {
-			setIsTransitioning(false)
-			setIsManualNavigation(false)
-		}, 300)
+		setTimeout(() => setIsTransitioning(false), 300)
 	}
 
 	const prevSlide = () => {
 		if (isTransitioning) return
 		setIsTransitioning(true)
-		setIsManualNavigation(true)
 
 		setPosition(prev => prev - 1)
-		setCurrentSlide(prev => (prev - 1 + cases.length) % cases.length)
 
-		setTimeout(() => {
-			setIsTransitioning(false)
-			setIsManualNavigation(false)
-		}, 300)
+		setTimeout(() => setIsTransitioning(false), 300)
 	}
 
 	const goToSlide = (index) => {
@@ -41,26 +31,9 @@ const Cases = () => {
 		setIsTransitioning(true)
 		setIsManualNavigation(true)
 
-		// Находим ближайшую копию нужного слайда относительно текущей позиции
-		const findOptimalPosition = (targetIndex, currentPos) => {
-			const options = [
-				targetIndex,                    // первая копия
-				targetIndex + cases.length,     // вторая копия  
-				targetIndex + cases.length * 2  // третья копия
-			]
-
-			// Находим позицию с минимальным расстоянием
-			return options.reduce((closest, option) => {
-				const currentDistance = Math.abs(currentPos - closest)
-				const optionDistance = Math.abs(currentPos - option)
-				return optionDistance < currentDistance ? option : closest
-			})
-		}
-
-		const optimalPosition = findOptimalPosition(index, position)
-
+		// Используем вторую копию для точек навигации
 		setCurrentSlide(index)
-		setPosition(optimalPosition)
+		setPosition(index + cases.length) // Вторая копия: позиции 3, 4, 5
 
 		setTimeout(() => {
 			setIsTransitioning(false)
@@ -110,30 +83,39 @@ const Cases = () => {
 		}
 	]
 
-	// Создаем расширенный массив для плавных переходов (3 копии для лучшей бесконечности)
+	// Создаем минимальный расширенный массив для бесконечной прокрутки (best practice)
 	const getExtendedCases = () => {
-		return [...cases, ...cases, ...cases]
+		return [...cases, ...cases, ...cases] // 3 копии - минимум для плавности
 	}
 
 	const extendedCases = getExtendedCases()
 
-	// Управление сбросом позиции для бесконечной прокрутки
+	// Синхронизация currentSlide с position (только для автоматической прокрутки)
 	useEffect(() => {
-		// Не сбрасываем позицию во время ручной навигации
-		if (!isTransitioning && !isManualNavigation) {
-			if (position >= cases.length * 2) {
-				// Мгновенно переходим к началу первой копии (позиция cases.length)
-				setTimeout(() => {
-					setPosition(cases.length)
-				}, 20)
-			} else if (position < cases.length) {
-				// Мгновенно переходим к началу второй копии (позиция cases.length)
-				setTimeout(() => {
-					setPosition(cases.length)
-				}, 20)
+		if (!isManualNavigation) {
+			// Для 3 копий: позиция 3,4,5 соответствует слайдам 0,1,2
+			const slideIndex = position - cases.length
+			if (slideIndex >= 0 && slideIndex < cases.length) {
+				setCurrentSlide(slideIndex)
 			}
 		}
-	}, [position, isTransitioning, isManualNavigation, cases.length])
+	}, [position, cases.length, isManualNavigation])
+
+	// Best practice: мгновенный сброс позиции для бесконечной прокрутки
+	useEffect(() => {
+		if (!isTransitioning && !isManualNavigation) {
+			// Когда доходим до последней копии - перепрыгиваем к эквивалентной позиции в средней копии
+			if (position >= extendedCases.length - cases.length) {
+				const equivalentPosition = position - cases.length
+				setPosition(equivalentPosition)
+			}
+			// Когда доходим до первой копии - перепрыгиваем к эквивалентной позиции в средней копии
+			else if (position < cases.length) {
+				const equivalentPosition = position + cases.length
+				setPosition(equivalentPosition)
+			}
+		}
+	}, [position, isTransitioning, isManualNavigation, cases.length, extendedCases.length])
 
 	return (
 		<section id="cases" className="relative py-16 lg:py-24 bg-gradient-to-br from-slate-800 via-slate-700 to-ocean-800 overflow-hidden">
@@ -283,7 +265,7 @@ const Cases = () => {
 					{/* Navigation Arrows */}
 					<button
 						onClick={prevSlide}
-						className={`absolute -left-16 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white hover:scale-110 text-ocean-600 p-4 rounded-full shadow-xl transition-all duration-300 backdrop-blur-sm transform hover:shadow-2xl hover:shadow-ocean-500/25 ${isHovered ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-2'
+						className={`absolute left-0 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white hover:scale-110 text-ocean-600 p-4 rounded-full shadow-xl transition-all duration-300 backdrop-blur-sm transform hover:shadow-2xl hover:shadow-ocean-500/25 ${isHovered ? 'opacity-100 translate-x-0' : 'opacity-100 -translate-x-2'
 							}`}
 					>
 						<svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -292,7 +274,7 @@ const Cases = () => {
 					</button>
 					<button
 						onClick={nextSlide}
-						className={`absolute -right-16 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white hover:scale-110 text-ocean-600 p-4 rounded-full shadow-xl transition-all duration-300 backdrop-blur-sm transform hover:shadow-2xl hover:shadow-ocean-500/25 ${isHovered ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-2'
+						className={`absolute right-0 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white hover:scale-110 text-ocean-600 p-4 rounded-full shadow-xl transition-all duration-300 backdrop-blur-sm transform hover:shadow-2xl hover:shadow-ocean-500/25 ${isHovered ? 'opacity-100 translate-x-0' : 'opacity-100 translate-x-2'
 							}`}
 					>
 						<svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
