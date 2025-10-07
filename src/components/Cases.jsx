@@ -128,71 +128,70 @@ const Cases = () => {
 								const isActive = index === actualCurrentSlide
 								return (
 									<div key={`${caseItem.id}-${index}`} className="w-4/5 flex-shrink-0 px-4">
-										<div className={`bg-white/95 backdrop-blur-sm border border-ocean-200/50 rounded-2xl p-6 lg:p-8 shadow-lg transition-all duration-300 ${
-											isActive
+										<div className={`bg-white/95 backdrop-blur-sm border border-ocean-200/50 rounded-2xl p-6 lg:p-8 shadow-lg transition-all duration-300 ${isActive
 												? 'scale-100 opacity-100'
 												: 'scale-95 opacity-60'
-										}`}>
-										{/* Case Header with Number */}
-										<div className="flex items-start gap-4 mb-6">
-											<div className="flex-shrink-0 w-16 h-16 bg-ocean-600 text-white rounded-xl flex items-center justify-center text-2xl font-medium">
-												{String(caseItem.id).padStart(2, '0')}
-											</div>
-											<div className="flex-1">
-												<h3 className="text-xl lg:text-2xl font-medium text-slate-700">
-													{caseItem.title}
-												</h3>
-												<div className="text-sm text-ocean-600 font-medium">
-													{caseItem.duration}
+											}`}>
+											{/* Case Header with Number */}
+											<div className="flex items-start gap-4 mb-6">
+												<div className="flex-shrink-0 w-16 h-16 bg-ocean-600 text-white rounded-xl flex items-center justify-center text-2xl font-medium">
+													{String(caseItem.id).padStart(2, '0')}
+												</div>
+												<div className="flex-1">
+													<h3 className="text-xl lg:text-2xl font-medium text-slate-700">
+														{caseItem.title}
+													</h3>
+													<div className="text-sm text-ocean-600 font-medium">
+														{caseItem.duration}
+													</div>
 												</div>
 											</div>
-										</div>
 
-										{/* Problem Preview */}
-										<div className="mb-6">
-											<h4 className="text-sm font-semibold text-red-600 uppercase tracking-wide mb-2">
-												Проблема
-											</h4>
-											<p className="text-slate-600 leading-relaxed">
-												{truncateText(caseItem.problem)}
-											</p>
-										</div>
+											{/* Problem Preview */}
+											<div className="mb-6">
+												<h4 className="text-sm font-semibold text-red-600 uppercase tracking-wide mb-2">
+													Проблема
+												</h4>
+												<p className="text-slate-600 leading-relaxed">
+													{truncateText(caseItem.problem)}
+												</p>
+											</div>
 
-										{/* Solution Preview */}
-										<div className="mb-6">
-											<h4 className="text-sm font-semibold text-ocean-600 uppercase tracking-wide mb-2">
-												Решение
-											</h4>
-											<p className="text-slate-700 leading-relaxed">
-												{truncateText(caseItem.solution)}
-											</p>
-										</div>
+											{/* Solution Preview */}
+											<div className="mb-6">
+												<h4 className="text-sm font-semibold text-ocean-600 uppercase tracking-wide mb-2">
+													Решение
+												</h4>
+												<p className="text-slate-700 leading-relaxed">
+													{truncateText(caseItem.solution)}
+												</p>
+											</div>
 
-										{/* Result Preview */}
-										<div className="mb-6">
-											<h4 className="text-sm font-semibold text-green-600 uppercase tracking-wide mb-2">
-												Результат
-											</h4>
-											<p className="text-slate-700 leading-relaxed">
-												{truncateText(caseItem.result)}
-											</p>
-										</div>
+											{/* Result Preview */}
+											<div className="mb-6">
+												<h4 className="text-sm font-semibold text-green-600 uppercase tracking-wide mb-2">
+													Результат
+												</h4>
+												<p className="text-slate-700 leading-relaxed">
+													{truncateText(caseItem.result)}
+												</p>
+											</div>
 
-										{/* Read More Button */}
-										<div className="pt-4 border-t border-slate-200">
-											<button
-												onClick={() => openModal(caseItem)}
-												className="inline-flex items-center gap-2 text-ocean-600 hover:text-ocean-700 font-medium text-sm transition-colors duration-200"
-											>
-												<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-													<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-												</svg>
-												Читать подробнее
-											</button>
+											{/* Read More Button */}
+											<div className="pt-4 border-t border-slate-200">
+												<button
+													onClick={() => openModal(caseItem)}
+													className="inline-flex items-center gap-2 text-ocean-600 hover:text-ocean-700 font-medium text-sm transition-colors duration-200"
+												>
+													<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+														<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+													</svg>
+													Читать подробнее
+												</button>
+											</div>
 										</div>
 									</div>
-								</div>
-							)
+								)
 							})}
 						</div>
 					</div>
