@@ -1,20 +1,38 @@
 import React, { useState, useEffect } from 'react'
 
 const Cases = () => {
-	const [currentSlide, setCurrentSlide] = useState(0)
+	const [currentSlide, setCurrentSlide] = useState(0) // Логический индекс для точек навигации
+	const [position, setPosition] = useState(1) // Физическая позиция в расширенном массиве
 	const [selectedCase, setSelectedCase] = useState(null)
 	const [isHovered, setIsHovered] = useState(false)
+	const [isTransitioning, setIsTransitioning] = useState(false)
 
 	const nextSlide = () => {
-		setCurrentSlide((prev) => (prev + 1) % cases.length)
+		if (isTransitioning) return
+		setIsTransitioning(true)
+
+		setPosition(prev => prev + 1)
+		setCurrentSlide(prev => (prev + 1) % cases.length)
+
+		setTimeout(() => setIsTransitioning(false), 500)
 	}
 
 	const prevSlide = () => {
-		setCurrentSlide((prev) => (prev - 1 + cases.length) % cases.length)
+		if (isTransitioning) return
+		setIsTransitioning(true)
+
+		setPosition(prev => prev - 1)
+		setCurrentSlide(prev => (prev - 1 + cases.length) % cases.length)
+
+		setTimeout(() => setIsTransitioning(false), 500)
 	}
 
 	const goToSlide = (index) => {
+		if (isTransitioning) return
+		setIsTransitioning(true)
 		setCurrentSlide(index)
+		setPosition(index + 1) // +1 потому что первый элемент в расширенном массиве это дубликат последнего
+		setTimeout(() => setIsTransitioning(false), 500)
 	}
 
 	const openModal = (caseItem) => {
@@ -59,18 +77,33 @@ const Cases = () => {
 		}
 	]
 
-	// Создаем тройной массив для бесконечной карусели
-	const extendedCases = [...cases, ...cases, ...cases]
-	const actualCurrentSlide = currentSlide + cases.length // Начинаем с середины массива
+	// Создаем расширенный массив для плавных переходов
+	const getExtendedCases = () => {
+		const lastCase = cases[cases.length - 1]
+		const firstCase = cases[0]
+		return [lastCase, ...cases, firstCase]
+	}
 
-	// Контроль бесконечной прокрутки
+	const extendedCases = getExtendedCases()
+
+	// Управление сбросом позиции для бесконечной прокрутки
 	useEffect(() => {
-		if (currentSlide >= cases.length) {
-			setTimeout(() => setCurrentSlide(currentSlide - cases.length), 300)
-		} else if (currentSlide < 0) {
-			setTimeout(() => setCurrentSlide(currentSlide + cases.length), 300)
+		if (!isTransitioning) {
+			if (position > cases.length) {
+				// Мгновенно переходим к первому реальному элементу без анимации
+				const timer = setTimeout(() => {
+					setPosition(1)
+				}, 50)
+				return () => clearTimeout(timer)
+			} else if (position < 1) {
+				// Мгновенно переходим к последнему реальному элементу без анимации
+				const timer = setTimeout(() => {
+					setPosition(cases.length)
+				}, 50)
+				return () => clearTimeout(timer)
+			}
 		}
-	}, [currentSlide, cases.length])
+	}, [position, isTransitioning, cases.length])
 
 	return (
 		<section id="cases" className="relative py-16 lg:py-24 bg-gradient-to-br from-slate-800 via-slate-700 to-ocean-800 overflow-hidden">
@@ -119,18 +152,19 @@ const Cases = () => {
 					onMouseLeave={() => setIsHovered(false)}
 				>
 					{/* Carousel */}
-					<div className="relative overflow-hidden rounded-2xl">
+					<div className="relative rounded-2xl">
 						<div
 							className="flex transition-transform duration-500 ease-in-out"
-							style={{ transform: `translateX(calc(-${actualCurrentSlide * 80}% + 10%))` }}
+							style={{ transform: `translateX(calc(-${position * 80}% + 10%))` }}
 						>
 							{extendedCases.map((caseItem, index) => {
-								const isActive = index === actualCurrentSlide
+								// Активен слайд на позиции position
+								const isActive = index === position
 								return (
 									<div key={`${caseItem.id}-${index}`} className="w-4/5 flex-shrink-0 px-4">
 										<div className={`bg-white/95 backdrop-blur-sm border border-ocean-200/50 rounded-2xl p-6 lg:p-8 shadow-lg transition-all duration-300 ${isActive
-												? 'scale-100 opacity-100'
-												: 'scale-95 opacity-60'
+											? 'scale-100 opacity-100'
+											: 'scale-95 opacity-60'
 											}`}>
 											{/* Case Header with Number */}
 											<div className="flex items-start gap-4 mb-6">
