@@ -289,19 +289,19 @@ const Testimonials = () => {
 				{/* Stats */}
 				<div className="mt-16 grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
 					<div className="text-center">
-						<div className="text-3xl lg:text-4xl font-medium text-ocean-600 mb-2">100+</div>
+						<div className="text-3xl lg:text-4xl font-bold text-ocean-600 mb-2">150+</div>
 						<div className="text-sm text-slate-600">Довольных пациентов</div>
 					</div>
 					<div className="text-center">
-						<div className="text-3xl lg:text-4xl font-medium text-ocean-600 mb-2">97%</div>
+						<div className="text-3xl lg:text-4xl font-bold text-ocean-600 mb-2">95%</div>
 						<div className="text-sm text-slate-600">Успешных случаев</div>
 					</div>
 					<div className="text-center">
-						<div className="text-3xl lg:text-4xl font-medium text-ocean-600 mb-2">4.95</div>
+						<div className="text-3xl lg:text-4xl font-bold text-ocean-600 mb-2">4.9</div>
 						<div className="text-sm text-slate-600">Средняя оценка</div>
 					</div>
 					<div className="text-center">
-						<div className="text-3xl lg:text-4xl font-medium text-ocean-600 mb-2">3+</div>
+						<div className="text-3xl lg:text-4xl font-bold text-ocean-600 mb-2">3+</div>
 						<div className="text-sm text-slate-600">Года практики</div>
 					</div>
 				</div>

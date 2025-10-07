@@ -15,7 +15,7 @@ function App() {
 			<Hero />
 			<PDTRMethod />
 			<Cases />
-			<Testimonials />
+			{/* <Testimonials /> */}
 		</div>
 	)
 }

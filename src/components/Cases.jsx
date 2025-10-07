@@ -1,22 +1,33 @@
 import React, { useState } from 'react'
 
 const Cases = () => {
-	const [expandedCases, setExpandedCases] = useState({})
+	const [currentSlide, setCurrentSlide] = useState(0)
+	const [selectedCase, setSelectedCase] = useState(null)
 
-	const toggleCase = (caseId) => {
-		setExpandedCases(prev => ({
-			...prev,
-			[caseId]: !prev[caseId]
-		}))
+	const nextSlide = () => {
+		setCurrentSlide((prev) => (prev + 1) % cases.length)
 	}
 
-	const truncateText = (text, limit = 150) => {
-		if (text.length <= limit) return text
-		return text.substring(0, limit) + '...'
+	const prevSlide = () => {
+		setCurrentSlide((prev) => (prev - 1 + cases.length) % cases.length)
 	}
 
-	const removeHtmlTags = (str) => {
-		return str.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
+	const goToSlide = (index) => {
+		setCurrentSlide(index)
+	}
+
+	const openModal = (caseItem) => {
+		setSelectedCase(caseItem)
+	}
+
+	const closeModal = () => {
+		setSelectedCase(null)
+	}
+
+	const truncateText = (text, limit = 120) => {
+		const plainText = text.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
+		if (plainText.length <= limit) return plainText
+		return plainText.substring(0, limit) + '...'
 	}
 	const cases = [
 		{
@@ -76,7 +87,6 @@ const Cases = () => {
 			</div>
 
 			<div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10">
-				{/* Header */}
 				<div className="text-center mb-16">
 					<h2 className="text-3xl md:text-4xl lg:text-5xl font-medium text-white mb-6">
 						Кейсы из практики
@@ -86,101 +96,111 @@ const Cases = () => {
 					</p>
 				</div>
 
-				{/* Cases Grid */}
-				<div className="space-y-12">
-					{cases.map((caseItem, index) => (
-						<div key={caseItem.id} className={`flex flex-col lg:flex-row items-start gap-6 lg:gap-12 ${index % 2 === 1 ? 'lg:flex-row-reverse' : ''}`}>
-							{/* Case Number & Duration */}
-							<div className="flex justify-center w-full lg:block flex-shrink-0 lg:w-48">
-								<div className="w-full max-w-xs lg:max-w-none lg:w-auto bg-white backdrop-blur-sm border border-ocean-200/50 rounded-2xl p-6 text-center hover:bg-white transition-all duration-300 shadow-lg">
-									<div className="text-5xl font-medium text-ocean-600 mb-2">
-										{String(caseItem.id).padStart(2, '')}
-									</div>
-									<div className="text-sm text-ocean-700 font-medium">
-										{caseItem.duration}
+				{/* Carousel Container */}
+				<div className="relative max-w-5xl mx-auto">
+					{/* Carousel */}
+					<div className="relative overflow-hidden rounded-2xl">
+						<div
+							className="flex transition-transform duration-300 ease-in-out"
+							style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+						>
+							{cases.map((caseItem) => (
+								<div key={caseItem.id} className="w-full flex-shrink-0">
+									<div className="bg-white/95 backdrop-blur-sm border border-ocean-200/50 rounded-2xl p-6 lg:p-8 mx-4 shadow-lg">
+										{/* Case Header with Number */}
+										<div className="flex items-start gap-4 mb-6">
+											<div className="flex-shrink-0 w-16 h-16 bg-ocean-600 text-white rounded-xl flex items-center justify-center text-2xl font-medium">
+												{String(caseItem.id).padStart(2, '0')}
+											</div>
+											<div className="flex-1">
+												<h3 className="text-xl lg:text-2xl font-medium text-slate-700">
+													{caseItem.title}
+												</h3>
+												<div className="text-sm text-ocean-600 font-medium">
+													{caseItem.duration}
+												</div>
+											</div>
+										</div>
+
+										{/* Problem Preview */}
+										<div className="mb-6">
+											<h4 className="text-sm font-semibold text-red-600 uppercase tracking-wide mb-2">
+												Проблема
+											</h4>
+											<p className="text-slate-600 leading-relaxed">
+												{truncateText(caseItem.problem)}
+											</p>
+										</div>
+
+										{/* Solution Preview */}
+										<div className="mb-6">
+											<h4 className="text-sm font-semibold text-ocean-600 uppercase tracking-wide mb-2">
+												Решение
+											</h4>
+											<p className="text-slate-700 leading-relaxed">
+												{truncateText(caseItem.solution)}
+											</p>
+										</div>
+
+										{/* Result Preview */}
+										<div className="mb-6">
+											<h4 className="text-sm font-semibold text-green-600 uppercase tracking-wide mb-2">
+												Результат
+											</h4>
+											<p className="text-slate-700 leading-relaxed">
+												{truncateText(caseItem.result)}
+											</p>
+										</div>
+
+										{/* Read More Button */}
+										<div className="pt-4 border-t border-slate-200">
+											<button
+												onClick={() => openModal(caseItem)}
+												className="inline-flex items-center gap-2 text-ocean-600 hover:text-ocean-700 font-medium text-sm transition-colors duration-200"
+											>
+												<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+													<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+												</svg>
+												Читать подробнее
+											</button>
+										</div>
 									</div>
 								</div>
-							</div>
-
-							{/* Case Content */}
-							<div className="flex-1 bg-white/95 backdrop-blur-sm border border-ocean-200/50 rounded-2xl p-6 lg:p-8 hover:bg-white transition-all duration-300 shadow-lg">
-								<h3 className="text-xl lg:text-2xl font-medium text-slate-700 mb-6">
-									{caseItem.title}
-								</h3>
-
-								<div className="space-y-6">
-									{/* Problem */}
-									<div>
-										<h4 className="text-sm font-semibold text-red-600 uppercase tracking-wide mb-2">
-											Проблема
-										</h4>
-										<div
-											className="text-slate-600 leading-relaxed"
-											dangerouslySetInnerHTML={{
-												__html: expandedCases[caseItem.id]
-													? caseItem.problem
-													: truncateText(removeHtmlTags(caseItem.problem), 120)
-											}}
-										/>
-									</div>
-
-									{/* Solution */}
-									<div>
-										<h4 className="text-sm font-semibold text-ocean-600 uppercase tracking-wide mb-2">
-											Решение
-										</h4>
-										<div
-											className="text-slate-700 leading-relaxed"
-											dangerouslySetInnerHTML={{
-												__html: expandedCases[caseItem.id]
-													? caseItem.solution
-													: truncateText(removeHtmlTags(caseItem.solution), 120)
-											}}
-										/>
-									</div>
-
-									{/* Result */}
-									<div>
-										<h4 className="text-sm font-semibold text-green-600 uppercase tracking-wide mb-2">
-											Результат
-										</h4>
-										<div
-											className="text-slate-700 leading-relaxed"
-											dangerouslySetInnerHTML={{
-												__html: expandedCases[caseItem.id]
-													? caseItem.result
-													: truncateText(removeHtmlTags(caseItem.result), 120)
-											}}
-										/>
-									</div>
-
-									{/* Expand/Collapse Button */}
-									<div className="pt-4 border-t border-slate-200">
-										<button
-											onClick={() => toggleCase(caseItem.id)}
-											className="inline-flex items-center gap-2 text-ocean-600 hover:text-ocean-700 font-medium text-sm transition-colors duration-200"
-										>
-											{expandedCases[caseItem.id] ? (
-												<>
-													<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-														<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-													</svg>
-													Свернуть
-												</>
-											) : (
-												<>
-													<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-														<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-													</svg>
-													Читать подробнее
-												</>
-											)}
-										</button>
-									</div>
-								</div>
-							</div>
+							))}
 						</div>
-					))}
+					</div>
+
+					{/* Navigation Dots */}
+					<div className="flex justify-center mt-8 gap-2">
+						{cases.map((_, index) => (
+							<button
+								key={index}
+								onClick={() => goToSlide(index)}
+								className={`w-3 h-3 rounded-full transition-all duration-200 ${index === currentSlide
+									? 'bg-ocean-400'
+									: 'bg-ocean-200 hover:bg-ocean-300'
+									}`}
+							/>
+						))}
+					</div>
+
+					{/* Navigation Arrows */}
+					<button
+						onClick={prevSlide}
+						className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-ocean-600 p-3 rounded-full shadow-lg transition-all duration-200 backdrop-blur-sm"
+					>
+						<svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+						</svg>
+					</button>
+					<button
+						onClick={nextSlide}
+						className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-ocean-600 p-3 rounded-full shadow-lg transition-all duration-200 backdrop-blur-sm"
+					>
+						<svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+						</svg>
+					</button>
 				</div>
 
 				{/* CTA */}
@@ -200,6 +220,77 @@ const Cases = () => {
 					</a>
 				</div>
 			</div>
+
+			{/* Modal */}
+			{selectedCase && (
+				<div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" onClick={closeModal}>
+					<div
+						className="bg-white rounded-2xl max-w-4xl max-h-[90vh] overflow-auto"
+						onClick={(e) => e.stopPropagation()}
+					>
+						{/* Modal Header */}
+						<div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between rounded-t-2xl">
+							<div className="flex items-center gap-4">
+								<div className="w-12 h-12 bg-ocean-600 text-white rounded-xl flex items-center justify-center text-lg font-medium">
+									{String(selectedCase.id).padStart(2, '0')}
+								</div>
+								<div>
+									<h3 className="text-xl lg:text-2xl font-medium text-slate-700">
+										{selectedCase.title}
+									</h3>
+									<div className="text-sm text-ocean-600 font-medium">
+										{selectedCase.duration}
+									</div>
+								</div>
+							</div>
+							<button
+								onClick={closeModal}
+								className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+							>
+								<svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+								</svg>
+							</button>
+						</div>
+
+						{/* Modal Content */}
+						<div className="p-6 space-y-8">
+							{/* Problem */}
+							<div>
+								<h4 className="text-lg font-semibold text-red-600 mb-3">
+									Проблема
+								</h4>
+								<div
+									className="text-slate-600 leading-relaxed"
+									dangerouslySetInnerHTML={{ __html: selectedCase.problem }}
+								/>
+							</div>
+
+							{/* Solution */}
+							<div>
+								<h4 className="text-lg font-semibold text-ocean-600 mb-3">
+									Решение
+								</h4>
+								<div
+									className="text-slate-700 leading-relaxed"
+									dangerouslySetInnerHTML={{ __html: selectedCase.solution }}
+								/>
+							</div>
+
+							{/* Result */}
+							<div>
+								<h4 className="text-lg font-semibold text-green-600 mb-3">
+									Результат
+								</h4>
+								<div
+									className="text-slate-700 leading-relaxed"
+									dangerouslySetInnerHTML={{ __html: selectedCase.result }}
+								/>
+							</div>
+						</div>
+					</div>
+				</div>
+			)}
 		</section>
 	)
 }
