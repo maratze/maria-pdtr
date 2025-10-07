@@ -81,20 +81,20 @@ const Cases = () => {
 					<h2 className="text-3xl md:text-4xl lg:text-5xl font-medium text-white mb-6">
 						Кейсы из практики
 					</h2>
-					<p className="text-md md:text-lg text-slate-300 max-w-3xl mx-auto">
+					<p className="text-md md:text-lg text-slate-200 max-w-3xl mx-auto">
 						Реальные истории пациентов, которые восстановили здоровье с помощью P-DTR метода
 					</p>
 				</div>
 
 				{/* Cases Grid */}
-				<div className="space-y-4 lg:space-y-8">
+				<div className="space-y-12">
 					{cases.map((caseItem, index) => (
-						<div key={caseItem.id} className={`flex flex-col lg:flex-row items-start gap-4 lg:gap-8 ${index % 2 === 1 ? 'lg:flex-row-reverse' : ''}`}>
+						<div key={caseItem.id} className={`flex flex-col lg:flex-row items-start gap-6 lg:gap-12 ${index % 2 === 1 ? 'lg:flex-row-reverse' : ''}`}>
 							{/* Case Number & Duration */}
-							<div className="flex-shrink-0 lg:w-48">
-								<div className="bg-white/90 backdrop-blur-sm border border-ocean-200/50 rounded-2xl p-6 text-center hover:bg-white transition-all duration-300 shadow-lg">
-									<div className="text-4xl font-medium text-ocean-600 mb-2">
-										{String(caseItem.id).padStart(2, '0')}
+							<div className="flex justify-center w-full lg:block flex-shrink-0 lg:w-48">
+								<div className="w-full max-w-xs lg:max-w-none lg:w-auto bg-white backdrop-blur-sm border border-ocean-200/50 rounded-2xl p-6 text-center hover:bg-white transition-all duration-300 shadow-lg">
+									<div className="text-5xl font-medium text-ocean-600 mb-2">
+										{String(caseItem.id).padStart(2, '')}
 									</div>
 									<div className="text-sm text-ocean-700 font-medium">
 										{caseItem.duration}
@@ -104,7 +104,7 @@ const Cases = () => {
 
 							{/* Case Content */}
 							<div className="flex-1 bg-white/95 backdrop-blur-sm border border-ocean-200/50 rounded-2xl p-6 lg:p-8 hover:bg-white transition-all duration-300 shadow-lg">
-								<h3 className="text-xl lg:text-2xl font-medium text-slate-800 mb-6">
+								<h3 className="text-xl lg:text-2xl font-medium text-slate-700 mb-6">
 									{caseItem.title}
 								</h3>
 
@@ -115,7 +115,7 @@ const Cases = () => {
 											Проблема
 										</h4>
 										<div
-											className="text-slate-700 leading-relaxed"
+											className="text-slate-600 leading-relaxed"
 											dangerouslySetInnerHTML={{
 												__html: expandedCases[caseItem.id]
 													? caseItem.problem
@@ -185,13 +185,13 @@ const Cases = () => {
 
 				{/* CTA */}
 				<div className="text-center mt-16">
-					<p className="text-slate-300 mb-6">
+					<p className="text-slate-200 mb-6">
 						Хотите получить такой же результат?
 					</p>
 					<a
 						href="https://t.me/maria_pdtr"
 						target="_blank"
-						className="inline-flex items-center gap-2 bg-ocean-600 text-white px-8 py-4 rounded-full hover:bg-ocean-500 transition-all duration-300 font-medium shadow-lg hover:shadow-ocean-500/25"
+						className="inline-flex items-center gap-2 bg-ocean-600 text-white px-8 py-4 rounded-full hover:bg-ocean-500 transition-all duration-300 shadow-lg hover:shadow-ocean-500/25"
 					>
 						<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />

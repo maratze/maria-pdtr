@@ -196,7 +196,7 @@ const PDTRMethod = () => {
 					</h2>
 
 					{/* Описание */}
-					<p className="text-md md:text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed mb-8">
+					<p className="text-md md:text-lg text-slate-600 max-w-3xl mx-auto leading-relaxed mb-8">
 						Инновационный подход к восстановлению здоровья через работу с нервной системой.
 						<span className="text-ocean-600 font-medium"> Быстрые результаты без побочных эффектов.</span>
 					</p>
@@ -226,13 +226,13 @@ const PDTRMethod = () => {
 										</svg>
 									</div>
 									<div className="flex-1">
-										<h4 className="text-lg font-medium text-gray-900 mb-3 leading-tight">
+										<h4 className="text-lg font-medium text-slate-700 mb-3 leading-tight">
 											Эмоциональные и психосоматические проблемы
 										</h4>
 										<div className="w-12 h-0.5 bg-gradient-to-r from-ocean-500 to-ocean-300 rounded-full"></div>
 									</div>
 								</div>
-								<div className="text-gray-700 text-sm leading-relaxed space-y-3">
+								<div className="text-slate-600 text-sm leading-relaxed space-y-3">
 									<div className="flex items-start gap-3 text-[15px]">
 										<div className="w-1.5 h-1.5 bg-ocean-500 rounded-full mt-2 flex-shrink-0"></div>
 										<p>Интеграция P-DTR с психотерапией для достижения максимальных результатов. Эффективная коррекция острых состояний: утрата, расставание, конфликты.</p>
@@ -255,13 +255,13 @@ const PDTRMethod = () => {
 										</svg>
 									</div>
 									<div className="flex-1">
-										<h4 className="text-lg font-medium text-gray-900 mb-3 leading-tight">
+										<h4 className="text-lg font-medium text-slate-700 mb-3 leading-tight">
 											Оптимизация функционального состояния
 										</h4>
 										<div className="w-12 h-0.5 bg-gradient-to-r from-emerald-500 to-emerald-300 rounded-full"></div>
 									</div>
 								</div>
-								<div className="text-gray-700 text-sm leading-relaxed space-y-3">
+								<div className="text-slate-600 text-sm leading-relaxed space-y-3">
 									<div className="flex items-start gap-3 text-[15px]">
 										<div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mt-2 flex-shrink-0"></div>
 										<p>Устранение энергозатратных программ в работе нервной системы для повышения общей функциональности организма.</p>
@@ -284,13 +284,13 @@ const PDTRMethod = () => {
 										</svg>
 									</div>
 									<div className="flex-1">
-										<h4 className="text-lg font-medium text-gray-900 mb-3 leading-tight">
+										<h4 className="text-lg font-medium text-slate-700 mb-3 leading-tight">
 											Эффективное облегчение болевых синдромов
 										</h4>
 										<div className="w-12 h-0.5 bg-gradient-to-r from-amber-500 to-amber-300 rounded-full"></div>
 									</div>
 								</div>
-								<div className="text-gray-700 text-sm leading-relaxed space-y-3">
+								<div className="text-slate-600 text-sm leading-relaxed space-y-3">
 									<div className="flex items-start gap-3 text-[15px]">
 										<div className="w-1.5 h-1.5 bg-amber-500 rounded-full mt-2 flex-shrink-0"></div>
 										<p>Комплексный подход к уменьшению хронической и острой боли различной этиологии через работу с нервной системой.</p>
@@ -313,13 +313,13 @@ const PDTRMethod = () => {
 										</svg>
 									</div>
 									<div className="flex-1">
-										<h4 className="text-lg font-medium text-gray-900 mb-3 leading-tight">
+										<h4 className="text-lg font-medium text-slate-700 mb-3 leading-tight">
 											Восстановление энергетических ресурсов
 										</h4>
 										<div className="w-12 h-0.5 bg-gradient-to-r from-violet-500 to-violet-300 rounded-full"></div>
 									</div>
 								</div>
-								<div className="text-gray-700 text-sm leading-relaxed space-y-3">
+								<div className="text-slate-600 text-sm leading-relaxed space-y-3">
 									<div className="flex items-start gap-3 text-[15px]">
 										<div className="w-1.5 h-1.5 bg-violet-500 rounded-full mt-2 flex-shrink-0"></div>
 										<p>Борьба с хронической усталостью, апатией и преддепрессивными состояниями через нормализацию работы нервной системы.</p>
