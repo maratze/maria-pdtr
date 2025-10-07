@@ -1,8 +1,9 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 
 const Cases = () => {
 	const [currentSlide, setCurrentSlide] = useState(0)
 	const [selectedCase, setSelectedCase] = useState(null)
+	const [isHovered, setIsHovered] = useState(false)
 
 	const nextSlide = () => {
 		setCurrentSlide((prev) => (prev + 1) % cases.length)
@@ -18,10 +19,12 @@ const Cases = () => {
 
 	const openModal = (caseItem) => {
 		setSelectedCase(caseItem)
+		document.body.style.overflow = 'hidden'
 	}
 
 	const closeModal = () => {
 		setSelectedCase(null)
+		document.body.style.overflow = 'unset'
 	}
 
 	const truncateText = (text, limit = 120) => {
@@ -55,6 +58,19 @@ const Cases = () => {
 			duration: "4 сеанса"
 		}
 	]
+
+	// Создаем тройной массив для бесконечной карусели
+	const extendedCases = [...cases, ...cases, ...cases]
+	const actualCurrentSlide = currentSlide + cases.length // Начинаем с середины массива
+
+	// Контроль бесконечной прокрутки
+	useEffect(() => {
+		if (currentSlide >= cases.length) {
+			setTimeout(() => setCurrentSlide(currentSlide - cases.length), 300)
+		} else if (currentSlide < 0) {
+			setTimeout(() => setCurrentSlide(currentSlide + cases.length), 300)
+		}
+	}, [currentSlide, cases.length])
 
 	return (
 		<section id="cases" className="relative py-16 lg:py-24 bg-gradient-to-br from-slate-800 via-slate-700 to-ocean-800 overflow-hidden">
@@ -97,16 +113,26 @@ const Cases = () => {
 				</div>
 
 				{/* Carousel Container */}
-				<div className="relative max-w-5xl mx-auto">
+				<div
+					className="relative max-w-6xl mx-auto group"
+					onMouseEnter={() => setIsHovered(true)}
+					onMouseLeave={() => setIsHovered(false)}
+				>
 					{/* Carousel */}
 					<div className="relative overflow-hidden rounded-2xl">
 						<div
-							className="flex transition-transform duration-300 ease-in-out"
-							style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+							className="flex transition-transform duration-500 ease-in-out"
+							style={{ transform: `translateX(calc(-${actualCurrentSlide * 80}% + 10%))` }}
 						>
-							{cases.map((caseItem) => (
-								<div key={caseItem.id} className="w-full flex-shrink-0">
-									<div className="bg-white/95 backdrop-blur-sm border border-ocean-200/50 rounded-2xl p-6 lg:p-8 mx-4 shadow-lg">
+							{extendedCases.map((caseItem, index) => {
+								const isActive = index === actualCurrentSlide
+								return (
+									<div key={`${caseItem.id}-${index}`} className="w-4/5 flex-shrink-0 px-4">
+										<div className={`bg-white/95 backdrop-blur-sm border border-ocean-200/50 rounded-2xl p-6 lg:p-8 shadow-lg transition-all duration-300 ${
+											isActive
+												? 'scale-100 opacity-100'
+												: 'scale-95 opacity-60'
+										}`}>
 										{/* Case Header with Number */}
 										<div className="flex items-start gap-4 mb-6">
 											<div className="flex-shrink-0 w-16 h-16 bg-ocean-600 text-white rounded-xl flex items-center justify-center text-2xl font-medium">
@@ -166,7 +192,8 @@ const Cases = () => {
 										</div>
 									</div>
 								</div>
-							))}
+							)
+							})}
 						</div>
 					</div>
 
@@ -187,7 +214,8 @@ const Cases = () => {
 					{/* Navigation Arrows */}
 					<button
 						onClick={prevSlide}
-						className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-ocean-600 p-3 rounded-full shadow-lg transition-all duration-200 backdrop-blur-sm"
+						className={`absolute -left-16 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white hover:scale-110 text-ocean-600 p-4 rounded-full shadow-xl transition-all duration-300 backdrop-blur-sm transform hover:shadow-2xl hover:shadow-ocean-500/25 ${isHovered ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-2'
+							}`}
 					>
 						<svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -195,7 +223,8 @@ const Cases = () => {
 					</button>
 					<button
 						onClick={nextSlide}
-						className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-ocean-600 p-3 rounded-full shadow-lg transition-all duration-200 backdrop-blur-sm"
+						className={`absolute -right-16 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white hover:scale-110 text-ocean-600 p-4 rounded-full shadow-xl transition-all duration-300 backdrop-blur-sm transform hover:shadow-2xl hover:shadow-ocean-500/25 ${isHovered ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-2'
+							}`}
 					>
 						<svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
