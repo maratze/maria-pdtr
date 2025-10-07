@@ -24,157 +24,196 @@ import review22 from '../assets/images/review-22.png'
 import review23 from '../assets/images/review-23.png'
 import review24 from '../assets/images/review-24.png'
 
+const categories = [
+	'Все',
+	'Физическая боль',
+	'Эмоциональные проблемы',
+	'Финансовые блоки',
+	'Отношения',
+	'Карьера',
+	'Здоровье'
+]
+
 const Testimonials = () => {
 	const [visibleCount, setVisibleCount] = useState(3)
+	const [activeCategory, setActiveCategory] = useState('Все')
 
 	const testimonials = [
 		{
 			id: 1,
 			problem: "Работа с эмоциональными блоками",
 			image: review1,
-			rating: 5
+			rating: 5,
+			category: "Эмоциональные проблемы"
 		},
 		{
 			id: 2,
 			problem: "Боль в плечах, водянка, давление",
 			image: review2,
-			rating: 5
+			rating: 5,
+			category: "Физическая боль"
 		},
 		{
 			id: 3,
 			problem: "Мигрень, психоэмоциональная коррекция",
 			image: review3,
-			rating: 5
+			rating: 5,
+			category: "Физическая боль"
 		},
 		{
 			id: 4,
 			problem: "Психоэмоциональная коррекция",
 			image: review4,
-			rating: 5
+			rating: 5,
+			category: "Эмоциональные проблемы"
 		},
 		{
 			id: 5,
 			problem: "Косоглазие у ребенка",
 			image: review5,
-			rating: 5
+			rating: 5,
+			category: "Здоровье"
 		},
 		{
 			id: 6,
 			problem: "Страх моря",
 			image: review6,
-			rating: 5
+			rating: 5,
+			category: "Эмоциональные проблемы"
 		},
 		{
 			id: 7,
 			problem: "Боль в руке",
 			image: review7,
-			rating: 5
+			rating: 5,
+			category: "Физическая боль"
 		},
 		{
 			id: 8,
 			problem: "Психоэмоциональная коррекция",
 			image: review8,
-			rating: 5
+			rating: 5,
+			category: "Эмоциональные проблемы"
 		},
 		{
 			id: 9,
 			problem: "Эмоциональный блок на деньги, проявленность",
 			image: review9,
-			rating: 5
+			rating: 5,
+			category: "Финансовые блоки"
 		},
 		{
 			id: 10,
 			problem: "Эмоциональный блок на деньги, проявленность",
 			image: review10,
-			rating: 5
+			rating: 5,
+			category: "Финансовые блоки"
 		},
 		{
 			id: 11,
 			problem: "Эмоциональный блок на деньги, проявленность",
 			image: review11,
-			rating: 5
+			rating: 5,
+			category: "Финансовые блоки"
 		},
 		{
 			id: 12,
 			problem: "Эмоциональный блок на деньги, проявленность",
 			image: review12,
-			rating: 5
+			rating: 5,
+			category: "Финансовые блоки"
 		},
 		{
 			id: 13,
 			problem: "Боль в шее",
 			image: review13,
-			rating: 5
+			rating: 5,
+			category: "Физическая боль"
 		},
 		{
 			id: 14,
 			problem: "Боль в спине",
 			image: review14,
-			rating: 5
+			rating: 5,
+			category: "Физическая боль"
 		},
 		{
 			id: 15,
 			problem: "Эмоции",
 			image: review15,
-			rating: 5
+			rating: 5,
+			category: "Эмоциональные проблемы"
 		},
 		{
 			id: 16,
 			problem: "Эмоции",
 			image: review1,
-			rating: 5
+			rating: 5,
+			category: "Эмоциональные проблемы"
 		},
 		{
 			id: 17,
 			problem: "Боль в ноге",
 			image: review1,
-			rating: 5
+			rating: 5,
+			category: "Физическая боль"
 		},
 		{
 			id: 18,
 			problem: "Последствия операции",
 			image: review18,
-			rating: 5
+			rating: 5,
+			category: "Физическая боль"
 		},
 		{
 			id: 19,
 			problem: "Невралгия",
 			image: review19,
-			rating: 5
+			rating: 5,
+			category: "Физическая боль"
 		},
 		{
 			id: 20,
 			problem: "Психоэмоциональная коррекция",
 			image: review20,
-			rating: 5
+			rating: 5,
+			category: "Эмоциональные проблемы"
 		},
 		{
 			id: 21,
 			problem: "Психоэмоциональная коррекция",
 			image: review21,
-			rating: 5
+			rating: 5,
+			category: "Эмоциональные проблемы"
 		},
 		{
 			id: 22,
 			problem: "Эмоции",
 			image: review22,
-			rating: 5
+			rating: 5,
+			category: "Эмоциональные проблемы"
 		},
 		{
 			id: 23,
 			problem: "Эмоции",
 			image: review23,
-			rating: 5
+			rating: 5,
+			category: "Эмоциональные проблемы"
 		},
 		{
 			id: 24,
 			problem: "Эмоции",
 			image: review24,
-			rating: 5
+			rating: 5,
+			category: "Эмоциональные проблемы"
 		}
 	]
 
-	const displayedTestimonials = testimonials.slice(0, visibleCount)
+	const filteredTestimonials = activeCategory === 'Все'
+		? testimonials
+		: testimonials.filter(testimonial => testimonial.category === activeCategory)
+
+	const displayedTestimonials = filteredTestimonials.slice(0, visibleCount)
 
 	return (
 		<section id="testimonials" className="py-16 lg:py-24 bg-gradient-to-br from-slate-50 to-ocean-50">
@@ -187,6 +226,25 @@ const Testimonials = () => {
 					<p className="text-md md:text-lg text-slate-600 max-w-3xl mx-auto">
 						Что говорят люди, которые уже испытали на себе эффективность P-DTR метода
 					</p>
+				</div>
+
+				{/* Category Tabs */}
+				<div className="flex flex-wrap justify-center gap-2 mb-12">
+					{categories.map((category) => (
+						<button
+							key={category}
+							onClick={() => {
+								setActiveCategory(category)
+								setVisibleCount(3) // Reset pagination when changing category
+							}}
+							className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${activeCategory === category
+									? 'bg-ocean-600 text-white shadow-lg'
+									: 'bg-white text-slate-600 hover:bg-ocean-50 hover:text-ocean-600 border border-slate-200'
+								}`}
+						>
+							{category}
+						</button>
+					))}
 				</div>
 
 				{/* Testimonials Grid */}
@@ -229,7 +287,7 @@ const Testimonials = () => {
 				</div>
 
 				{/* Show More Button */}
-				{visibleCount < testimonials.length && (
+				{visibleCount < filteredTestimonials.length && (
 					<div className="text-center mt-12">
 						<button
 							onClick={() => setVisibleCount(prev => prev + 3)}
