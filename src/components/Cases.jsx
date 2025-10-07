@@ -2,37 +2,70 @@ import React, { useState, useEffect } from 'react'
 
 const Cases = () => {
 	const [currentSlide, setCurrentSlide] = useState(0) // Логический индекс для точек навигации
-	const [position, setPosition] = useState(1) // Физическая позиция в расширенном массиве
+	const [position, setPosition] = useState(3) // Физическая позиция в расширенном массиве (начинаем с первой копии)
 	const [selectedCase, setSelectedCase] = useState(null)
 	const [isHovered, setIsHovered] = useState(false)
 	const [isTransitioning, setIsTransitioning] = useState(false)
+	const [isManualNavigation, setIsManualNavigation] = useState(false) // Флаг для ручной навигации
 
 	const nextSlide = () => {
 		if (isTransitioning) return
 		setIsTransitioning(true)
+		setIsManualNavigation(true)
 
 		setPosition(prev => prev + 1)
 		setCurrentSlide(prev => (prev + 1) % cases.length)
 
-		setTimeout(() => setIsTransitioning(false), 500)
+		setTimeout(() => {
+			setIsTransitioning(false)
+			setIsManualNavigation(false)
+		}, 300)
 	}
 
 	const prevSlide = () => {
 		if (isTransitioning) return
 		setIsTransitioning(true)
+		setIsManualNavigation(true)
 
 		setPosition(prev => prev - 1)
 		setCurrentSlide(prev => (prev - 1 + cases.length) % cases.length)
 
-		setTimeout(() => setIsTransitioning(false), 500)
+		setTimeout(() => {
+			setIsTransitioning(false)
+			setIsManualNavigation(false)
+		}, 300)
 	}
 
 	const goToSlide = (index) => {
 		if (isTransitioning) return
 		setIsTransitioning(true)
+		setIsManualNavigation(true)
+
+		// Находим ближайшую копию нужного слайда относительно текущей позиции
+		const findOptimalPosition = (targetIndex, currentPos) => {
+			const options = [
+				targetIndex,                    // первая копия
+				targetIndex + cases.length,     // вторая копия  
+				targetIndex + cases.length * 2  // третья копия
+			]
+
+			// Находим позицию с минимальным расстоянием
+			return options.reduce((closest, option) => {
+				const currentDistance = Math.abs(currentPos - closest)
+				const optionDistance = Math.abs(currentPos - option)
+				return optionDistance < currentDistance ? option : closest
+			})
+		}
+
+		const optimalPosition = findOptimalPosition(index, position)
+
 		setCurrentSlide(index)
-		setPosition(index + 1) // +1 потому что первый элемент в расширенном массиве это дубликат последнего
-		setTimeout(() => setIsTransitioning(false), 500)
+		setPosition(optimalPosition)
+
+		setTimeout(() => {
+			setIsTransitioning(false)
+			setIsManualNavigation(false)
+		}, 300)
 	}
 
 	const openModal = (caseItem) => {
@@ -77,33 +110,30 @@ const Cases = () => {
 		}
 	]
 
-	// Создаем расширенный массив для плавных переходов
+	// Создаем расширенный массив для плавных переходов (3 копии для лучшей бесконечности)
 	const getExtendedCases = () => {
-		const lastCase = cases[cases.length - 1]
-		const firstCase = cases[0]
-		return [lastCase, ...cases, firstCase]
+		return [...cases, ...cases, ...cases]
 	}
 
 	const extendedCases = getExtendedCases()
 
 	// Управление сбросом позиции для бесконечной прокрутки
 	useEffect(() => {
-		if (!isTransitioning) {
-			if (position > cases.length) {
-				// Мгновенно переходим к первому реальному элементу без анимации
-				const timer = setTimeout(() => {
-					setPosition(1)
-				}, 50)
-				return () => clearTimeout(timer)
-			} else if (position < 1) {
-				// Мгновенно переходим к последнему реальному элементу без анимации
-				const timer = setTimeout(() => {
+		// Не сбрасываем позицию во время ручной навигации
+		if (!isTransitioning && !isManualNavigation) {
+			if (position >= cases.length * 2) {
+				// Мгновенно переходим к началу первой копии (позиция cases.length)
+				setTimeout(() => {
 					setPosition(cases.length)
-				}, 50)
-				return () => clearTimeout(timer)
+				}, 20)
+			} else if (position < cases.length) {
+				// Мгновенно переходим к началу второй копии (позиция cases.length)
+				setTimeout(() => {
+					setPosition(cases.length)
+				}, 20)
 			}
 		}
-	}, [position, isTransitioning, cases.length])
+	}, [position, isTransitioning, isManualNavigation, cases.length])
 
 	return (
 		<section id="cases" className="relative py-16 lg:py-24 bg-gradient-to-br from-slate-800 via-slate-700 to-ocean-800 overflow-hidden">
@@ -137,9 +167,11 @@ const Cases = () => {
 
 			<div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10">
 				<div className="text-center mb-16">
-					<h2 className="text-3xl md:text-4xl lg:text-5xl font-medium text-white mb-6">
-						Кейсы из практики
-					</h2>
+					<div className="flex items-center justify-center gap-3 mb-4">
+						<h2 className="text-3xl md:text-4xl lg:text-5xl font-medium text-white">
+							Кейсы из практики
+						</h2>
+					</div>
 					<p className="text-md md:text-lg text-slate-200 max-w-3xl mx-auto">
 						Реальные истории пациентов, которые восстановили здоровье с помощью P-DTR метода
 					</p>
@@ -154,14 +186,16 @@ const Cases = () => {
 					{/* Carousel */}
 					<div className="relative rounded-2xl">
 						<div
-							className="flex transition-transform duration-500 ease-in-out"
+							className="flex transition-transform duration-300 ease-in-out"
 							style={{ transform: `translateX(calc(-${position * 80}% + 10%))` }}
 						>
 							{extendedCases.map((caseItem, index) => {
 								// Активен слайд на позиции position
 								const isActive = index === position
+								// Создаем уникальный ключ для избежания проблем с дублированными элементами
+								const uniqueKey = `${caseItem.id}-${Math.floor(index / cases.length)}-${index}`
 								return (
-									<div key={`${caseItem.id}-${index}`} className="w-4/5 flex-shrink-0 px-4">
+									<div key={uniqueKey} className="w-4/5 flex-shrink-0 px-4">
 										<div className={`bg-white/95 backdrop-blur-sm border border-ocean-200/50 rounded-2xl p-6 lg:p-8 shadow-lg transition-all duration-300 ${isActive
 											? 'scale-100 opacity-100'
 											: 'scale-95 opacity-60'
@@ -230,18 +264,20 @@ const Cases = () => {
 						</div>
 					</div>
 
-					{/* Navigation Dots */}
-					<div className="flex justify-center mt-8 gap-2">
-						{cases.map((_, index) => (
-							<button
-								key={index}
-								onClick={() => goToSlide(index)}
-								className={`w-3 h-3 rounded-full transition-all duration-200 ${index === currentSlide
-									? 'bg-ocean-400'
-									: 'bg-ocean-200 hover:bg-ocean-300'
-									}`}
-							/>
-						))}
+					{/* Navigation Dots and Controls */}
+					<div className="flex justify-center items-center mt-8 gap-4">
+						<div className="flex gap-2">
+							{cases.map((_, index) => (
+								<button
+									key={index}
+									onClick={() => goToSlide(index)}
+									className={`w-3 h-3 rounded-full transition-all duration-200 ${index === currentSlide
+										? 'bg-ocean-400'
+										: 'bg-ocean-200 hover:bg-ocean-300'
+										}`}
+								/>
+							))}
+						</div>
 					</div>
 
 					{/* Navigation Arrows */}
@@ -268,7 +304,7 @@ const Cases = () => {
 				{/* CTA */}
 				<div className="text-center mt-16">
 					<p className="text-slate-200 mb-6">
-						Хотите получить такой же результат?
+						Хотите получить такие же результаты?
 					</p>
 					<a
 						href="https://t.me/maria_pdtr"
