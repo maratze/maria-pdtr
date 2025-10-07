@@ -1,8 +1,31 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import review1 from '../assets/images/review-1.png'
+import review2 from '../assets/images/review-2.png'
+import review3 from '../assets/images/review-3.png'
+import review4 from '../assets/images/review-4.png'
+import review5 from '../assets/images/review-5.png'
+import review6 from '../assets/images/review-6.png'
+import review7 from '../assets/images/review-7.png'
+import review8 from '../assets/images/review-8.png'
+import review9 from '../assets/images/review-9.png'
+import review10 from '../assets/images/review-10.png'
+import review11 from '../assets/images/review-11.png'
+import review12 from '../assets/images/review-12.png'
+import review13 from '../assets/images/review-13.png'
+import review14 from '../assets/images/review-14.png'
+import review15 from '../assets/images/review-15.png'
+import review16 from '../assets/images/review-16.png'
+import review17 from '../assets/images/review-17.png'
+import review18 from '../assets/images/review-18.png'
+import review19 from '../assets/images/review-19.png'
+import review20 from '../assets/images/review-20.png'
+import review21 from '../assets/images/review-21.png'
+import review22 from '../assets/images/review-22.png'
+import review23 from '../assets/images/review-23.png'
+import review24 from '../assets/images/review-24.png'
 
 const Testimonials = () => {
-	const [currentSlide, setCurrentSlide] = useState(0)
+	const [visibleCount, setVisibleCount] = useState(3)
 
 	const testimonials = [
 		{
@@ -14,155 +37,144 @@ const Testimonials = () => {
 		{
 			id: 2,
 			problem: "Боль в плечах, водянка, давление",
-			image: null,
+			image: review2,
 			rating: 5
 		},
 		{
 			id: 3,
 			problem: "Мигрень, психоэмоциональная коррекция",
-			image: null,
+			image: review3,
 			rating: 5
 		},
 		{
 			id: 4,
 			problem: "Психоэмоциональная коррекция",
-			image: null,
+			image: review4,
 			rating: 5
 		},
 		{
 			id: 5,
 			problem: "Косоглазие у ребенка",
-			image: null,
+			image: review5,
 			rating: 5
 		},
 		{
 			id: 6,
 			problem: "Страх моря",
-			image: null,
+			image: review6,
 			rating: 5
 		},
 		{
 			id: 7,
 			problem: "Боль в руке",
-			image: null,
+			image: review7,
 			rating: 5
 		},
 		{
 			id: 8,
 			problem: "Психоэмоциональная коррекция",
-			image: null,
+			image: review8,
 			rating: 5
 		},
 		{
 			id: 9,
 			problem: "Эмоциональный блок на деньги, проявленность",
-			image: null,
+			image: review9,
 			rating: 5
 		},
 		{
 			id: 10,
 			problem: "Эмоциональный блок на деньги, проявленность",
-			image: null,
+			image: review10,
 			rating: 5
 		},
 		{
 			id: 11,
 			problem: "Эмоциональный блок на деньги, проявленность",
-			image: null,
+			image: review11,
 			rating: 5
 		},
 		{
 			id: 12,
 			problem: "Эмоциональный блок на деньги, проявленность",
-			image: null,
+			image: review12,
 			rating: 5
 		},
 		{
 			id: 13,
 			problem: "Боль в шее",
-			image: null,
+			image: review13,
 			rating: 5
 		},
 		{
 			id: 14,
 			problem: "Боль в спине",
-			image: null,
+			image: review14,
 			rating: 5
 		},
 		{
 			id: 15,
 			problem: "Эмоции",
-			image: null,
+			image: review15,
 			rating: 5
 		},
 		{
 			id: 16,
 			problem: "Эмоции",
-			image: null,
+			image: review1,
 			rating: 5
 		},
 		{
 			id: 17,
 			problem: "Боль в ноге",
-			image: null,
+			image: review1,
 			rating: 5
 		},
 		{
 			id: 18,
 			problem: "Последствия операции",
-			image: null,
+			image: review18,
 			rating: 5
 		},
 		{
 			id: 19,
 			problem: "Невралгия",
-			image: null,
+			image: review19,
 			rating: 5
 		},
 		{
 			id: 20,
 			problem: "Психоэмоциональная коррекция",
-			image: null,
+			image: review20,
 			rating: 5
 		},
 		{
 			id: 21,
-			problem: "Эмоции",
-			image: null,
+			problem: "Психоэмоциональная коррекция",
+			image: review21,
 			rating: 5
 		},
 		{
 			id: 22,
 			problem: "Эмоции",
-			image: null,
+			image: review22,
+			rating: 5
+		},
+		{
+			id: 23,
+			problem: "Эмоции",
+			image: review23,
+			rating: 5
+		},
+		{
+			id: 24,
+			problem: "Эмоции",
+			image: review24,
 			rating: 5
 		}
 	]
 
-	const itemsPerPage = 3
-	const totalSlides = Math.ceil(testimonials.length / itemsPerPage)
-
-	// Auto-slide functionality
-	useEffect(() => {
-		const interval = setInterval(() => {
-			setCurrentSlide((prev) => (prev + 1) % totalSlides)
-		}, 5000) // Change slide every 5 seconds
-
-		return () => clearInterval(interval)
-	}, [totalSlides])
-
-	const nextSlide = () => {
-		setCurrentSlide((prev) => (prev + 1) % totalSlides)
-	}
-
-	const prevSlide = () => {
-		setCurrentSlide((prev) => (prev - 1 + totalSlides) % totalSlides)
-	}
-
-	const getCurrentTestimonials = () => {
-		const startIndex = currentSlide * itemsPerPage
-		return testimonials.slice(startIndex, startIndex + itemsPerPage)
-	}
+	const displayedTestimonials = testimonials.slice(0, visibleCount)
 
 	return (
 		<section id="testimonials" className="py-16 lg:py-24 bg-gradient-to-br from-slate-50 to-ocean-50">
@@ -177,115 +189,59 @@ const Testimonials = () => {
 					</p>
 				</div>
 
-				{/* Testimonials Carousel */}
-				<div className="relative">
-					{/* Navigation Arrows */}
-					<button
-						onClick={prevSlide}
-						className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 bg-white hover:bg-ocean-50 text-ocean-600 p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 group"
-					>
-						<svg className="w-6 h-6 transform group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-						</svg>
-					</button>
-
-					<button
-						onClick={nextSlide}
-						className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 bg-white hover:bg-ocean-50 text-ocean-600 p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 group"
-					>
-						<svg className="w-6 h-6 transform group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-						</svg>
-					</button>
-
-					{/* Testimonials Container */}
-					<div className="overflow-hidden">
-						<div
-							className="flex transition-transform duration-500 ease-in-out"
-							style={{ transform: `translateX(-${currentSlide * 100}%)` }}
-						>
-							{Array.from({ length: totalSlides }).map((_, slideIndex) => (
-								<div key={slideIndex} className="w-full flex-shrink-0">
-									<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-										{testimonials
-											.slice(slideIndex * itemsPerPage, (slideIndex + 1) * itemsPerPage)
-											.map((testimonial) => (
-												<div key={testimonial.id} className="group">
-													<div className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
-														{/* Review Image */}
-														<div className="aspect-[4/5] bg-gradient-to-br from-ocean-100 to-slate-100 relative overflow-hidden">
-															{testimonial.image ? (
-																<img
-																	src={testimonial.image}
-																	alt={`Отзыв: ${testimonial.problem}`}
-																	className="w-full h-full object-cover"
-																/>
-															) : (
-																<div className="absolute inset-0 flex items-center justify-center">
-																	<div className="text-center p-6">
-																		<div className="w-16 h-16 bg-ocean-200 rounded-full flex items-center justify-center mb-4 mx-auto">
-																			<svg className="w-8 h-8 text-ocean-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-																				<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-																			</svg>
-																		</div>
-																		<p className="text-sm font-medium text-slate-700 leading-relaxed">{testimonial.problem}</p>
-																	</div>
-																</div>
-															)}
-
-															{/* Overlay for hover effect */}
-															<div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300"></div>
-
-															{/* Review badge */}
-															<div className="absolute top-4 left-4 bg-ocean-600 text-white text-xs px-3 py-1 rounded-full font-medium">
-																{testimonial.image ? 'Отзыв' : 'Скриншот отзыва'}
-															</div>
-														</div>
-
-														{/* Card footer */}
-														<div className="p-4">
-															{/* Problem info */}
-															<div className="mb-3">
-																<p className="text-sm font-medium text-slate-800 leading-relaxed">{testimonial.problem}</p>
-															</div>
-
-															<div className="flex items-center justify-between">
-																<div className="flex items-center gap-1">
-																	{[...Array(testimonial.rating)].map((_, i) => (
-																		<svg key={i} className="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
-																			<path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-																		</svg>
-																	))}
-																</div>
-																<span className="text-xs text-slate-500 font-medium">
-																	Проверенный отзыв
-																</span>
-															</div>
-														</div>
-													</div>
+				{/* Testimonials Grid */}
+				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+					{displayedTestimonials.map((testimonial) => (
+						<div key={testimonial.id} className="group">
+							<div className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+								{/* Review Image */}
+								<div className="aspect-[4/5] bg-gradient-to-br from-ocean-100 to-slate-100 relative overflow-hidden">
+									{testimonial.image ? (
+										<img
+											src={testimonial.image}
+											alt={`Отзыв: ${testimonial.problem}`}
+											className="w-full h-full object-cover"
+										/>
+									) : (
+										<div className="absolute inset-0 flex items-center justify-center">
+											<div className="text-center p-6">
+												<div className="w-16 h-16 bg-ocean-200 rounded-full flex items-center justify-center mb-4 mx-auto">
+													<svg className="w-8 h-8 text-ocean-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+														<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+													</svg>
 												</div>
-											))}
-									</div>
-								</div>
-							))}
-						</div>
-					</div>
+												<p className="text-sm font-medium text-slate-700 leading-relaxed">{testimonial.problem}</p>
+											</div>
+										</div>
+									)}
 
-					{/* Dots Navigation */}
-					<div className="flex justify-center mt-8 space-x-2">
-						{Array.from({ length: totalSlides }).map((_, index) => (
-							<button
-								key={index}
-								onClick={() => setCurrentSlide(index)}
-								className={`w-3 h-3 rounded-full transition-all duration-300 ${index === currentSlide
-									? 'bg-ocean-600 scale-125'
-									: 'bg-ocean-200 hover:bg-ocean-300'
-									}`}
-							/>
-						))}
-					</div>
+									{/* Overlay for hover effect */}
+									<div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300"></div>
+								</div>
+
+								{/* Card footer */}
+								<div className="p-4">
+									<p className="text-sm font-medium text-slate-800 leading-relaxed">{testimonial.problem}</p>
+								</div>
+							</div>
+						</div>
+					))}
 				</div>
 
+				{/* Show More Button */}
+				{visibleCount < testimonials.length && (
+					<div className="text-center mt-12">
+						<button
+							onClick={() => setVisibleCount(prev => prev + 3)}
+							className="inline-flex items-center gap-2 bg-ocean-600 text-white px-8 py-4 rounded-full hover:bg-ocean-500 transition-all duration-300 shadow-lg hover:shadow-ocean-500/25"
+						>
+							<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+							</svg>
+							Показать еще отзывы
+						</button>
+					</div>
+				)}
 				{/* Stats */}
 				<div className="mt-16 grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
 					<div className="text-center">
