@@ -220,7 +220,7 @@ const Testimonials = () => {
 			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 				{/* Header */}
 				<div className="text-center mb-16">
-					<h2 className="text-3xl md:text-4xl lg:text-5xl font-medium text-ocean-600 mb-6">
+					<h2 className="text-3xl md:text-4xl lg:text-5xl font-medium text-ocean-600 mb-4">
 						Отзывы пациентов
 					</h2>
 					<p className="text-md md:text-lg text-slate-600 max-w-3xl mx-auto">
@@ -229,7 +229,7 @@ const Testimonials = () => {
 				</div>
 
 				{/* Category Tabs */}
-				<div className="flex flex-wrap justify-center gap-2 mb-12">
+				<div className="flex flex-wrap sm:justify-center gap-2 mb-8">
 					{categories.map((category) => (
 						<button
 							key={category}
@@ -238,8 +238,8 @@ const Testimonials = () => {
 								setVisibleCount(3) // Reset pagination when changing category
 							}}
 							className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${activeCategory === category
-									? 'bg-ocean-600 text-white shadow-lg'
-									: 'bg-white text-slate-600 hover:bg-ocean-50 hover:text-ocean-600 border border-slate-200'
+								? 'bg-ocean-600 text-white shadow-lg'
+								: 'bg-white text-slate-600 hover:bg-ocean-50 hover:text-ocean-600 border border-slate-200'
 								}`}
 						>
 							{category}
@@ -248,12 +248,12 @@ const Testimonials = () => {
 				</div>
 
 				{/* Testimonials Grid */}
-				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-8">
 					{displayedTestimonials.map((testimonial) => (
-						<div key={testimonial.id} className="group">
-							<div className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+						<div key={testimonial.id} className="group h-full">
+							<div className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 h-full flex flex-col">
 								{/* Review Image */}
-								<div className="aspect-[4/5] bg-gradient-to-br from-ocean-100 to-slate-100 relative overflow-hidden">
+								<div className="aspect-[4/5] bg-gradient-to-br from-ocean-100 to-slate-100 relative overflow-hidden flex-shrink-0">
 									{testimonial.image ? (
 										<img
 											src={testimonial.image}
@@ -278,7 +278,7 @@ const Testimonials = () => {
 								</div>
 
 								{/* Card footer */}
-								<div className="p-4">
+								<div className="p-4 flex-1 flex items-start">
 									<p className="text-sm font-medium text-slate-800 leading-relaxed">{testimonial.problem}</p>
 								</div>
 							</div>
