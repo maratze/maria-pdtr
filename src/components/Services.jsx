@@ -1,4 +1,5 @@
 import React from 'react'
+import SectionHeader from './SectionHeader';
 
 const Services = () => {
 	const services = [
@@ -69,9 +70,7 @@ const Services = () => {
 			<div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
 				{/* Заголовок секции */}
 				<div className="text-center mb-8 sm:mb-12">
-					<h2 className="text-3xl sm:text-3xl md:text-4xl lg:text-5xl font-medium text-white mb-3 sm:mb-4 px-2">
-						Услуги
-					</h2>
+					<SectionHeader title="Услуги" isDarkMode={true} />
 					<p className="text-md md:text-lg text-slate-200 max-w-3xl mx-auto px-2 sm:px-4">
 						Индивидуальный подход к каждому клиенту. Выберите формат работы, который подходит именно вам.
 					</p>

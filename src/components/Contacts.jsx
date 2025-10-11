@@ -1,23 +1,18 @@
 import React from 'react';
 import { FaInstagram, FaTelegram, FaWhatsapp, FaPhone, FaEnvelope } from 'react-icons/fa';
+import SectionHeader from './SectionHeader';
 
 const Contacts = () => {
 	return (
 		<section id="contacts" className="py-20 bg-white">
 			<div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-				{/* Заголовок */}
-				<div className="text-center mb-16">
-					<h2 className="text-3xl sm:text-4xl md:text-5xl font-light text-slate-800 mb-4">
-						Контакты
-					</h2>
-					<div className="w-20 h-1 bg-emerald-500 mx-auto"></div>
-				</div>
+				<SectionHeader title="Контакты" />
 
 				{/* Основная контактная информация */}
-				<div className="text-center mb-12">
+				<div className="text-center mb-12 mt-12">
 					<div className="space-y-6">
 						<div className="group">
-							<div className="inline-flex items-center gap-3 text-slate-700 hover:text-emerald-600 transition-colors">
+							<div className="inline-flex items-center gap-3 text-slate-700 hover:text-ocean-500 transition-colors">
 								<FaPhone className="text-xl" />
 								<a href="tel:+79660962626" className="text-2xl font-light tracking-wide">
 									+7 (966) 096 26 26
@@ -26,7 +21,7 @@ const Contacts = () => {
 						</div>
 
 						<div className="group">
-							<div className="inline-flex items-center gap-3 text-slate-700 hover:text-emerald-600 transition-colors">
+							<div className="inline-flex items-center gap-3 text-slate-700 hover:text-ocean-500 transition-colors">
 								<FaEnvelope className="text-xl" />
 								<a href="mailto:solomkina.pdtr@yandex.ru" className="text-xl font-light">
 									solomkina.pdtr@yandex.ru
@@ -55,7 +50,7 @@ const Contacts = () => {
 						href="https://t.me"
 						target="_blank"
 						rel="noopener noreferrer"
-						className="w-14 h-14 flex items-center justify-center rounded-full border-2 border-slate-300 text-slate-600 hover:border-blue-500 hover:text-blue-500 hover:shadow-lg transition-all duration-300"
+						className="w-14 h-14 flex items-center justify-center rounded-full border-2 border-slate-300 text-slate-600 hover:border-ocean-500 hover:text-ocean-500 hover:shadow-lg transition-all duration-300"
 						aria-label="Telegram"
 					>
 						<FaTelegram className="text-2xl" />
