@@ -165,7 +165,7 @@ const Cases = () => {
 						<div className="w-1.5 h-1.5 bg-ocean-500 rounded-full mr-2"></div>
 						Истории успеха
 					</div>
-					
+
 					<div className="flex items-center justify-center gap-3 mb-3 sm:mb-4">
 						<h2 className="text-3xl sm:text-3xl md:text-4xl lg:text-5xl font-medium text-white">
 							Кейсы из практики
