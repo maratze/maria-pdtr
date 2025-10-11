@@ -9,7 +9,7 @@ function MainHeading() {
 					Соломкина
 				</span>
 			</h1>
-			<div className="block lg:flex flex-wrap items-center gap-x-4 text-md text-slate-200 font-medium">
+			<div className="block lg:flex flex-wrap items-center gap-x-4 text-md text-slate-200 font-regular">
 				<div className="flex items-center gap-x-2">
 					<span className="lg:hidden w-1.5 h-1.5 bg-ocean-300 rounded-full"></span>
 					<span>Специалист метода P-DTR</span>

@@ -207,7 +207,7 @@ const PDTRMethod = () => {
 										</svg>
 									</div>
 									<div className="flex-1">
-										<h4 className="text-lg font-regular text-slate-700 mb-3 leading-tight">
+										<h4 className="text-[16px] sm:text-[20px] font-regular text-slate-700 mb-3 leading-tight">
 											Эмоциональные и психосоматические проблемы
 										</h4>
 										<div className="w-12 h-0.5 bg-gradient-to-r from-ocean-500 to-ocean-300 rounded-full"></div>
@@ -236,7 +236,7 @@ const PDTRMethod = () => {
 										</svg>
 									</div>
 									<div className="flex-1">
-										<h4 className="text-lg font-regular text-slate-700 mb-3 leading-tight">
+										<h4 className="text-[16px] sm:text-[20px]  font-regular text-slate-700 mb-3 leading-tight">
 											Оптимизация функционального состояния
 										</h4>
 										<div className="w-12 h-0.5 bg-gradient-to-r from-emerald-500 to-emerald-300 rounded-full"></div>
@@ -265,7 +265,7 @@ const PDTRMethod = () => {
 										</svg>
 									</div>
 									<div className="flex-1">
-										<h4 className="text-lg font-regular text-slate-700 mb-3 leading-tight">
+										<h4 className="text-[16px] sm:text-[20px]  font-regular text-slate-700 mb-3 leading-tight">
 											Эффективное облегчение болевых синдромов
 										</h4>
 										<div className="w-12 h-0.5 bg-gradient-to-r from-amber-500 to-amber-300 rounded-full"></div>
@@ -294,7 +294,7 @@ const PDTRMethod = () => {
 										</svg>
 									</div>
 									<div className="flex-1">
-										<h4 className="text-lg font-regular text-slate-700 mb-3 leading-tight">
+										<h4 className="text-[16px] sm:text-[20px]  font-regular text-slate-700 mb-3 leading-tight">
 											Восстановление энергетических ресурсов
 										</h4>
 										<div className="w-12 h-0.5 bg-gradient-to-r from-violet-500 to-violet-300 rounded-full"></div>
