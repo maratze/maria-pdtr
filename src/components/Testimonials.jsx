@@ -23,6 +23,8 @@ import review21 from '../assets/images/review-21.png'
 import review22 from '../assets/images/review-22.png'
 import review23 from '../assets/images/review-23.png'
 import review24 from '../assets/images/review-24.png'
+import SectionHeader from './SectionHeader';
+import SectionDescription from './SectionDescription';
 
 const categories = [
 	'Все',
@@ -220,12 +222,8 @@ const Testimonials = () => {
 			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 				{/* Header */}
 				<div className="text-center mb-12 sm:mb-16">
-					<h2 className="text-3xl sm:text-3xl md:text-4xl lg:text-5xl font-medium text-ocean-600 mb-3 sm:mb-4">
-						Отзывы пациентов
-					</h2>
-					<p className="text-md md:text-lg text-slate-600 max-w-3xl mx-auto px-4">
-						Что говорят люди, которые уже испытали на себе эффективность P-DTR метода
-					</p>
+					<SectionHeader title="Отзывы пациентов" />
+					<SectionDescription text="Что говорят люди, которые уже испытали на себе эффективность P-DTR метода" />
 				</div>
 
 				{/* Category Tabs - Hidden on mobile */}

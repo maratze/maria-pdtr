@@ -1,5 +1,6 @@
 import React from 'react'
 import SectionHeader from './SectionHeader';
+import SectionDescription from './SectionDescription';
 
 const Services = () => {
 	const services = [
@@ -71,9 +72,7 @@ const Services = () => {
 				{/* Заголовок секции */}
 				<div className="text-center mb-8 sm:mb-12">
 					<SectionHeader title="Услуги" isDarkMode={true} />
-					<p className="text-md md:text-lg text-slate-200 max-w-3xl mx-auto px-2 sm:px-4">
-						Индивидуальный подход к каждому клиенту. Выберите формат работы, который подходит именно вам.
-					</p>
+					<SectionDescription text="Индивидуальный подход к каждому клиенту. Выберите формат работы, который подходит именно вам." isDarkMode={true} />
 				</div>
 
 				{/* Компактный список услуг */}
