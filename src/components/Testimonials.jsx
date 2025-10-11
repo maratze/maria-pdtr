@@ -235,9 +235,9 @@ const Testimonials = () => {
 								setActiveCategory(category)
 								setVisibleCount(3) // Reset pagination when changing category
 							}}
-							className={`px-3 py-2 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all duration-300 ${activeCategory === category
+							className={`px-3 py-2 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-regular transition-all duration-300 ${activeCategory === category
 								? 'bg-ocean-600 text-white shadow-lg'
-								: 'bg-white text-slate-600 hover:bg-ocean-50 hover:text-ocean-600 border border-slate-200'
+								: 'bg-white text-slate-900 hover:bg-ocean-50 hover:text-ocean-600 border border-slate-200'
 								}`}
 						>
 							{category}
@@ -318,7 +318,7 @@ const Testimonials = () => {
 
 									{/* Card footer */}
 									<div className="p-3 sm:p-4 flex-1 flex items-start">
-										<p className="text-sm font-medium text-slate-900 leading-relaxed">{testimonial.problem}</p>
+										<p className="text-[15px] font-regular text-slate-900 leading-relaxed">{testimonial.problem}</p>
 									</div>
 								</div>
 							</div>
@@ -372,10 +372,10 @@ const Testimonials = () => {
 								</div>
 							</div>
 							<div className="text-center sm:text-left flex-1">
-								<h3 className="text-lg md:text-xl font-medium text-slate-800 mb-2">
+								<h3 className="text-lg md:text-xl font-regular text-slate-800 mb-2">
 									Хотите оставить отзыв?
 								</h3>
-								<p className="text-sm md:text-base text-slate-600 mb-3 sm:mb-4 leading-relaxed">
+								<p className="text-sm md:text-base text-slate-500 mb-3 sm:mb-4 leading-relaxed">
 									Скоро здесь появится возможность оставлять отзывы прямо на сайте.
 									А пока вы можете поделиться своими впечатлениями в личных сообщениях.
 								</p>

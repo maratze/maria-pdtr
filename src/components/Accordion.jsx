@@ -12,7 +12,7 @@ const AccordionItem = ({ title, children, isOpen, onToggle, isFirst, isLast }) =
 				onClick={onToggle}
 				className="w-full px-4 sm:px-6 py-5 text-left flex justify-between items-center transition-colors duration-200"
 			>
-				<h3 className={`text-md sm:text-lg font-medium transition-colors duration-200 ${isOpen ? 'text-ocean-600' : 'text-slate-700 group-hover:text-ocean-600'
+				<h3 className={`text-md sm:text-lg font-regular transition-colors duration-200 ${isOpen ? 'text-ocean-600' : 'text-slate-700 group-hover:text-ocean-600'
 					}`}>
 					{title}
 				</h3>

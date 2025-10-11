@@ -7,42 +7,42 @@ const Services = () => {
 		{
 			id: 1,
 			title: "Базовый",
-			price: "10 000₽",
+			price: "10 000 ₽",
 			duration: "45 - 60 мин",
 			description: "Индивидуальный сеанс"
 		},
 		{
 			id: 2,
 			title: "Денежные вопросы, проявленность",
-			price: "15 000₽",
+			price: "15 000 ₽",
 			duration: "60 - 90 мин",
 			description: "Индивидуальный сеанс"
 		},
 		{
 			id: 3,
 			title: "Работа с установками и убеждениями",
-			price: "15 000₽",
+			price: "15 000 ₽",
 			duration: "60 - 90 мин",
 			description: "Индивидуальный сеанс"
 		},
 		{
 			id: 4,
 			title: "Комплекс",
-			price: "25 000₽",
+			price: "25 000 ₽",
 			duration: "3 сеанса",
 			description: "Более глубокое погружение в метод P-DTR. Включает 3 сеанса."
 		},
 		{
 			id: 5,
 			title: "Индивидуальное сопровождение",
-			price: "от 30 000₽",
+			price: "от 30 000 ₽",
 			duration: "",
 			description: "Мое персональное сопровождение Вас до достижения желаемой цели/состояния, консультирование и коррекция. Входит 1-2 сеанса офлайн и безлимитные консультации онлайн."
 		},
 		{
 			id: 6,
 			title: "Обучение методу психоэмоциональной коррекции",
-			price: "40 000₽",
+			price: "40 000 ₽",
 			duration: "16 часов",
 			description: "Групповое обучение до 4х человек. Длительность 16 часов (4ч. теория, 10ч. практика)"
 		}
@@ -88,10 +88,10 @@ const Services = () => {
 							>
 								<div className="flex flex-col gap-2">
 									<div className="flex items-start justify-between gap-3">
-										<h3 className="text-base sm:text-lg md:text-xl font-medium text-white leading-tight flex-1">
+										<h3 className="text-base sm:text-lg md:text-xl font-light text-white leading-tight flex-1">
 											{service.title}
 										</h3>
-										<div className="text-lg sm:text-xl md:text-2xl font-medium text-ocean-300 whitespace-nowrap">
+										<div className="text-lg sm:text-xl md:text-2xl font-light text-ocean-300 whitespace-nowrap">
 											{service.price}
 										</div>
 									</div>
@@ -120,7 +120,7 @@ const Services = () => {
 									<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
 								</svg>
 							</div>
-							<h3 className="text-xl sm:text-2xl font-medium text-white mb-2 sm:mb-3 px-2">
+							<h3 className="text-xl sm:text-2xl font-light text-white mb-2 sm:mb-3 px-2">
 								Онлайн-запись
 							</h3>
 							<p className="text-sm sm:text-base text-slate-300 mb-4 sm:mb-6 px-2">
@@ -140,7 +140,7 @@ const Services = () => {
 									</svg>
 								</div>
 								<div className="text-sm text-slate-400 mb-1">Позвонить</div>
-								<div className="text-sm font-medium text-white text-center">+7 (966) 096-26-26</div>
+								<div className="text-sm font-light text-white text-center">+7 (966) 096-26-26</div>
 							</a>
 
 							{/* WhatsApp */}
@@ -156,7 +156,7 @@ const Services = () => {
 									</svg>
 								</div>
 								<div className="text-sm text-slate-400 mb-1">WhatsApp</div>
-								<div className="text-sm font-medium text-white">Написать</div>
+								<div className="text-sm font-light text-white">Написать</div>
 							</a>
 
 							{/* Telegram */}
@@ -172,7 +172,7 @@ const Services = () => {
 									</svg>
 								</div>
 								<div className="text-sm text-slate-400 mb-1">Telegram</div>
-								<div className="text-sm font-medium text-white">Написать</div>
+								<div className="text-sm font-light text-white">Написать</div>
 							</a>
 						</div>
 
@@ -194,7 +194,7 @@ const Services = () => {
 								</svg>
 							</div>
 							<div className="text-left">
-								<h4 className="font-medium text-white mb-1 sm:mb-2 text-base">Не знаете, что выбрать?</h4>
+								<h4 className="font-light text-white mb-1 sm:mb-2 text-base">Не знаете, что выбрать?</h4>
 								<p className="text-slate-300 text-sm leading-relaxed">
 									Я помогу определиться с форматом работы на бесплатной консультации.
 									Свяжитесь со мной удобным способом, и мы обсудим вашу ситуацию.

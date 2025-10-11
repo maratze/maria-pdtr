@@ -199,10 +199,10 @@ const Cases = () => {
 													{String(caseItem.id).padStart(2, '0')}
 												</div>
 												<div className="flex-1 min-w-0">
-													<h3 className="text-lg sm:text-xl lg:text-2xl font-medium text-slate-700 break-words leading-5">
+													<h3 className="text-lg sm:text-xl lg:text-2xl font-regular text-slate-700 break-words leading-5">
 														{caseItem.title}
 													</h3>
-													<div className="text-xs sm:text-sm text-ocean-600 font-medium mt-1">
+													<div className="text-xs sm:text-sm text-ocean-600 font-regular mt-1">
 														{caseItem.duration}
 													</div>
 												</div>
@@ -210,7 +210,7 @@ const Cases = () => {
 
 											{/* Problem Preview */}
 											<div className="mb-4 sm:mb-6">
-												<h4 className="text-xs sm:text-sm font-semibold text-red-600 uppercase tracking-wide mb-2">
+												<h4 className="text-xs sm:text-sm font-medium text-red-600 uppercase tracking-wide mb-2">
 													Проблема
 												</h4>
 												<p className="text-sm sm:text-base text-slate-600 leading-relaxed">
@@ -220,7 +220,7 @@ const Cases = () => {
 
 											{/* Solution Preview */}
 											<div className="mb-4 sm:mb-6">
-												<h4 className="text-xs sm:text-sm font-semibold text-ocean-600 uppercase tracking-wide mb-2">
+												<h4 className="text-xs sm:text-sm font-medium text-ocean-600 uppercase tracking-wide mb-2">
 													Решение
 												</h4>
 												<p className="text-sm sm:text-base text-slate-700 leading-relaxed">
@@ -230,7 +230,7 @@ const Cases = () => {
 
 											{/* Result Preview */}
 											<div className="mb-4 sm:mb-6">
-												<h4 className="text-xs sm:text-sm font-semibold text-green-600 uppercase tracking-wide mb-2">
+												<h4 className="text-xs sm:text-sm font-medium text-green-600 uppercase tracking-wide mb-2">
 													Результат
 												</h4>
 												<p className="text-sm sm:text-base text-slate-700 leading-relaxed">
@@ -302,7 +302,7 @@ const Cases = () => {
 					<a
 						href="https://t.me/maria_pdtr"
 						target="_blank"
-						className="inline-flex items-center gap-2 bg-ocean-600 text-white px-4 py-3 sm:px-8 sm:py-4 rounded-full hover:bg-ocean-500 transition-all duration-300 shadow-lg hover:shadow-ocean-500/25 text-sm sm:text-base"
+						className="inline-flex items-center gap-2 bg-ocean-600 text-white px-4 py-3 sm:px-8 sm:py-4 rounded-full hover:bg-ocean-500 transition-all duration-300 shadow-lg hover:shadow-ocean-500/25 text-sm sm:text-base font-light"
 					>
 						<svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />

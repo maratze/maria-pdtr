@@ -40,7 +40,7 @@ function KeyAchievements() {
 				{stats.map((stat, index) => {
 					return (
 						<div key={index} className="min-[420px]:text-center group">
-							<div className="flex justify-center text-3xl sm:text-4xl font-medium text-ocean-400 leading-none">
+							<div className="flex justify-center text-3xl sm:text-4xl font-regular text-ocean-400 leading-none">
 								{stat.number}
 							</div>
 							<div className="text-sm text-slate-200">
