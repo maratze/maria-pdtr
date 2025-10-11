@@ -7,7 +7,7 @@ const Contacts = () => {
 			<div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
 				{/* Заголовок */}
 				<div className="text-center mb-16">
-					<h2 className="text-4xl md:text-5xl font-light text-slate-800 mb-4">
+					<h2 className="text-3xl sm:text-4xl md:text-5xl font-light text-slate-800 mb-4">
 						Контакты
 					</h2>
 					<div className="w-20 h-1 bg-emerald-500 mx-auto"></div>
