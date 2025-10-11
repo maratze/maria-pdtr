@@ -88,7 +88,7 @@ const Services = () => {
 									${index !== services.length - 1 ? 'border-b border-white/10' : ''}
 								`}
 							>
-								<div className="flex flex-col gap-3 sm:gap-4">
+								<div className="flex flex-col gap-2">
 									<div className="flex items-start justify-between gap-3">
 										<h3 className="text-base sm:text-lg md:text-xl font-medium text-white leading-tight flex-1">
 											{service.title}
