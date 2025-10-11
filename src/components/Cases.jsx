@@ -129,7 +129,7 @@ const Cases = () => {
 	}, [position, isTransitioning, isManualNavigation, cases.length, extendedCases.length])
 
 	return (
-		<section id="cases" className="relative py-16 lg:py-24 bg-gradient-to-br from-slate-800 via-slate-700 to-ocean-800 overflow-hidden">
+		<section id="cases" className="relative py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-slate-800 via-slate-700 to-ocean-800 overflow-hidden">
 			{/* Декоративный фон в стиле Hero */}
 			<div className="absolute inset-0">
 				{/* Основной градиент */}
@@ -159,13 +159,13 @@ const Cases = () => {
 			</div>
 
 			<div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10">
-				<div className="text-center mb-16">
-					<div className="flex items-center justify-center gap-3 mb-4">
-						<h2 className="text-3xl md:text-4xl lg:text-5xl font-medium text-white">
+				<div className="text-center mb-12 sm:mb-16">
+					<div className="flex items-center justify-center gap-3 mb-3 sm:mb-4">
+						<h2 className="text-3xl sm:text-3xl md:text-4xl lg:text-5xl font-medium text-white">
 							Кейсы из практики
 						</h2>
 					</div>
-					<p className="text-md md:text-lg text-slate-200 max-w-3xl mx-auto">
+					<p className="text-md md:text-lg text-slate-200 max-w-3xl mx-auto px-4">
 						Реальные истории пациентов, которые восстановили здоровье с помощью P-DTR метода
 					</p>
 				</div>

@@ -174,7 +174,7 @@ const PDTRMethod = () => {
 	];
 
 	return (
-		<section id="method" className="py-12 md:py-20 bg-gradient-to-br from-gray-50 via-white to-ocean-50 relative overflow-hidden">
+		<section id="method" className="py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-gray-50 via-white to-ocean-50 relative overflow-hidden">
 			{/* Декоративные элементы фона */}
 			<div className="absolute inset-0 opacity-30">
 				<div className="absolute top-10 left-10 w-32 h-32 bg-ocean-200 rounded-full blur-3xl"></div>
@@ -191,12 +191,12 @@ const PDTRMethod = () => {
 					</div>
 
 					{/* Главный заголовок */}
-					<h2 className="text-3xl md:text-4xl lg:text-5xl font-medium text-ocean-600 mb-4 leading-tight">
+					<h2 className="text-3xl sm:text-3xl md:text-4xl lg:text-5xl font-medium text-ocean-600 mb-3 sm:mb-4 leading-tight">
 						Метод P-DTR
 					</h2>
 
 					{/* Описание */}
-					<p className="text-md md:text-lg text-slate-600 max-w-3xl mx-auto leading-relaxed mb-8">
+					<p className="text-md md:text-lg text-slate-600 max-w-3xl mx-auto leading-relaxed mb-8 px-4">
 						Инновационный подход к восстановлению здоровья через работу с нервной системой.
 						<span className="text-ocean-600 font-medium"> Быстрые результаты без побочных эффектов.</span>
 					</p>
@@ -213,7 +213,7 @@ const PDTRMethod = () => {
 
 				{/* Блок преимуществ P-DTR */}
 				<div className="mt-8 sm:mt-16 md:mt-20">
-					<h2 className="text-2xl lg:text-3xl font-medium text-ocean-600 text-center mb-8">Главные преимущества</h2>
+					<h2 className="text-2xl lg:text-3xl font-medium text-ocean-600 text-center mb-6 sm:mb-8">Главные преимущества</h2>
 
 					<div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:gap-8">
 						{/* Решение эмоциональных проблем */}

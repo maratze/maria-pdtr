@@ -220,10 +220,10 @@ const Testimonials = () => {
 			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 				{/* Header */}
 				<div className="text-center mb-12 sm:mb-16">
-					<h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-medium text-ocean-600 mb-3 sm:mb-4">
+					<h2 className="text-3xl sm:text-3xl md:text-4xl lg:text-5xl font-medium text-ocean-600 mb-3 sm:mb-4">
 						Отзывы пациентов
 					</h2>
-					<p className="text-sm sm:text-md md:text-lg text-slate-600 max-w-3xl mx-auto px-4">
+					<p className="text-md md:text-lg text-slate-600 max-w-3xl mx-auto px-4">
 						Что говорят люди, которые уже испытали на себе эффективность P-DTR метода
 					</p>
 				</div>
@@ -303,7 +303,7 @@ const Testimonials = () => {
 
 								{/* Card footer */}
 								<div className="p-3 sm:p-4 flex-1 flex items-start">
-									<p className="text-xs sm:text-sm font-medium text-slate-800 leading-relaxed">{testimonial.problem}</p>
+									<p className="text-sm font-medium text-slate-800 leading-relaxed">{testimonial.problem}</p>
 								</div>
 							</div>
 						</div>
