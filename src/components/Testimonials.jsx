@@ -271,44 +271,62 @@ const Testimonials = () => {
 					</select>
 				</div>
 
-				{/* Testimonials Grid */}
-				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-					{displayedTestimonials.map((testimonial) => (
-						<div key={testimonial.id} className="group h-full">
-							<div className="bg-white rounded-xl sm:rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 h-full flex flex-col">
-								{/* Review Image */}
-								<div className="aspect-[4/5] bg-gradient-to-br from-ocean-100 to-slate-100 relative overflow-hidden flex-shrink-0">
-									{testimonial.image ? (
-										<img
-											src={testimonial.image}
-											alt={`Отзыв: ${testimonial.problem}`}
-											className="w-full h-full object-cover"
-										/>
-									) : (
-										<div className="absolute inset-0 flex items-center justify-center">
-											<div className="text-center p-4 sm:p-6">
-												<div className="w-12 h-12 sm:w-16 sm:h-16 bg-ocean-200 rounded-full flex items-center justify-center mb-3 sm:mb-4 mx-auto">
-													<svg className="w-6 h-6 sm:w-8 sm:h-8 text-ocean-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-														<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-													</svg>
+				{/* Testimonials Grid or Empty State */}
+				{filteredTestimonials.length === 0 ? (
+					<div className="flex items-center justify-center">
+						<div className="bg-white rounded-xl sm:rounded-2xl p-8 sm:p-12 shadow-md border border-ocean-100 max-w-md mx-auto text-center">
+							<div className="w-16 h-16 sm:w-20 sm:h-20 bg-ocean-100 rounded-full flex items-center justify-center mb-4 sm:mb-6 mx-auto">
+								<svg className="w-8 h-8 sm:w-10 sm:h-10 text-ocean-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+								</svg>
+							</div>
+							<h3 className="text-lg sm:text-xl font-bold text-slate-700 mb-2 sm:mb-3">
+								Отзывов пока нет
+							</h3>
+							<p className="text-sm sm:text-base text-slate-600 leading-relaxed">
+								В категории <span className="font-semibold text-ocean-600">"{activeCategory}"</span> еще не добавлены отзывы
+							</p>
+						</div>
+					</div>
+				) : (
+					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+						{displayedTestimonials.map((testimonial) => (
+							<div key={testimonial.id} className="group h-full">
+								<div className="bg-white rounded-xl sm:rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 h-full flex flex-col">
+									{/* Review Image */}
+									<div className="aspect-[4/5] bg-gradient-to-br from-ocean-100 to-slate-100 relative overflow-hidden flex-shrink-0">
+										{testimonial.image ? (
+											<img
+												src={testimonial.image}
+												alt={`Отзыв: ${testimonial.problem}`}
+												className="w-full h-full object-cover"
+											/>
+										) : (
+											<div className="absolute inset-0 flex items-center justify-center">
+												<div className="text-center p-4 sm:p-6">
+													<div className="w-12 h-12 sm:w-16 sm:h-16 bg-ocean-200 rounded-full flex items-center justify-center mb-3 sm:mb-4 mx-auto">
+														<svg className="w-6 h-6 sm:w-8 sm:h-8 text-ocean-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+															<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+														</svg>
+													</div>
+													<p className="text-xs sm:text-sm font-medium text-slate-700 leading-relaxed">{testimonial.problem}</p>
 												</div>
-												<p className="text-xs sm:text-sm font-medium text-slate-700 leading-relaxed">{testimonial.problem}</p>
 											</div>
-										</div>
-									)}
+										)}
 
-									{/* Overlay for hover effect */}
-									<div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300"></div>
-								</div>
+										{/* Overlay for hover effect */}
+										<div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300"></div>
+									</div>
 
-								{/* Card footer */}
-								<div className="p-3 sm:p-4 flex-1 flex items-start">
-									<p className="text-sm font-medium text-slate-800 leading-relaxed">{testimonial.problem}</p>
+									{/* Card footer */}
+									<div className="p-3 sm:p-4 flex-1 flex items-start">
+										<p className="text-sm font-medium text-slate-800 leading-relaxed">{testimonial.problem}</p>
+									</div>
 								</div>
 							</div>
-						</div>
-					))}
-				</div>
+						))}
+					</div>
+				)}
 
 				{/* Show More Button */}
 				{visibleCount < filteredTestimonials.length && (
