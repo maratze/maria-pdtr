@@ -216,20 +216,20 @@ const Testimonials = () => {
 	const displayedTestimonials = filteredTestimonials.slice(0, visibleCount)
 
 	return (
-		<section id="testimonials" className="py-16 lg:py-24 bg-gradient-to-br from-slate-50 to-ocean-50">
+		<section id="testimonials" className="py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-slate-50 to-ocean-50">
 			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 				{/* Header */}
-				<div className="text-center mb-16">
-					<h2 className="text-3xl md:text-4xl lg:text-5xl font-medium text-ocean-600 mb-4">
+				<div className="text-center mb-12 sm:mb-16">
+					<h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-medium text-ocean-600 mb-3 sm:mb-4">
 						Отзывы пациентов
 					</h2>
-					<p className="text-md md:text-lg text-slate-600 max-w-3xl mx-auto">
+					<p className="text-sm sm:text-md md:text-lg text-slate-600 max-w-3xl mx-auto px-4">
 						Что говорят люди, которые уже испытали на себе эффективность P-DTR метода
 					</p>
 				</div>
 
-				{/* Category Tabs */}
-				<div className="flex flex-wrap sm:justify-center gap-2 mb-8">
+				{/* Category Tabs - Hidden on mobile */}
+				<div className="hidden sm:flex flex-wrap justify-center gap-2 mb-8">
 					{categories.map((category) => (
 						<button
 							key={category}
@@ -237,7 +237,7 @@ const Testimonials = () => {
 								setActiveCategory(category)
 								setVisibleCount(3) // Reset pagination when changing category
 							}}
-							className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${activeCategory === category
+							className={`px-3 py-2 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all duration-300 ${activeCategory === category
 								? 'bg-ocean-600 text-white shadow-lg'
 								: 'bg-white text-slate-600 hover:bg-ocean-50 hover:text-ocean-600 border border-slate-200'
 								}`}
@@ -247,11 +247,35 @@ const Testimonials = () => {
 					))}
 				</div>
 
+				{/* Category Select - Visible only on mobile */}
+				<div className="sm:hidden mb-6">
+					<select
+						value={activeCategory}
+						onChange={(e) => {
+							setActiveCategory(e.target.value)
+							setVisibleCount(3) // Reset pagination when changing category
+						}}
+						className="w-full px-4 py-3 rounded-xl text-sm font-medium bg-white text-slate-700 border-2 border-slate-200 focus:border-ocean-600 focus:outline-none focus:ring-2 focus:ring-ocean-600/20 transition-all duration-300 appearance-none cursor-pointer"
+						style={{
+							backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%232563eb'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
+							backgroundRepeat: 'no-repeat',
+							backgroundPosition: 'right 0.75rem center',
+							backgroundSize: '1.25rem'
+						}}
+					>
+						{categories.map((category) => (
+							<option key={category} value={category}>
+								{category}
+							</option>
+						))}
+					</select>
+				</div>
+
 				{/* Testimonials Grid */}
-				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-8">
+				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
 					{displayedTestimonials.map((testimonial) => (
 						<div key={testimonial.id} className="group h-full">
-							<div className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 h-full flex flex-col">
+							<div className="bg-white rounded-xl sm:rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 h-full flex flex-col">
 								{/* Review Image */}
 								<div className="aspect-[4/5] bg-gradient-to-br from-ocean-100 to-slate-100 relative overflow-hidden flex-shrink-0">
 									{testimonial.image ? (
@@ -262,13 +286,13 @@ const Testimonials = () => {
 										/>
 									) : (
 										<div className="absolute inset-0 flex items-center justify-center">
-											<div className="text-center p-6">
-												<div className="w-16 h-16 bg-ocean-200 rounded-full flex items-center justify-center mb-4 mx-auto">
-													<svg className="w-8 h-8 text-ocean-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<div className="text-center p-4 sm:p-6">
+												<div className="w-12 h-12 sm:w-16 sm:h-16 bg-ocean-200 rounded-full flex items-center justify-center mb-3 sm:mb-4 mx-auto">
+													<svg className="w-6 h-6 sm:w-8 sm:h-8 text-ocean-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 														<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
 													</svg>
 												</div>
-												<p className="text-sm font-medium text-slate-700 leading-relaxed">{testimonial.problem}</p>
+												<p className="text-xs sm:text-sm font-medium text-slate-700 leading-relaxed">{testimonial.problem}</p>
 											</div>
 										</div>
 									)}
@@ -278,8 +302,8 @@ const Testimonials = () => {
 								</div>
 
 								{/* Card footer */}
-								<div className="p-4 flex-1 flex items-start">
-									<p className="text-sm font-medium text-slate-800 leading-relaxed">{testimonial.problem}</p>
+								<div className="p-3 sm:p-4 flex-1 flex items-start">
+									<p className="text-xs sm:text-sm font-medium text-slate-800 leading-relaxed">{testimonial.problem}</p>
 								</div>
 							</div>
 						</div>
@@ -288,12 +312,12 @@ const Testimonials = () => {
 
 				{/* Show More Button */}
 				{visibleCount < filteredTestimonials.length && (
-					<div className="text-center mt-12">
+					<div className="text-center mt-8 sm:mt-12">
 						<button
 							onClick={() => setVisibleCount(prev => prev + 3)}
-							className="inline-flex items-center gap-2 bg-ocean-600 text-white px-8 py-4 rounded-full hover:bg-ocean-500 transition-all duration-300 shadow-lg hover:shadow-ocean-500/25"
+							className="inline-flex items-center gap-2 bg-ocean-600 text-white px-6 py-3 sm:px-8 sm:py-4 rounded-full hover:bg-ocean-500 transition-all duration-300 shadow-lg hover:shadow-ocean-500/25 text-sm sm:text-base"
 						>
-							<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
 							</svg>
 							Показать еще отзывы
@@ -301,22 +325,22 @@ const Testimonials = () => {
 					</div>
 				)}
 				{/* Stats */}
-				<div className="mt-16 grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+				<div className="mt-12 sm:mt-16 grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
 					<div className="text-center">
-						<div className="text-3xl lg:text-4xl font-bold text-ocean-600 mb-2">150+</div>
-						<div className="text-sm text-slate-600">Довольных пациентов</div>
+						<div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-ocean-600 mb-1 sm:mb-2">150+</div>
+						<div className="text-xs sm:text-sm text-slate-600">Довольных пациентов</div>
 					</div>
 					<div className="text-center">
-						<div className="text-3xl lg:text-4xl font-bold text-ocean-600 mb-2">95%</div>
-						<div className="text-sm text-slate-600">Успешных случаев</div>
+						<div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-ocean-600 mb-1 sm:mb-2">95%</div>
+						<div className="text-xs sm:text-sm text-slate-600">Успешных случаев</div>
 					</div>
 					<div className="text-center">
-						<div className="text-3xl lg:text-4xl font-bold text-ocean-600 mb-2">4.9</div>
-						<div className="text-sm text-slate-600">Средняя оценка</div>
+						<div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-ocean-600 mb-1 sm:mb-2">4.9</div>
+						<div className="text-xs sm:text-sm text-slate-600">Средняя оценка</div>
 					</div>
 					<div className="text-center">
-						<div className="text-3xl lg:text-4xl font-bold text-ocean-600 mb-2">3+</div>
-						<div className="text-sm text-slate-600">Года практики</div>
+						<div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-ocean-600 mb-1 sm:mb-2">3+</div>
+						<div className="text-xs sm:text-sm text-slate-600">Года практики</div>
 					</div>
 				</div>
 
