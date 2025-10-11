@@ -160,6 +160,12 @@ const Cases = () => {
 
 			<div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10">
 				<div className="text-center mb-12 sm:mb-16">
+					{/* Бейдж */}
+					<div className="inline-flex items-center px-4 py-2 bg-ocean-100 text-ocean-600 rounded-full text-sm font-medium mb-4">
+						<div className="w-1.5 h-1.5 bg-ocean-500 rounded-full mr-2"></div>
+						Истории успеха
+					</div>
+					
 					<div className="flex items-center justify-center gap-3 mb-3 sm:mb-4">
 						<h2 className="text-3xl sm:text-3xl md:text-4xl lg:text-5xl font-medium text-white">
 							Кейсы из практики

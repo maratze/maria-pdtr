@@ -6,6 +6,7 @@ import Hero from './components/Hero';
 import PDTRMethod from './components/PDTRMethod';
 import Cases from './components/Cases';
 import Testimonials from './components/Testimonials';
+import Services from './components/Services';
 import './App.css'
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
 			<PDTRMethod />
 			<Cases />
 			<Testimonials />
+			<Services />
 		</div>
 	)
 }

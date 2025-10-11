@@ -3,7 +3,6 @@ import Badge from './Badge'
 import MainHeading from './MainHeading'
 import Description from './Description'
 import KeyAchievements from './KeyAchievements'
-import ProfessionalActivities from './ProfessionalActivities'
 import HeroImage from './HeroImage'
 
 function Hero() {
