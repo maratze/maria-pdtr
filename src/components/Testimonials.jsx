@@ -363,22 +363,34 @@ const Testimonials = () => {
 				</div>
 
 				{/* Future reviews form teaser */}
-				{/* <div className="mt-16 text-center">
-					<div className="bg-white rounded-2xl p-8 shadow-lg border border-ocean-100">
-						<h3 className="text-xl font-bold text-slate-700 mb-4">
-							Хотите оставить отзыв?
-						</h3>
-						<p className="text-slate-600 mb-6">
-							В скором времени здесь появится возможность оставлять отзывы прямо на сайте
-						</p>
-						<div className="inline-flex items-center gap-2 bg-slate-100 text-slate-600 px-6 py-3 rounded-full font-medium">
-							<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-							</svg>
-							Скоро будет доступно
+				<div className="mt-12 sm:mt-16">
+					<div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 shadow-lg border border-ocean-100 max-w-2xl mx-auto">
+						<div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
+							<div className="flex-shrink-0 mx-auto sm:mx-0">
+								<div className="w-10 h-10 sm:w-12 sm:h-12 bg-ocean-100 rounded-full flex items-center justify-center">
+									<svg className="w-5 h-5 sm:w-6 sm:h-6 text-ocean-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+									</svg>
+								</div>
+							</div>
+							<div className="text-center sm:text-left flex-1">
+								<h3 className="text-lg md:text-xl font-medium text-slate-800 mb-2">
+									Хотите оставить отзыв?
+								</h3>
+								<p className="text-sm md:text-base text-slate-600 mb-3 sm:mb-4 leading-relaxed">
+									Скоро здесь появится возможность оставлять отзывы прямо на сайте.
+									А пока вы можете поделиться своими впечатлениями в личных сообщениях.
+								</p>
+								<div className="inline-flex items-center gap-2 bg-ocean-50 text-ocean-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg font-medium text-sm">
+									<svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+									</svg>
+									Скоро будет доступно
+								</div>
+							</div>
 						</div>
 					</div>
-				</div> */}
+				</div>
 			</div>
 		</section>
 	)
