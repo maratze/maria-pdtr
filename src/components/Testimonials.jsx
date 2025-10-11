@@ -364,7 +364,7 @@ const Testimonials = () => {
 
 				{/* Future reviews form teaser */}
 				<div className="mt-12 sm:mt-16">
-					<div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 shadow-lg border border-ocean-100 max-w-2xl mx-auto">
+					<div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 shadow-lg border border-ocean-100 mx-auto">
 						<div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
 							<div className="flex-shrink-0 mx-auto sm:mx-0">
 								<div className="w-10 h-10 sm:w-12 sm:h-12 bg-ocean-100 rounded-full flex items-center justify-center">
