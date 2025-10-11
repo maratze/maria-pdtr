@@ -7,6 +7,7 @@ import PDTRMethod from './components/PDTRMethod';
 import Cases from './components/Cases';
 import Testimonials from './components/Testimonials';
 import Services from './components/Services';
+import Contacts from './components/Contacts';
 import './App.css'
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
 			<Cases />
 			<Testimonials />
 			<Services />
+			<Contacts />
 		</div>
 	)
 }
