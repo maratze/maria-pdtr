@@ -5,42 +5,42 @@ const Services = () => {
 		{
 			id: 1,
 			title: "Базовый",
-			price: "10000₽",
+			price: "10 000₽",
 			duration: "45 - 60 мин",
 			description: "Индивидуальный сеанс"
 		},
 		{
 			id: 2,
 			title: "Денежные вопросы, проявленность",
-			price: "15000₽",
+			price: "15 000₽",
 			duration: "60 - 90 мин",
 			description: "Индивидуальный сеанс"
 		},
 		{
 			id: 3,
 			title: "Работа с установками и убеждениями",
-			price: "15000₽",
+			price: "15 000₽",
 			duration: "60 - 90 мин",
 			description: "Индивидуальный сеанс"
 		},
 		{
 			id: 4,
 			title: "Комплекс",
-			price: "25000₽",
+			price: "25 000₽",
 			duration: "3 сеанса",
 			description: "Более глубокое погружение в метод P-DTR. Включает 3 сеанса."
 		},
 		{
 			id: 5,
 			title: "Индивидуальное сопровождение",
-			price: "от 30000₽",
+			price: "от 30 000₽",
 			duration: "",
 			description: "Мое персональное сопровождение Вас до достижения желаемой цели/состояния, консультирование и коррекция. Входит 1-2 сеанса офлайн и безлимитные консультации онлайн."
 		},
 		{
 			id: 6,
 			title: "Обучение методу психоэмоциональной коррекции",
-			price: "40000₽",
+			price: "40 000₽",
 			duration: "16 часов",
 			description: "Групповое обучение до 4х человек. Длительность 16 часов (4ч. теория, 10ч. практика)"
 		}
@@ -69,14 +69,8 @@ const Services = () => {
 			<div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
 				{/* Заголовок секции */}
 				<div className="text-center mb-12">
-					{/* Бейдж */}
-					<div className="inline-flex items-center px-4 py-2 bg-ocean-100 text-ocean-600 rounded-full text-sm font-medium mb-4">
-						<div className="w-1.5 h-1.5 bg-ocean-500 rounded-full mr-2"></div>
-						Услуги
-					</div>
-
 					<h2 className="text-3xl sm:text-3xl md:text-4xl lg:text-5xl font-medium text-white mb-4">
-						Прайс-лист
+						Услуги
 					</h2>
 					<p className="text-md md:text-lg text-slate-200 max-w-3xl mx-auto px-4">
 						Индивидуальный подход к каждому клиенту. Выберите формат работы, который подходит именно вам.
@@ -84,7 +78,7 @@ const Services = () => {
 				</div>
 
 				{/* Компактный список услуг */}
-				<div className="max-w-4xl mx-auto mb-16">
+				<div className="max-w-4xl mx-auto mb-12">
 					<div className="bg-white/5 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/10">
 						{services.map((service, index) => (
 							<div
@@ -96,28 +90,22 @@ const Services = () => {
 							>
 								<div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
 									<div className="flex-1">
-										<h3 className="text-lg font-semibold text-white mb-2">
+										<h3 className="text-xl font-medium text-white mb-2">
 											{service.title}
 										</h3>
 										{service.duration && (
-											<p className="text-sm text-ocean-200 mb-2">
+											<p className="text-md text-ocean-200 mb-2">
 												{service.duration}
 											</p>
 										)}
-										<p className="text-sm text-slate-300 leading-relaxed">
+										<p className="text-md text-slate-300 leading-relaxed">
 											{service.description}
 										</p>
 									</div>
 									<div className="flex-shrink-0 text-right">
-										<div className="text-2xl font-bold text-ocean-300 mb-2">
+										<div className="text-2xl font-medium text-ocean-300">
 											{service.price}
 										</div>
-										<a
-											href="#booking"
-											className="inline-block px-6 py-2 bg-ocean-600 text-white rounded-lg text-sm font-medium hover:bg-ocean-500 transition-all duration-300"
-										>
-											Записаться
-										</a>
 									</div>
 								</div>
 							</div>
@@ -134,7 +122,7 @@ const Services = () => {
 									<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
 								</svg>
 							</div>
-							<h3 className="text-2xl font-semibold text-white mb-3">
+							<h3 className="text-2xl font-medium text-white mb-3">
 								Онлайн-запись
 							</h3>
 							<p className="text-slate-300 mb-6">
@@ -145,7 +133,7 @@ const Services = () => {
 						<div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
 							{/* Телефон */}
 							<a
-								href="tel:+79999999999"
+								href="tel:+79660962626"
 								className="flex flex-col items-center p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-all duration-300 group border border-white/5"
 							>
 								<div className="w-12 h-12 bg-ocean-600/20 rounded-full flex items-center justify-center mb-3 group-hover:bg-ocean-600/30 transition-colors">
@@ -154,12 +142,12 @@ const Services = () => {
 									</svg>
 								</div>
 								<div className="text-sm text-slate-400 mb-1">Позвонить</div>
-								<div className="text-sm font-semibold text-white">+7 (999) 999-99-99</div>
+								<div className="text-sm font-medium text-white">+7 (966) 096-26-26</div>
 							</a>
 
 							{/* WhatsApp */}
 							<a
-								href="https://wa.me/79999999999"
+								href="https://wa.me/79660962626"
 								target="_blank"
 								rel="noopener noreferrer"
 								className="flex flex-col items-center p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-all duration-300 group border border-white/5"
@@ -170,12 +158,12 @@ const Services = () => {
 									</svg>
 								</div>
 								<div className="text-sm text-slate-400 mb-1">WhatsApp</div>
-								<div className="text-sm font-semibold text-white">Написать</div>
+								<div className="text-sm font-medium text-white">Написать</div>
 							</a>
 
 							{/* Telegram */}
 							<a
-								href="https://t.me/username"
+								href="https://t.me/maria_pdtr"
 								target="_blank"
 								rel="noopener noreferrer"
 								className="flex flex-col items-center p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-all duration-300 group border border-white/5"
@@ -186,7 +174,7 @@ const Services = () => {
 									</svg>
 								</div>
 								<div className="text-sm text-slate-400 mb-1">Telegram</div>
-								<div className="text-sm font-semibold text-white">Написать</div>
+								<div className="text-sm font-medium text-white">Написать</div>
 							</a>
 						</div>
 
@@ -208,7 +196,7 @@ const Services = () => {
 								</svg>
 							</div>
 							<div className="text-left">
-								<h4 className="font-semibold text-white mb-2">Не знаете, что выбрать?</h4>
+								<h4 className="font-medium text-white mb-2">Не знаете, что выбрать?</h4>
 								<p className="text-slate-300 text-[15px]">
 									Я помогу определиться с форматом работы на бесплатной консультации.
 									Свяжитесь со мной удобным способом, и мы обсудим вашу ситуацию.
