@@ -318,7 +318,7 @@ const Testimonials = () => {
 
 									{/* Card footer */}
 									<div className="p-3 sm:p-4 flex-1 flex items-start">
-										<p className="text-sm font-medium text-slate-800 leading-relaxed">{testimonial.problem}</p>
+										<p className="text-sm font-medium text-slate-900 leading-relaxed">{testimonial.problem}</p>
 									</div>
 								</div>
 							</div>

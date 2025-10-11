@@ -1,5 +1,7 @@
 import React from 'react';
 import Accordion from './Accordion';
+import SectionHeader from './SectionHeader';
+import SectionDescription from './SectionDescription';
 
 const PDTRMethod = () => {
 	const accordionItems = [
@@ -184,23 +186,8 @@ const PDTRMethod = () => {
 
 			<div className="max-w-5xl mx-auto px-4 sm:px-6 relative z-10">
 				<div className="text-center mb-8 md:mb-12">
-					{/* Главный заголовок */}
-					<h2 className="text-3xl sm:text-3xl md:text-4xl lg:text-5xl font-medium text-ocean-600 mb-3 sm:mb-4 leading-tight">
-						Метод P-DTR
-					</h2>
-
-					{/* Описание */}
-					<p className="text-md md:text-lg text-slate-600 max-w-3xl mx-auto leading-relaxed mb-8 px-4">
-						Инновационный подход к восстановлению здоровья через работу с нервной системой.
-						<span className="text-ocean-600 font-medium"> Быстрые результаты без побочных эффектов.</span>
-					</p>
-
-					{/* Декоративная линия */}
-					<div className="flex items-center justify-center mt-6 mb-2">
-						<div className="h-px bg-gradient-to-r from-transparent via-ocean-500 to-transparent w-32"></div>
-						<div className="mx-4 w-1.5 h-1.5 bg-ocean-500 rounded-full"></div>
-						<div className="h-px bg-gradient-to-r from-transparent via-ocean-500 to-transparent w-32"></div>
-					</div>
+					<SectionHeader title="Метод P-DTR" />
+					<SectionDescription text="Инновационный подход к восстановлению здоровья через работу с нервной системой. Быстрые результаты без побочных эффектов." />
 				</div>
 
 				<Accordion items={accordionItems} allowMultiple={false} />
