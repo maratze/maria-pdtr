@@ -1,4 +1,5 @@
 import React from 'react'
+import mainImage from '../assets/images/main-image.png'
 
 function HeroImage() {
 	return (
@@ -9,7 +10,7 @@ function HeroImage() {
 			<div
 				className="absolute inset-0 bg-cover bg-center bg-no-repeat blur-xl opacity-5 scale-115"
 				style={{
-					backgroundImage: "url('/src/assets/images/main-image.png')"
+					backgroundImage: `url(${mainImage})`
 				}}
 			></div>
 
@@ -17,7 +18,7 @@ function HeroImage() {
 			<div
 				className="absolute inset-0 bg-cover bg-center bg-no-repeat blur-xl opacity-20 scale-115"
 				style={{
-					backgroundImage: "url('/src/assets/images/main-image.png')"
+					backgroundImage: `url(${mainImage})`
 				}}
 			></div>
 
@@ -25,7 +26,7 @@ function HeroImage() {
 			<div
 				className="absolute inset-0 bg-cover bg-center bg-no-repeat blur-xl opacity-15 scale-115"
 				style={{
-					backgroundImage: "url('/src/assets/images/main-image.png')"
+					backgroundImage: `url(${mainImage})`
 				}}
 			></div>
 
@@ -37,7 +38,7 @@ function HeroImage() {
 			<div
 				className="relative z-10 bg-cover bg-center bg-no-repeat w-full h-full"
 				style={{
-					backgroundImage: "url('/src/assets/images/main-image.png')"
+					backgroundImage: `url(${mainImage})`
 				}}
 			>
 			</div>
