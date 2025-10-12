@@ -30,6 +30,17 @@ function KeyAchievements() {
 			icon: HiOutlineCheckCircle,
 			text: "Сертифицированный специалист P-DTR",
 			highlight: null
+		},
+		{
+			icon: HiOutlineCalendar,
+			text: (
+				<>
+					Приемы: Москва
+					<br />
+					Казань, СПБ, Новосибирск <small>(по предварительной записи)</small>
+				</>
+			),
+			highlight: null
 		}
 	]
 

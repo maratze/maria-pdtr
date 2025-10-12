@@ -4,6 +4,7 @@ import MainHeading from './MainHeading'
 import Description from './Description'
 import KeyAchievements from './KeyAchievements'
 import HeroImage from './HeroImage'
+import { FaTelegram, FaTelegramPlane } from 'react-icons/fa'
 
 function Hero() {
 	return (
@@ -37,10 +38,34 @@ function Hero() {
 				</div>
 			</div>
 
-			<div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10">
-				<div className="relative flex items-baseline justify-self-center md:justify-self-stretch lg:items-center pt-24 sm:pt-32 pb-4 md:py-40">
+			<div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10 pt-24 sm:pt-32 pb-20">
+				<div className="flex sm:flex-row gap-2 min-[1000px]:hidden mb-4">
+					<a
+						href="https://t.me/maria_pdtr"
+						target="_blank"
+						rel="noopener noreferrer"
+						className="bg-ocean-600 text-white px-5 py-3 rounded-full hover:bg-ocean-500 transform transition-all duration-300 text-[14px] flex items-center justify-center gap-2 shadow-md hover:shadow-ocean-500/25 font-light"
+					>
+						<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.4} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+						</svg>
+						Записаться
+					</a>
+
+					<a
+						href="https://t.me/moscow_pdtr"
+						target="_blank"
+						rel="noopener noreferrer"
+						className="bg-white/10 text-white px-5 py-3 rounded-full hover:bg-white-20 transform transition-all duration-300 text-[14px] flex items-center justify-center gap-2 shadow-md hover:shadow-white-500/25 font-light"
+					>
+						<FaTelegramPlane className="text-xl" />
+						<span>Telegram</span>
+					</a>
+				</div>
+				<div className="relative flex items-baseline justify-self-center md:justify-self-stretch lg:items-center">
 					<div className="max-w-full md:max-w-[500px] space-y-6 sm:space-y-8 z-30 relative">
 						<Badge />
+
 						<MainHeading />
 						<Description />
 						<KeyAchievements />
@@ -48,9 +73,7 @@ function Hero() {
 					</div>
 				</div>
 			</div>
-			<HeroImage />
-
-		</section>
+			<HeroImage />		</section>
 	)
 }
 
