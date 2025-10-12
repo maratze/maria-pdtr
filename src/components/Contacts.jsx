@@ -69,7 +69,7 @@ const Contacts = () => {
 				{/* Футер с копирайтом и юридической информацией */}
 				<div className="text-center pt-12 border-t border-slate-200">
 					<p className="text-slate-600 mb-3">
-						© sitename.ru 2025. Все права защищены
+						© pdtr.moscow 2025. Все права защищены
 					</p>
 					<p className="text-xs text-slate-400 font-light">
 						ИП Соломкина Мария • Москва • ОГРНИП: 325774600515650 • ИНН: 540301416259
