@@ -12,7 +12,7 @@ function KeyAchievements() {
 	const stats = [
 		{ number: "3+", text: "года в P-DTR" },
 		{ number: "15+", text: "семинаров" },
-		{ number: "100+", text: "здоровых клиентов" }
+		{ number: "150+", text: "здоровых клиентов" }
 	]
 
 	const achievements = [
