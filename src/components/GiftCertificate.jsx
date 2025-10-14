@@ -38,7 +38,7 @@ function GiftCertificate() {
 			<div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 				<div className="max-w-5xl mx-auto">
 					{/* Премиум карточка */}
-					<div className="relative bg-white rounded-2xl shadow-md border-1 border-slate-100 overflow-hidden group hover:shadow-2xl hover:border-ocean-200 transition-all duration-500">
+					<div className="relative bg-white rounded-2xl shadow-md border-1 border-slate-100 overflow-hidden group hover:shadow-xl hover:border-ocean-200 transition-all duration-500">
 						{/* Тонкая градиентная линия сверху */}
 						<div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-ocean-400 via-ocean-500 to-blue-500"></div>
 
