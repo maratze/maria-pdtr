@@ -12,6 +12,7 @@ const Testimonials = () => {
 	const [dynamicReviews, setDynamicReviews] = useState([])
 	const [loadingReviews, setLoadingReviews] = useState(true)
 	const [selectedImage, setSelectedImage] = useState(null) // For image popup
+	const [imageLoading, setImageLoading] = useState(false)
 
 	// Load categories from database
 	useEffect(() => {
@@ -193,7 +194,7 @@ const Testimonials = () => {
 
 												{/* View Image Button */}
 												<button
-													onClick={() => setSelectedImage(testimonial.image)}
+													onClick={() => { setImageLoading(true); setSelectedImage(testimonial.image) }}
 													className="inline-flex items-center gap-2 text-ocean-600 hover:text-ocean-700 font-medium text-sm mb-4 transition-colors"
 												>
 													<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -235,7 +236,7 @@ const Testimonials = () => {
 														src={testimonial.image}
 														alt={`Отзыв: ${testimonial.name}`}
 														className="w-full h-full object-cover cursor-pointer"
-														onClick={() => setSelectedImage(testimonial.image)}
+														onClick={() => { setImageLoading(true); setSelectedImage(testimonial.image) }}
 													/>
 													<div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300"></div>
 												</div>
@@ -341,10 +342,17 @@ const Testimonials = () => {
 											<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
 										</svg>
 									</button>
+									{imageLoading && (
+										<div className="w-full h-64 flex items-center justify-center">
+											<div className="w-12 h-12 border-4 border-slate-200 border-t-ocean-600 rounded-full animate-spin"></div>
+										</div>
+									)}
 									<img
 										src={selectedImage}
 										alt="Full review"
-										className="w-full h-auto rounded-lg"
+										className={`w-full h-auto rounded-lg ${imageLoading ? 'hidden' : ''}`}
+										onLoad={() => setImageLoading(false)}
+										onError={() => setImageLoading(false)}
 									/>
 								</div>
 							</div>
