@@ -279,11 +279,11 @@ const Testimonials = () => {
 									<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
 								</svg>
 							</div>
-							<h3 className="text-lg sm:text-xl font-bold text-slate-700 mb-2 sm:mb-3">
+							<h3 className="text-lg sm:text-xl font-regular text-slate-700 mb-2 sm:mb-3">
 								Отзывов пока нет
 							</h3>
 							<p className="text-sm sm:text-base text-slate-600 leading-relaxed">
-								В категории <span className="font-semibold text-ocean-600">"{activeCategory}"</span> еще не добавлены отзывы
+								В категории <span className="font-semibold text-ocean-600">"{activeCategory}"</span> еще нет отзывов
 							</p>
 						</div>
 					</div>

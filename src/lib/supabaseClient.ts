@@ -11,7 +11,15 @@ if (!supabaseUrl || !supabaseAnonKey) {
   console.warn('Supabase URL or ANON KEY is missing. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY')
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  db: {
+    schema: 'public'
+  },
+  auth: {
+    persistSession: false,
+    autoRefreshToken: false
+  }
+})
 
 // Admin client - uses service role key (only use server-side or in protected admin routes)
 const supabaseServiceKey = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY || ''

@@ -2,11 +2,16 @@ import { supabase, supabaseAdmin } from './supabaseClient'
 import type { Review, NewReview } from '../types/review'
 
 // Public API: Add a review (will be pending approval)
-export async function addReview({ name, message, rating = 5 }: NewReview) {
+export async function addReview({ name, email, message, rating = 5, photos = [] }: NewReview) {
+  // Используем RPC функцию для обхода RLS проблем
   const { data, error } = await supabase
-    .from('reviews')
-    .insert([{ name, message, rating, photos: [], approved: false }])
-    .select()
+    .rpc('insert_review', {
+      p_name: name,
+      p_email: email,
+      p_message: message,
+      p_rating: rating,
+      p_photos: photos
+    })
 
   return { data: data as Review[] | null, error }
 }
@@ -43,7 +48,7 @@ export async function deletePhoto(path: string) {
 }
 
 // Admin: update review (edit fields, replace photos array)
-export async function updateReview(reviewId: number, patch: Partial<Omit<Review, 'id' | 'created_at'>>) {
+export async function updateReview(reviewId: string, patch: Partial<Omit<Review, 'id' | 'created_at'>>) {
   if (!supabaseAdmin) {
     return { data: null, error: new Error('Admin client not configured. Set VITE_SUPABASE_SERVICE_ROLE_KEY') }
   }
@@ -75,7 +80,7 @@ export async function listAllReviews() {
 }
 
 // Admin API: Approve a review
-export async function approveReview(reviewId: number) {
+export async function approveReview(reviewId: string) {
   if (!supabaseAdmin) {
     return {
       data: null,
@@ -93,7 +98,7 @@ export async function approveReview(reviewId: number) {
 }
 
 // Admin API: Delete a review
-export async function deleteReview(reviewId: number) {
+export async function deleteReview(reviewId: string) {
   if (!supabaseAdmin) {
     return {
       data: null,
