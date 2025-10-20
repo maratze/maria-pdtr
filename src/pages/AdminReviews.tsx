@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { listAllReviews, approveReview, deleteReview, uploadPhoto, updateReview, getCategories } from '../lib/reviews'
 import AdminPreloader from '../components/AdminPreloader'
+import CategoryDropdown from '../components/CategoryDropdown'
 import type { Review, Category } from '../types/review'
 
 export default function AdminReviews() {
@@ -615,7 +616,7 @@ function ReviewCard({ review, categories, onApprove, onDelete, onUpdateCategory,
               }}
               className="hidden"
             />
-            <div className="w-full h-10 rounded-lg border-2 border-dashed border-slate-300 hover:border-ocean-400 flex items-center justify-center gap-1.5 cursor-pointer transition-colors text-slate-600 hover:text-ocean-600">
+            <div className="w-full h-10 rounded-lg border border-dashed border-slate-300 hover:border-ocean-400 flex items-center justify-center gap-1.5 cursor-pointer transition-colors text-slate-600 hover:text-ocean-600">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
@@ -627,24 +628,12 @@ function ReviewCard({ review, categories, onApprove, onDelete, onUpdateCategory,
         {/* Category */}
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-1.5">Категория</label>
-          <div className="relative">
-            <select
-              value={review.category_id || ''}
-              onChange={(e) => onUpdateCategory?.(review.id, e.target.value || null)}
-              disabled={processing}
-              className="w-full h-10 appearance-none text-sm rounded-lg border border-slate-200 px-3 py-2 pr-8 text-slate-900 bg-white hover:border-ocean-300 focus:border-ocean-400 focus:outline-none focus:ring-2 focus:ring-ocean-100 disabled:opacity-50 disabled:bg-slate-50 transition-colors cursor-pointer"
-            >
-              <option value="">Без категории</option>
-              {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.name}
-                </option>
-              ))}
-            </select>
-            <svg className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-            </svg>
-          </div>
+          <CategoryDropdown
+            categories={categories}
+            value={review.category_id || null}
+            onChange={(categoryId) => onUpdateCategory?.(review.id, categoryId)}
+            disabled={processing}
+          />
         </div>
       </div>
 
