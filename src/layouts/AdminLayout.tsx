@@ -25,7 +25,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 			{/* Sidebar */}
 			<aside className="fixed left-0 top-0 bottom-0 w-64 bg-white border-r border-slate-200 flex flex-col z-20">
 				{/* Logo in navigation */}
-				<div className="px-4 py-3 border-b border-slate-200 h-14">
+				<div className="px-4 py-3 border-b border-slate-200 h-16 flex items-center">
 					<Link to="/" className="flex items-center gap-2 group">
 						<div className="w-8 h-8 bg-gradient-to-br from-ocean-500 to-ocean-600 rounded-lg flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
 							<span className="text-white text-sm font-semibold">P</span>
