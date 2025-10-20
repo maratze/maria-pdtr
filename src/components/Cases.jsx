@@ -195,7 +195,7 @@ const Cases = () => {
 											}`}>
 											{/* Case Header with Number */}
 											<div className="flex items-start gap-3 sm:gap-4 mb-4 sm:mb-6">
-												<div className="flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-ocean-600 text-white rounded-lg sm:rounded-xl flex items-center justify-center text-xl sm:text-2xl font-medium">
+												<div className="flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-gradient-to-r from-ocean-600 to-ocean-600 text-white rounded-lg sm:rounded-xl flex items-center justify-center text-xl sm:text-2xl font-medium">
 													{String(caseItem.id).padStart(2, '0')}
 												</div>
 												<div className="flex-1 min-w-0">
@@ -302,7 +302,7 @@ const Cases = () => {
 					<a
 						href="https://t.me/maria_pdtr"
 						target="_blank"
-						className="inline-flex items-center gap-2 bg-ocean-600 text-white px-4 py-3 sm:px-8 sm:py-4 rounded-full hover:bg-ocean-500 transition-all duration-300 shadow-lg hover:shadow-ocean-500/25 text-sm sm:text-base font-light"
+						className="inline-flex items-center gap-2 bg-gradient-to-r from-ocean-600 to-ocean-600 text-white px-4 py-3 sm:px-8 sm:py-4 rounded-full hover:bg-ocean-500 transition-all duration-300 shadow-lg hover:shadow-ocean-500/25 text-sm sm:text-base font-light"
 					>
 						<svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -322,7 +322,7 @@ const Cases = () => {
 						{/* Modal Header - фиксированная шапка */}
 						<div className="flex-shrink-0 bg-white border-b border-gray-200 p-4 sm:p-6 flex items-center justify-between rounded-t-xl sm:rounded-t-2xl">
 							<div className="flex items-start gap-3 sm:gap-4 flex-1 min-w-0 pr-2">
-								<div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-ocean-600 text-white rounded-lg sm:rounded-xl flex items-center justify-center text-base sm:text-lg font-medium">
+								<div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-ocean-600 to-ocean-600 text-white rounded-lg sm:rounded-xl flex items-center justify-center text-base sm:text-lg font-medium">
 									{String(selectedCase.id).padStart(2, '0')}
 								</div>
 								<div className="flex-1 min-w-0">

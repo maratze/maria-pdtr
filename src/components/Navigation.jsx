@@ -1,24 +1,45 @@
 import React, { useState, useEffect } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import Logo from './Logo'
 import { FaTelegramPlane } from 'react-icons/fa'
 
 function Navigation() {
 	const [isScrolled, setIsScrolled] = useState(false)
 	const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+	const location = useLocation()
+	const navigate = useNavigate()
 
 	// Smooth scroll to section
 	const handleSmoothScroll = (e, targetId) => {
 		e.preventDefault()
-		const targetElement = document.getElementById(targetId)
-		if (targetElement) {
-			const elementPosition = targetElement.offsetTop
-			const offsetPosition = elementPosition - 80 // Subtract header height
 
-			window.scrollTo({
-				top: offsetPosition,
-				behavior: 'smooth'
-			})
+		// If not on home page, navigate to home first
+		if (location.pathname !== '/') {
+			navigate('/')
+			// Wait for navigation then scroll
+			setTimeout(() => {
+				const targetElement = document.getElementById(targetId)
+				if (targetElement) {
+					const elementPosition = targetElement.offsetTop
+					const offsetPosition = elementPosition - 80
+					window.scrollTo({
+						top: offsetPosition,
+						behavior: 'smooth'
+					})
+				}
+			}, 100)
+		} else {
+			const targetElement = document.getElementById(targetId)
+			if (targetElement) {
+				const elementPosition = targetElement.offsetTop
+				const offsetPosition = elementPosition - 80
+				window.scrollTo({
+					top: offsetPosition,
+					behavior: 'smooth'
+				})
+			}
 		}
+
 		// Close mobile menu if open
 		setIsMobileMenuOpen(false)
 	}
@@ -65,22 +86,22 @@ function Navigation() {
 
 					{/* Desktop Navigation Links */}
 					<div className="hidden min-[1000px]:flex items-center space-x-4">
-						<a href="#about" onClick={(e) => handleSmoothScroll(e, 'about')} className="text-sm text-white hover:text-ocean-300 transition-all duration-300 font-medium uppercase tracking-wide">
+						<a href="#about" onClick={(e) => handleSmoothScroll(e, 'about')} className="text-sm text-white hover:text-ocean-300 transition-all duration-300 font-light uppercase tracking-wide">
 							Обо мне
 						</a>
-						<a href="#method" onClick={(e) => handleSmoothScroll(e, 'method')} className="text-sm text-white hover:text-ocean-300 transition-all duration-300 font-medium uppercase tracking-wide">
+						<a href="#method" onClick={(e) => handleSmoothScroll(e, 'method')} className="text-sm text-white hover:text-ocean-300 transition-all duration-300 font-light uppercase tracking-wide">
 							P-DTR метод
 						</a>
-						<a href="#cases" onClick={(e) => handleSmoothScroll(e, 'cases')} className="text-sm text-white hover:text-ocean-300 transition-all duration-300 font-medium uppercase tracking-wide">
+						<a href="#cases" onClick={(e) => handleSmoothScroll(e, 'cases')} className="text-sm text-white hover:text-ocean-300 transition-all duration-300 font-light uppercase tracking-wide">
 							Кейсы
 						</a>
-						<a href="#testimonials" onClick={(e) => handleSmoothScroll(e, 'testimonials')} className="text-sm text-white hover:text-ocean-300 transition-all duration-300 font-medium uppercase tracking-wide">
+						<a href="#testimonials" onClick={(e) => handleSmoothScroll(e, 'testimonials')} className="text-sm text-white hover:text-ocean-300 transition-all duration-300 font-light uppercase tracking-wide">
 							Отзывы
 						</a>
-						<a href="#services" onClick={(e) => handleSmoothScroll(e, 'services')} className="text-sm text-white hover:text-ocean-300 transition-all duration-300 font-medium uppercase tracking-wide">
+						<a href="#services" onClick={(e) => handleSmoothScroll(e, 'services')} className="text-sm text-white hover:text-ocean-300 transition-all duration-300 font-light uppercase tracking-wide">
 							Услуги
 						</a>
-						<a href="#contacts" onClick={(e) => handleSmoothScroll(e, 'contacts')} className="text-sm text-white hover:text-ocean-300 transition-all duration-300 font-medium uppercase tracking-wide">
+						<a href="#contacts" onClick={(e) => handleSmoothScroll(e, 'contacts')} className="text-sm text-white hover:text-ocean-300 transition-all duration-300 font-light uppercase tracking-wide">
 							Контакты
 						</a>
 					</div>
@@ -96,7 +117,7 @@ function Navigation() {
 							<FaTelegramPlane className="text-xl" />
 							Telegram
 						</a>
-						<a href="https://t.me/maria_pdtr" target="_blank" className="bg-ocean-600 text-white px-6 py-3 rounded-full hover:bg-ocean-500 transform transition-all duration-300 text-md flex items-center gap-2 shadow-md hover:shadow-ocean-500/25 font-light">
+						<a href="https://t.me/maria_pdtr" target="_blank" className="bg-gradient-to-r from-ocean-600 to-ocean-600 text-white px-6 py-3 rounded-full hover:bg-ocean-500 transform transition-all duration-300 text-md flex items-center gap-2 shadow-md hover:shadow-ocean-500/25 font-light">
 							<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
 								<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.4} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
 							</svg>

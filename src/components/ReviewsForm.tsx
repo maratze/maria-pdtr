@@ -1,0 +1,536 @@
+import { useState, FormEvent, ChangeEvent } from 'react'
+import { addReview, uploadPhoto } from '../lib/reviews'
+import type { Review } from '../types/review'
+
+interface ReviewsFormProps {
+  onSubmitted?: (data: Review[] | null) => void
+}
+
+export default function ReviewsForm({ onSubmitted }: ReviewsFormProps) {
+  const [isOpen, setIsOpen] = useState(false)
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [message, setMessage] = useState('')
+  const [rating, setRating] = useState(5)
+  const [files, setFiles] = useState<File[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState(false)
+
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    setLoading(true)
+    setError(null)
+    setSuccess(false)
+
+    // Upload photos first
+    const uploadedUrls: string[] = []
+    for (const f of files) {
+      const res = await uploadPhoto(f)
+      if (res.error) {
+        setError('Ошибка загрузки фото: ' + res.error.message)
+        setLoading(false)
+        return
+      }
+      if (res.data) uploadedUrls.push(res.data)
+    }
+
+    const { data, error } = await addReview({ name, email, message, rating, photos: uploadedUrls })
+    setLoading(false)
+
+    if (error) {
+      setError(error.message || 'Не удалось отправить отзыв')
+      return
+    }
+
+    setName('')
+    setEmail('')
+    setMessage('')
+    setRating(5)
+    setFiles([])
+    setSuccess(true)
+    setIsOpen(false)
+
+    if (onSubmitted) onSubmitted(data)
+
+    // Hide success message after 5 seconds
+    setTimeout(() => setSuccess(false), 5000)
+  }
+
+  if (!isOpen) {
+    return (
+      <div className="flex flex-col items-center gap-4 py-8 sm:py-12">
+        <div className="text-center">
+          <p className="text-sm sm:text-base text-slate-600 max-w-md mb-6">
+            Поделитесь своим опытом работы с P-DTR методом. Ваш отзыв очень важен для нас!
+          </p>
+        </div>
+        <button
+          onClick={() => setIsOpen(true)}
+          className="inline-flex items-center gap-2 bg-gradient-to-r from-ocean-600 to-ocean-600 text-white px-8 py-4 rounded-full hover:shadow-lg hover:shadow-ocean-600/30 transition-all duration-300 text-sm sm:text-base font-medium transform "
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+          </svg>
+          Оставить отзыв
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <>
+      {/* Backdrop */}
+      <div
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition-opacity duration-300"
+        onClick={() => setIsOpen(false)}
+      />
+
+      {/* Modal */}
+      <div className="fixed inset-0 z-50 flex items-center justify-center px-4 py-8 sm:py-16 overflow-y-auto">
+        <div
+          className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Modal Header */}
+          <div className="sticky top-0 flex items-center justify-between p-5 sm:p-6 border-b border-slate-100 bg-gradient-to-r from-ocean-50 to-slate-50 rounded-t-2xl">
+            <div>
+              <h3 className="text-xl sm:text-2xl font-bold text-slate-800">Оставить отзыв</h3>
+              <p className="text-xs sm:text-sm text-slate-500 mt-0.5">Ваше мнение важно для нас</p>
+            </div>
+            <button
+              onClick={() => setIsOpen(false)}
+              className="flex-shrink-0 text-slate-400 hover:text-slate-600 transition-colors duration-300 p-2 hover:bg-slate-200/50 rounded-lg"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Modal Body */}
+          <form onSubmit={handleSubmit} className="p-5 sm:p-6 space-y-3.5 sm:space-y-4">
+            {/* Name Field */}
+            <div>
+              <label className="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5">
+                Имя <span className="text-ocean-600">*</span>
+              </label>
+              <input
+                type="text"
+                className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 focus:border-ocean-600 focus:outline-none focus:ring-2 focus:ring-ocean-600/20 transition-all duration-300 text-sm text-slate-900 placeholder-slate-400"
+                placeholder="Иван Иванов"
+                value={name}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
+                required
+              />
+            </div>
+
+            {/* Email Field */}
+            <div>
+              <label className="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5">
+                Email <span className="text-ocean-600">*</span>
+              </label>
+              <input
+                type="email"
+                className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 focus:border-ocean-600 focus:outline-none focus:ring-2 focus:ring-ocean-600/20 transition-all duration-300 text-sm text-slate-900 placeholder-slate-400"
+                placeholder="ivan@example.com"
+                value={email}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+
+            {/* Rating Field */}
+            <div>
+              <label className="block text-xs sm:text-sm font-semibold text-slate-700 mb-2">
+                Оценка <span className="text-ocean-600">*</span>
+              </label>
+              <div className="flex gap-1.5 sm:gap-2">
+                {[5, 4, 3, 2, 1].map((r) => (
+                  <button
+                    key={r}
+                    type="button"
+                    onClick={() => setRating(r)}
+                    className={`flex-1 px-3 py-2 rounded-lg font-medium text-sm transition-all duration-300 ${rating === r
+                      ? 'bg-gradient-to-r from-ocean-600 to-ocean-600 text-white shadow-md'
+                      : 'bg-slate-100 text-slate-700 hover:bg-ocean-50'
+                      }`}
+                  >
+                    {r}⭐
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Message Field */}
+            <div>
+              <label className="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5">
+                Ваш отзыв <span className="text-ocean-600">*</span>
+              </label>
+              <textarea
+                className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 focus:border-ocean-600 focus:outline-none focus:ring-2 focus:ring-ocean-600/20 transition-all duration-300 text-sm text-slate-900 placeholder-slate-400 resize-none"
+                rows={4}
+                placeholder="Расскажите о своем опыте..."
+                value={message}
+                onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setMessage(e.target.value)}
+                required
+              />
+            </div>
+
+            {/* Photo Upload Field */}
+            <div>
+              <label className="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5">
+                Фотографии (необязательно)
+              </label>
+              <div className="relative">
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                    if (!e.target.files) return
+                    setFiles(Array.from(e.target.files))
+                  }}
+                  className="hidden"
+                  id="photo-upload"
+                />
+                <label
+                  htmlFor="photo-upload"
+                  className="flex items-center justify-center gap-2 w-full px-3.5 py-2.5 rounded-lg border border-dashed border-slate-300 hover:border-ocean-600 bg-slate-50 hover:bg-ocean-50 transition-all duration-300 cursor-pointer group"
+                >
+                  <svg
+                    className="w-4 h-4 text-slate-400 group-hover:text-ocean-600 transition-colors duration-300"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                    />
+                  </svg>
+                  <span className="text-xs sm:text-sm font-medium text-slate-600 group-hover:text-ocean-700 transition-colors duration-300">
+                    {files.length > 0 ? `${files.length} фото` : 'Добавить фото'}
+                  </span>
+                </label>
+              </div>
+              {files.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {files.map((file, idx) => (
+                    <div
+                      key={idx}
+                      className="inline-flex items-center gap-1.5 bg-ocean-50 text-ocean-700 px-2 py-1 rounded-md text-xs font-medium"
+                    >
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                        />
+                      </svg>
+                      {file.name}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Error Message */}
+            {error && (
+              <div className="flex items-start gap-2 p-3 rounded-lg bg-red-50 border border-red-200">
+                <svg
+                  className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                <p className="text-xs sm:text-sm text-red-800">{error}</p>
+              </div>
+            )}
+
+            {/* Success Message */}
+            {success && (
+              <div className="flex items-start gap-2 p-3 rounded-lg bg-green-50 border border-green-200">
+                <svg
+                  className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <div>
+                  <p className="text-xs sm:text-sm font-medium text-green-800">Спасибо за отзыв!</p>
+                  <p className="text-xs text-green-700 mt-0.5">
+                    Отзыв отправлен на модерацию
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-ocean-600 to-ocean-600 text-white px-4 py-3 rounded-lg hover:shadow-md transition-all duration-300 text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? (
+                <>
+                  <svg
+                    className="animate-spin h-4 w-4"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    />
+                  </svg>
+                  Отправка...
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+                    />
+                  </svg>
+                  Отправить
+                </>
+              )}
+            </button>            {/* Email Field */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Email <span className="text-ocean-600">*</span>
+              </label>
+              <input
+                type="email"
+                className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-ocean-600 focus:outline-none focus:ring-2 focus:ring-ocean-600/20 transition-all duration-300 text-slate-900 placeholder-slate-400"
+                placeholder="ivan@example.com"
+                value={email}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+
+            {/* Rating Field */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Оценка <span className="text-ocean-600">*</span>
+              </label>
+              <div className="flex gap-2">
+                {[5, 4, 3, 2, 1].map((r) => (
+                  <button
+                    key={r}
+                    type="button"
+                    onClick={() => setRating(r)}
+                    className={`flex-1 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-300 ${rating === r
+                      ? 'bg-gradient-to-r from-ocean-600 to-ocean-600 text-white shadow-lg shadow-ocean-600/25'
+                      : 'bg-white text-slate-700 border-2 border-slate-200 hover:border-ocean-300 hover:bg-ocean-50'
+                      }`}
+                  >
+                    {r} ⭐
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Message Field */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Ваш отзыв <span className="text-ocean-600">*</span>
+              </label>
+              <textarea
+                className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-ocean-600 focus:outline-none focus:ring-2 focus:ring-ocean-600/20 transition-all duration-300 text-slate-900 placeholder-slate-400 resize-none"
+                rows={5}
+                placeholder="Расскажите о своем опыте..."
+                value={message}
+                onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setMessage(e.target.value)}
+                required
+              />
+            </div>
+
+            {/* Photo Upload Field */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Фотографии (необязательно)
+              </label>
+              <div className="relative">
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                    if (!e.target.files) return
+                    setFiles(Array.from(e.target.files))
+                  }}
+                  className="hidden"
+                  id="photo-upload"
+                />
+                <label
+                  htmlFor="photo-upload"
+                  className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl border-2 border-dashed border-slate-300 hover:border-ocean-600 bg-slate-50 hover:bg-ocean-50 transition-all duration-300 cursor-pointer group"
+                >
+                  <svg
+                    className="w-5 h-5 text-slate-400 group-hover:text-ocean-600 transition-colors duration-300"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                    />
+                  </svg>
+                  <span className="text-sm font-medium text-slate-600 group-hover:text-ocean-700 transition-colors duration-300">
+                    {files.length > 0 ? `Выбрано файлов: ${files.length}` : 'Добавить фотографии'}
+                  </span>
+                </label>
+              </div>
+              {files.length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {files.map((file, idx) => (
+                    <div
+                      key={idx}
+                      className="inline-flex items-center gap-2 bg-ocean-50 text-ocean-700 px-3 py-1.5 rounded-lg text-xs font-medium"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                        />
+                      </svg>
+                      {file.name}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Error Message */}
+            {error && (
+              <div className="flex items-start gap-2 p-4 rounded-xl bg-red-50 border border-red-200">
+                <svg
+                  className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                <p className="text-sm text-red-800">{error}</p>
+              </div>
+            )}
+
+            {/* Success Message */}
+            {success && (
+              <div className="flex items-start gap-2 p-4 rounded-xl bg-green-50 border border-green-200">
+                <svg
+                  className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <div>
+                  <p className="text-sm font-medium text-green-800">Спасибо за ваш отзыв!</p>
+                  <p className="text-xs text-green-700 mt-1">
+                    Ваш отзыв отправлен на модерацию и будет опубликован после проверки.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-ocean-600 to-ocean-600 text-white px-6 py-3 rounded-xl hover:bg-ocean-500 transition-all duration-300 shadow-lg hover:shadow-ocean-500/25 text-base font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? (
+                <>
+                  <svg
+                    className="animate-spin h-5 w-5"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    />
+                  </svg>
+                  Отправка...
+                </>
+              ) : (
+                <>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+                    />
+                  </svg>
+                  Отправить отзыв
+                </>
+              )}
+            </button>
+          </form>
+
+          {/* Modal Footer */}
+          <div className="px-5 sm:px-6 pb-4 border-t border-slate-100 flex gap-2 justify-end pt-4">
+            <button
+              onClick={() => setIsOpen(false)}
+              className="px-4 py-2 rounded-lg text-slate-700 hover:bg-slate-100 transition-colors duration-300 text-sm font-medium"
+            >
+              Отмена
+            </button>
+          </div>
+        </div>
+      </div>
+    </>
+  )
+}

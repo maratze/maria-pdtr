@@ -47,7 +47,7 @@ function GiftCertificate() {
 							<div className="space-y-6">
 								{/* Заголовок с иконкой */}
 								<div className="flex items-center gap-3">
-									<div className="flex-shrink-0 w-12 h-12 rounded-xl bg-ocean-600 flex items-center justify-center shadow-lg transition-transform duration-300">
+									<div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-r from-ocean-600 to-ocean-600 flex items-center justify-center shadow-lg transition-transform duration-300">
 										<HiOutlineGift className="text-2xl text-white" />
 									</div>
 									<div>
@@ -85,7 +85,7 @@ function GiftCertificate() {
 									href="https://t.me/maria_pdtr"
 									target="_blank"
 									rel="noopener noreferrer"
-									className="group/btn relative inline-flex items-center gap-2.5 bg-ocean-600 bg-size-200 hover:bg-ocean-500 bg-pos-0 hover:bg-pos-100 text-white px-8 py-3 rounded-full transform transition-all duration-300 shadow-lg shadow-ocean-500/40 hover:shadow-lg hover:shadow-ocean-500/50 text-base whitespace-nowrap font-light"
+									className="group/btn relative inline-flex items-center gap-2.5 bg-gradient-to-r from-ocean-600 to-ocean-600 bg-size-200 hover:bg-ocean-500 bg-pos-0 hover:bg-pos-100 text-white px-8 py-3 rounded-full transform transition-all duration-300 shadow-lg shadow-ocean-500/40 hover:shadow-lg hover:shadow-ocean-500/50 text-base whitespace-nowrap font-light"
 									style={{ backgroundSize: '200% auto' }}
 								>
 									<HiSparkles className="text-xl group-hover/btn:rotate-12 transition-transform duration-300" />

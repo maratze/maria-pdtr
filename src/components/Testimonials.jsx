@@ -23,8 +23,9 @@ import review21 from '../assets/images/review-21.png'
 import review22 from '../assets/images/review-22.png'
 import review23 from '../assets/images/review-23.png'
 import review24 from '../assets/images/review-24.png'
-import SectionHeader from './SectionHeader';
-import SectionDescription from './SectionDescription';
+import SectionHeader from './SectionHeader'
+import SectionDescription from './SectionDescription'
+import ReviewsForm from './ReviewsForm'
 
 const categories = [
 	'Все',
@@ -236,7 +237,7 @@ const Testimonials = () => {
 								setVisibleCount(3) // Reset pagination when changing category
 							}}
 							className={`px-3 py-2 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-regular transition-all duration-300 ${activeCategory === category
-								? 'bg-ocean-600 text-white shadow-lg'
+								? 'bg-gradient-to-r from-ocean-600 to-ocean-600 text-white shadow-lg'
 								: 'bg-white text-slate-900 hover:bg-ocean-50 hover:text-ocean-600 border border-slate-200'
 								}`}
 						>
@@ -331,7 +332,7 @@ const Testimonials = () => {
 					<div className="text-center mt-8 sm:mt-12">
 						<button
 							onClick={() => setVisibleCount(prev => prev + 3)}
-							className="inline-flex items-center gap-2 bg-ocean-600 text-white px-6 py-3 sm:px-8 sm:py-4 rounded-full hover:bg-ocean-500 transition-all duration-300 shadow-lg hover:shadow-ocean-500/25 text-sm sm:text-base"
+							className="inline-flex items-center gap-2 bg-gradient-to-r from-ocean-600 to-ocean-600 text-white px-6 py-3 sm:px-8 sm:py-4 rounded-full hover:bg-ocean-500 transition-all duration-300 shadow-lg hover:shadow-ocean-500/25 text-sm sm:text-base"
 						>
 							<svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -360,34 +361,9 @@ const Testimonials = () => {
 					</div>
 				</div>
 
-				{/* Future reviews form teaser */}
-				<div className="mt-12 sm:mt-16">
-					<div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 shadow-lg border border-ocean-100 mx-auto">
-						<div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
-							<div className="flex-shrink-0 mx-auto sm:mx-0">
-								<div className="w-10 h-10 sm:w-12 sm:h-12 bg-ocean-100 rounded-full flex items-center justify-center">
-									<svg className="w-5 h-5 sm:w-6 sm:h-6 text-ocean-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-									</svg>
-								</div>
-							</div>
-							<div className="text-center sm:text-left flex-1">
-								<h3 className="text-lg md:text-xl font-regular text-slate-800 mb-2">
-									Хотите оставить отзыв?
-								</h3>
-								<p className="text-sm md:text-base text-slate-500 mb-3 sm:mb-4 leading-relaxed">
-									Скоро здесь появится возможность оставлять отзывы прямо на сайте.
-									А пока вы можете поделиться своими впечатлениями в личных сообщениях.
-								</p>
-								<div className="inline-flex items-center gap-2 bg-ocean-50 text-ocean-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg font-medium text-sm">
-									<svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-									</svg>
-									Скоро будет доступно
-								</div>
-							</div>
-						</div>
-					</div>
+				{/* Review Form */}
+				<div className="mt-12 sm:mt-16 text-center">
+					<ReviewsForm />
 				</div>
 			</div>
 		</section>
