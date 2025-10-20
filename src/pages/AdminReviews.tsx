@@ -626,36 +626,38 @@ function ReviewCard({ review, categories, onApprove, onReject, onDelete, onUpdat
       )}
 
       {/* Controls */}
-      <div className="space-y-3 pt-4 border-t border-slate-100 mt-auto">
+      <div className="space-y-3 border-t border-slate-100 mt-auto">
         {/* Add/Update photos */}
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">
-            {review.photos && review.photos.length > 0 ? 'Обновить фото' : 'Добавить фото'}
-          </label>
-          <label className="block">
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => {
-                const files = e.target.files
-                if (!files) return
-                // Берем только первый файл
-                const singleFile = new DataTransfer()
-                singleFile.items.add(files[0])
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore
-                if (window._adminAddPhotos) window._adminAddPhotos(review.id, singleFile.files)
-              }}
-              className="hidden"
-            />
-            <div className="w-full h-10 rounded-lg border border-dashed border-slate-300 hover:border-ocean-400 flex items-center justify-center gap-1.5 cursor-pointer transition-colors text-slate-600 hover:text-ocean-600">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              <span className="text-sm font-medium">Выбрать</span>
-            </div>
-          </label>
-        </div>
+        {!review.approved && (
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5 mt-2">
+              {review.photos && review.photos.length > 0 ? 'Обновить фото' : 'Добавить фото'}
+            </label>
+            <label className="block">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const files = e.target.files
+                  if (!files) return
+                  // Берем только первый файл
+                  const singleFile = new DataTransfer()
+                  singleFile.items.add(files[0])
+                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                  // @ts-ignore
+                  if (window._adminAddPhotos) window._adminAddPhotos(review.id, singleFile.files)
+                }}
+                className="hidden"
+              />
+              <div className="w-full h-10 rounded-lg border border-dashed border-slate-300 hover:border-ocean-400 flex items-center justify-center gap-1.5 cursor-pointer transition-colors text-slate-600 hover:text-ocean-600">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                <span className="text-sm font-medium">Выбрать</span>
+              </div>
+            </label>
+          </div>
+        )}
       </div>
 
       {/* Action buttons */}
