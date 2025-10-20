@@ -55,6 +55,20 @@ export default function AdminReviews() {
     setReviews(reviews.map(r => r.id === reviewId ? { ...r, approved: true } : r))
   }
 
+  async function handleRejectReview(reviewId: string) {
+    setProcessingId(reviewId)
+    const { error } = await updateReview(reviewId, { approved: false })
+    setProcessingId(null)
+
+    if (error) {
+      alert('Ошибка: ' + error.message)
+      return
+    }
+
+    // Реактивно обновляем отзыв в списке
+    setReviews(reviews.map(r => r.id === reviewId ? { ...r, approved: false } : r))
+  }
+
   async function handleDelete(reviewId: string) {
     setDeleteConfirmId(reviewId)
     setDeleteConfirmType('review')
@@ -271,6 +285,7 @@ export default function AdminReviews() {
                 key={review.id}
                 review={review}
                 categories={categories}
+                onReject={handleRejectReview}
                 onDelete={handleDelete}
                 onUpdateCategory={handleUpdateCategory}
                 onUpdateMessage={handleUpdateMessage}
@@ -430,6 +445,7 @@ interface ReviewCardProps {
   review: Review
   categories: Category[]
   onApprove?: (id: string) => void
+  onReject?: (id: string) => void
   onDelete: (id: string) => void
   onUpdateCategory?: (id: string, categoryId: string | null) => void
   onUpdateMessage?: (id: string, message: string) => void
@@ -437,7 +453,7 @@ interface ReviewCardProps {
   onShowPhotos?: (photos: string[], index: number) => void
 }
 
-function ReviewCard({ review, categories, onApprove, onDelete, onUpdateCategory, onUpdateMessage, processing, onShowPhotos }: ReviewCardProps) {
+function ReviewCard({ review, categories, onApprove, onReject, onDelete, onUpdateCategory, onUpdateMessage, processing, onShowPhotos }: ReviewCardProps) {
   const [editedMessage, setEditedMessage] = useState(review.message)
   const [saveLoading, setSaveLoading] = useState(false)
 
@@ -519,37 +535,53 @@ function ReviewCard({ review, categories, onApprove, onDelete, onUpdateCategory,
         </time>
       </div>
 
-      {/* Message */}
+      {/* Category */}
       <div className="mb-4">
-        <textarea
-          value={editedMessage}
-          onChange={(e) => setEditedMessage(e.target.value)}
-          className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:border-ocean-400 focus:outline-none focus:ring-2 focus:ring-ocean-100 text-md text-slate-700 resize-none"
-          rows={4}
+        <CategoryDropdown
+          categories={categories}
+          value={review.category_id || null}
+          onChange={(categoryId) => onUpdateCategory?.(review.id, categoryId)}
+          disabled={processing}
         />
-        {editedMessage !== review.message && (
-          <div className="flex gap-2 mt-2 justify-end">
-            <button
-              onClick={handleSaveMessage}
-              disabled={saveLoading}
-              className="p-2 w-10 h-10 flex items-center justify-center rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              title="Сохранить"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-            </button>
-            <button
-              onClick={handleCancelEdit}
-              disabled={saveLoading}
-              className="p-2 w-10 h-10 flex items-center justify-center rounded-lg border border-slate-200 text-red-600 hover:bg-red-50 hover:border-red-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              title="Отмена"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
+      </div>
+
+      {/* Message */}
+      <div className="mb-2">
+        {review.approved ? (
+          <p className="text-md text-slate-700 leading-relaxed">{review.message}</p>
+        ) : (
+          <>
+            <textarea
+              value={editedMessage}
+              onChange={(e) => setEditedMessage(e.target.value)}
+              className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:border-ocean-400 focus:outline-none focus:ring-2 focus:ring-ocean-100 text-md text-slate-700 resize-none"
+              rows={4}
+            />
+            {editedMessage !== review.message && (
+              <div className="flex gap-2 mt-2 justify-end">
+                <button
+                  onClick={handleSaveMessage}
+                  disabled={saveLoading}
+                  className="p-2 w-10 h-10 flex items-center justify-center rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  title="Сохранить"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </button>
+                <button
+                  onClick={handleCancelEdit}
+                  disabled={saveLoading}
+                  className="p-2 w-10 h-10 flex items-center justify-center rounded-lg border border-slate-200 text-red-600 hover:bg-red-50 hover:border-red-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  title="Отмена"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
 
@@ -624,17 +656,6 @@ function ReviewCard({ review, categories, onApprove, onDelete, onUpdateCategory,
             </div>
           </label>
         </div>
-
-        {/* Category */}
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">Категория</label>
-          <CategoryDropdown
-            categories={categories}
-            value={review.category_id || null}
-            onChange={(categoryId) => onUpdateCategory?.(review.id, categoryId)}
-            disabled={processing}
-          />
-        </div>
       </div>
 
       {/* Action buttons */}
@@ -661,6 +682,15 @@ function ReviewCard({ review, categories, onApprove, onDelete, onUpdateCategory,
                 Одобрить
               </>
             )}
+          </button>
+        )}
+        {onReject && review.approved && (
+          <button
+            onClick={() => onReject(review.id)}
+            disabled={processing}
+            className="flex-1 px-3 py-2 h-10 rounded-lg border border-amber-200 text-amber-400 text-sm font-regular hover:bg-amber-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            На модерацию
           </button>
         )}
         <button

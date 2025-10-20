@@ -49,7 +49,7 @@ export default function CategoryDropdown({ categories, value, onChange, disabled
 
 			{/* Dropdown Menu */}
 			{isOpen && (
-				<div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-200 rounded-lg shadow-lg z-40">
+				<div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-200 rounded-lg shadow-lg z-40 overflow-hidden">
 					{/* "Без категории" option */}
 					<button
 						onClick={() => {
@@ -57,8 +57,8 @@ export default function CategoryDropdown({ categories, value, onChange, disabled
 							setIsOpen(false)
 						}}
 						className={`w-full text-left px-4 py-3 text-sm font-regular transition-colors flex items-center gap-2 ${!selectedCategory
-								? 'bg-ocean-50 text-ocean-700'
-								: 'text-slate-700 hover:bg-slate-50'
+							? 'bg-ocean-50 text-ocean-700'
+							: 'text-slate-700 hover:bg-slate-50'
 							}`}
 					>
 						{!selectedCategory && (
@@ -75,7 +75,7 @@ export default function CategoryDropdown({ categories, value, onChange, disabled
 					)}
 
 					{/* Category options */}
-					{categories.map((category) => (
+					{categories.map((category, index) => (
 						<button
 							key={category.id}
 							onClick={() => {
@@ -83,9 +83,9 @@ export default function CategoryDropdown({ categories, value, onChange, disabled
 								setIsOpen(false)
 							}}
 							className={`w-full text-left px-4 py-3 text-sm font-regular transition-colors flex items-center gap-2 ${selectedCategory?.id === category.id
-									? 'bg-ocean-50 text-ocean-700'
-									: 'text-slate-700 hover:bg-slate-50'
-								}`}
+								? 'bg-ocean-50 text-ocean-700'
+								: 'text-slate-700 hover:bg-slate-50'
+								} ${index === categories.length - 1 ? 'rounded-b-lg' : ''}`}
 						>
 							{selectedCategory?.id === category.id && (
 								<svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
