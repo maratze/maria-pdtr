@@ -97,12 +97,12 @@ const Services = () => {
 									</div>
 
 									{service.duration && (
-										<p className="text-sm sm:text-md text-ocean-200">
+										<p className="text-sm sm:text-base text-ocean-200">
 											{service.duration}
 										</p>
 									)}
 
-									<p className="text-sm sm:text-md text-slate-300 leading-relaxed">
+									<p className="text-sm sm:text-base text-slate-300 leading-relaxed">
 										{service.description}
 									</p>
 								</div>
@@ -177,7 +177,7 @@ const Services = () => {
 						</div>
 
 						<div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-ocean-600/10 rounded-xl border border-ocean-500/20">
-							<p className="text-sm text-slate-300 text-center leading-relaxed">
+							<p className="text-md text-slate-300 text-center leading-relaxed">
 								💡 Онлайн-календарь появится совсем скоро. Обычно отвечаю в течение часа.
 							</p>
 						</div>
@@ -194,8 +194,8 @@ const Services = () => {
 								</svg>
 							</div>
 							<div className="text-left">
-								<h4 className="font-light text-white mb-1 sm:mb-2 text-base">Не знаете, что выбрать?</h4>
-								<p className="text-slate-300 text-sm leading-relaxed">
+								<h4 className="font-light text-white mb-1 sm:mb-2 text-lg">Не знаете, что выбрать?</h4>
+								<p className="text-slate-300 text-md leading-relaxed">
 									Я помогу определиться с форматом работы на бесплатной консультации.
 									Свяжитесь со мной удобным способом, и мы обсудим вашу ситуацию.
 								</p>

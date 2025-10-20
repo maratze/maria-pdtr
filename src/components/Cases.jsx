@@ -202,7 +202,7 @@ const Cases = () => {
 													<h3 className="text-lg sm:text-xl lg:text-2xl font-regular text-slate-700 break-words leading-5">
 														{caseItem.title}
 													</h3>
-													<div className="text-xs sm:text-sm text-ocean-600 font-regular mt-1">
+													<div className="text-xs sm:text-md text-ocean-600 font-regular mt-1">
 														{caseItem.duration}
 													</div>
 												</div>

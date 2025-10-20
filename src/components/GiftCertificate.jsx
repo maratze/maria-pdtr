@@ -54,7 +54,7 @@ function GiftCertificate() {
 										<h2 className="text-2xl sm:text-3xl font-light text-slate-900 leading-tight">
 											Подарочный сертификат
 										</h2>
-										<p className="text-sm text-ocean-600 font-regular">
+										<p className="text-md text-ocean-600 font-regular">
 											Идеальный подарок для близких
 										</p>
 									</div>

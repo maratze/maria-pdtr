@@ -36,7 +36,7 @@ const PDTRMethod = () => {
 						</ul>
 					</div>
 					<div className="bg-ocean-50 p-4 rounded-lg">
-						<p className="text-sm text-ocean-700 text-[15px]">
+						<p className="text-ocean-700 text-[15px]">
 							<strong>P-DTR</strong> (Proprioceptive Deep Tendon Reflex) — это революционный подход
 							к восстановлению здоровья через коррекцию нарушений в работе нервной системы.
 						</p>
@@ -73,7 +73,7 @@ const PDTRMethod = () => {
 						</ul>
 					</div>
 					<div className="bg-ocean-50 p-4 rounded-lg">
-						<p className="text-sm text-ocean-700 text-[15px]">
+						<p className="text-ocean-700 text-[15px]">
 							<strong>Ключевой момент:</strong> P-DTR работает на уровне рефлексов, восстанавливая
 							правильную связь между рецепторами и центральной нервной системой.
 						</p>
@@ -123,7 +123,7 @@ const PDTRMethod = () => {
 						</ul>
 					</div>
 					<div className="bg-ocean-50 p-4 rounded-lg">
-						<p className="text-sm text-ocean-700 text-[15px]">
+						<p className="text-ocean-700 text-[15px]">
 							<strong>Важно:</strong> P-DTR работает не только с симптомами, но и с первопричиной проблем,
 							обеспечивая комплексный подход к восстановлению здоровья.
 						</p>
@@ -138,7 +138,7 @@ const PDTRMethod = () => {
 					<p className="mb-6 text-[15px]">
 						Метод P-DTR подходит людям различного возраста и с разными запросами:
 					</p>
-					<ul className="list-disc list-inside space-y-2 text-[15px]">
+					<ul className="list-disc list-inside space-y-2 text-md">
 						<li className="flex items-start gap-3">
 							<div className="w-1.5 h-1.5 bg-ocean-500 rounded-full mt-2 flex-shrink-0"></div>
 							<p>Взрослым с хроническими болями и дискомфортом</p>
@@ -161,12 +161,12 @@ const PDTRMethod = () => {
 							<p>Тем, кто хочет улучшить общее самочувствие и энергию</p>
 						</li>
 					</ul>
-					<p className="mt-4 text-sm text-gray-600 text-[15px]">
+					<p className="mt-4 text-sm text-gray-600 text-md">
 						Метод безопасен и может применяться как самостоятельно, так и в комплексе
 						с другими видами терапии.
 					</p>
 					<div className="bg-ocean-50 p-4 rounded-lg mt-6">
-						<p className="text-sm text-ocean-700 text-[15px]">
+						<p className="text-ocean-700 text-[15px]">
 							<strong>Важно:</strong> Не подходит в двух основных случаях - врожденные и органические изменения. Рекомендуется проконсультироваться со специалистом.
 						</p>
 					</div>
