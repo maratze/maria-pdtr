@@ -290,7 +290,7 @@ export default function AdminReviews() {
               alt="Full review"
               className="w-full h-auto rounded-lg"
             />
-            
+
             {/* Navigation and Counter */}
             {selectedImageReview.photos.length > 1 && (
               <>
