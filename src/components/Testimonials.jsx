@@ -190,7 +190,7 @@ const Testimonials = () => {
 												</div>
 
 												{/* Message */}
-												<p className="text-sm text-slate-700 leading-relaxed mb-4 flex-1">{testimonial.problem}</p>
+												<p className="text-[15px] text-slate-700 leading-[18px] mb-4 flex-1">{testimonial.problem}</p>
 
 												{/* View Image Button */}
 												<button
@@ -291,7 +291,7 @@ const Testimonials = () => {
 												</div>
 
 												{/* Message */}
-												<p className="text-sm text-slate-700 leading-relaxed mb-4 flex-1">{testimonial.problem}</p>
+												<p className="text-[15px] text-slate-700 leading-[18px] mb-4 flex-1">{testimonial.problem}</p>
 
 												{/* Author & Date - only if name exists */}
 												{testimonial.name && (
@@ -328,14 +328,14 @@ const Testimonials = () => {
 						{selectedImage && (
 							<div
 								className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-2"
-								onClick={() => setSelectedImage(null)}
+								onClick={() => { setSelectedImage(null); setImageLoading(false) }}
 							>
 								<div
 									className="relative w-full max-w-[400px]"
 									onClick={(e) => e.stopPropagation()}
 								>
 									<button
-										onClick={() => setSelectedImage(null)}
+										onClick={() => { setSelectedImage(null); setImageLoading(false) }}
 										className="absolute -top-10 right-0 text-white hover:text-gray-300 transition-colors"
 									>
 										<svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -406,7 +406,7 @@ const Testimonials = () => {
 									problem: review.message,
 									name: review.name || 'Аноним',
 									rating: review.rating,
-									category: 'Все',
+									category: review.categories?.name || 'Все',
 									image: review.photos && review.photos.length > 0 ? review.photos[0] : null,
 									hasText: !!review.message,
 									hasImage: review.photos && review.photos.length > 0,
