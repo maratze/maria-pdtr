@@ -90,14 +90,14 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 						{isActive('/admin/reviews') && 'Модерация отзывов'}
 						{isActive('/admin/categories') && 'Управление категориями'}
 					</h1>
-				<div className="flex items-center gap-2 text-sm text-slate-500">
-					<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-					</svg>
-					<span>{new Date().toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
-					<span>•</span>
-					<span>{new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}</span>
-				</div>
+					<div className="flex items-center gap-2 text-sm text-slate-500">
+						<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+						</svg>
+						<span>{new Date().toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+						<span>•</span>
+						<span>{new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}</span>
+					</div>
 					<div className="flex items-center gap-3">
 						<div className="w-10 h-10 bg-gradient-to-br from-ocean-400 to-ocean-600 rounded-full flex items-center justify-center text-white text-md font-regular shadow-sm">
 							{session?.user?.email?.[0].toUpperCase() || 'A'}
