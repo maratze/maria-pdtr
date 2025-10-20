@@ -221,16 +221,15 @@ export default function ReviewsForm({ onSubmitted }: ReviewsFormProps) {
               {/* Photo Upload Field */}
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5 text-left">
-                  Фотографии (необязательно)
+                  Фотография (необязательно)
                 </label>
                 <div className="relative">
                   <input
                     type="file"
                     accept="image/*"
-                    multiple
                     onChange={(e: ChangeEvent<HTMLInputElement>) => {
                       if (!e.target.files) return
-                      setFiles(Array.from(e.target.files))
+                      setFiles(Array.from(e.target.files).slice(0, 1))
                     }}
                     className="hidden"
                     id="photo-upload"
@@ -253,7 +252,7 @@ export default function ReviewsForm({ onSubmitted }: ReviewsFormProps) {
                       />
                     </svg>
                     <span className="text-xs sm:text-sm font-medium text-slate-600 group-hover:text-ocean-700 transition-colors duration-300">
-                      {files.length > 0 ? `${files.length} фото` : 'Добавить фото'}
+                      {files.length > 0 ? `Фото загружено` : 'Добавить фото'}
                     </span>
                   </label>
                 </div>

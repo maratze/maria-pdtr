@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { listAllReviews, approveReview, deleteReview, uploadPhoto, updateReview, getCategories } from '../lib/reviews'
+import AdminPreloader from '../components/AdminPreloader'
 import type { Review, Category } from '../types/review'
 
 export default function AdminReviews() {
@@ -8,6 +9,19 @@ export default function AdminReviews() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [processingId, setProcessingId] = useState<string | null>(null)
+  const [selectedImageReview, setSelectedImageReview] = useState<{ photos: string[], index: number } | null>(null)
+
+  function goToNextPhoto() {
+    if (!selectedImageReview) return
+    const nextIndex = (selectedImageReview.index + 1) % selectedImageReview.photos.length
+    setSelectedImageReview({ ...selectedImageReview, index: nextIndex })
+  }
+
+  function goToPreviousPhoto() {
+    if (!selectedImageReview) return
+    const prevIndex = (selectedImageReview.index - 1 + selectedImageReview.photos.length) % selectedImageReview.photos.length
+    setSelectedImageReview({ ...selectedImageReview, index: prevIndex })
+  }
 
   async function load() {
     setLoading(true)
@@ -142,17 +156,7 @@ export default function AdminReviews() {
   }, [reviews])
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="flex items-center gap-3 text-slate-600">
-          <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
-          <span className="text-sm">Загрузка отзывов...</span>
-        </div>
-      </div>
-    )
+    return <AdminPreloader message="Загрузка отзывов..." />
   }
 
   if (error) {
@@ -206,11 +210,11 @@ export default function AdminReviews() {
       {/* Pending Reviews */}
       {pendingReviews.length > 0 && (
         <section>
-          <h2 className="text-sm font-semibold text-slate-900 mb-3 flex items-center gap-2">
+          <h2 className="text-lg font-medium text-slate-900 mb-3 flex items-center gap-2">
             <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
             На модерации
           </h2>
-          <div className="space-y-3">
+          <div className="grid grid-cols-2 gap-4">
             {pendingReviews.map((review) => (
               <ReviewCard
                 key={review.id}
@@ -220,6 +224,7 @@ export default function AdminReviews() {
                 onDelete={handleDelete}
                 onUpdateCategory={handleUpdateCategory}
                 processing={processingId === review.id}
+                onShowPhotos={(photos, index) => setSelectedImageReview({ photos, index })}
               />
             ))}
           </div>
@@ -229,11 +234,11 @@ export default function AdminReviews() {
       {/* Approved Reviews */}
       {approvedReviews.length > 0 && (
         <section>
-          <h2 className="text-sm font-semibold text-slate-900 mb-3 flex items-center gap-2">
+          <h2 className="text-lg font-medium text-slate-900 mb-3 flex items-center gap-2">
             <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
             Одобренные
           </h2>
-          <div className="space-y-3">
+          <div className="grid grid-cols-2 gap-4">
             {approvedReviews.map((review) => (
               <ReviewCard
                 key={review.id}
@@ -242,6 +247,7 @@ export default function AdminReviews() {
                 onDelete={handleDelete}
                 onUpdateCategory={handleUpdateCategory}
                 processing={processingId === review.id}
+                onShowPhotos={(photos, index) => setSelectedImageReview({ photos, index })}
               />
             ))}
           </div>
@@ -260,6 +266,58 @@ export default function AdminReviews() {
           <p className="text-sm text-slate-500">Все отзывы будут отображаться здесь</p>
         </div>
       )}
+
+      {/* Image Popup Modal */}
+      {selectedImageReview && (
+        <div
+          className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-2"
+          onClick={() => setSelectedImageReview(null)}
+        >
+          <div
+            className="relative w-full max-w-[600px]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setSelectedImageReview(null)}
+              className="absolute -top-10 right-0 text-white hover:text-gray-300 transition-colors"
+            >
+              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <img
+              src={selectedImageReview.photos[selectedImageReview.index]}
+              alt="Full review"
+              className="w-full h-auto rounded-lg"
+            />
+            
+            {/* Navigation and Counter */}
+            {selectedImageReview.photos.length > 1 && (
+              <>
+                <button
+                  onClick={goToPreviousPhoto}
+                  className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/50 hover:bg-black/75 text-white rounded-full flex items-center justify-center transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+                <button
+                  onClick={goToNextPhoto}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/50 hover:bg-black/75 text-white rounded-full flex items-center justify-center transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/50 text-white text-xs px-2 py-1 rounded">
+                  {selectedImageReview.index + 1} / {selectedImageReview.photos.length}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -271,76 +329,100 @@ interface ReviewCardProps {
   onDelete: (id: string) => void
   onUpdateCategory?: (id: string, categoryId: string | null) => void
   processing: boolean
+  onShowPhotos?: (photos: string[], index: number) => void
 }
 
-function ReviewCard({ review, categories, onApprove, onDelete, onUpdateCategory, processing }: ReviewCardProps) {
+function ReviewCard({ review, categories, onApprove, onDelete, onUpdateCategory, processing, onShowPhotos }: ReviewCardProps) {
   return (
     <div className="bg-white rounded-xl border border-slate-200 p-5 hover:border-slate-300 transition-colors">
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-start gap-3 flex-1 min-w-0">
-          <div className="w-10 h-10 bg-gradient-to-br from-ocean-400 to-ocean-600 rounded-full flex items-center justify-center flex-shrink-0 text-white text-sm font-medium shadow-sm">
+          <div className="w-10 h-10 bg-gradient-to-br from-ocean-400 to-ocean-600 rounded-full flex items-center justify-center flex-shrink-0 text-white text-base font-medium shadow-sm">
             {review.name?.[0]?.toUpperCase() || '?'}
           </div>
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1">
-              <h3 className="text-sm font-semibold text-slate-900 truncate">{review.name || 'Аноним'}</h3>
-              {review.approved && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-xs font-medium">
-                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  Одобрено
-                </span>
-              )}
-            </div>
-            <div className="flex items-center gap-3 text-xs text-slate-500">
-              <div className="flex items-center gap-1">
-                {'⭐'.repeat(review.rating)}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                <h3 className="text-sm font-semibold text-slate-900 truncate">{review.name || 'Аноним'}</h3>
+                {review.approved && (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-xs font-medium">
+                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    Одобрено
+                  </span>
+                )}
               </div>
-              <span>•</span>
-              <time>
-                {new Date(review.created_at).toLocaleDateString('ru-RU', {
-                  day: 'numeric',
-                  month: 'short',
-                  year: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit'
-                })}
-              </time>
+              <div className="flex items-center">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <svg
+                    key={star}
+                    className={`w-4 h-4 ${star <= review.rating
+                      ? 'text-yellow-400 fill-yellow-400'
+                      : 'text-slate-300 fill-slate-300'
+                      }`}
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                  </svg>
+                ))}
+              </div>
             </div>
           </div>
         </div>
+        <time className="text-xs text-slate-500 flex-shrink-0 ml-2">
+          {new Date(review.created_at).toLocaleDateString('ru-RU', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          })}
+        </time>
       </div>
 
       {/* Message */}
-      <p className="text-sm text-slate-700 leading-relaxed mb-4 whitespace-pre-wrap">{review.message}</p>
+      <p className="text-md text-slate-700 leading-relaxed mb-4">{review.message}</p>
 
-      {/* Photos */}
+      {/* Photos Gallery */}
       {review.photos && review.photos.length > 0 && (
-        <div className="grid grid-cols-4 gap-2 mb-4">
-          {review.photos.map((p) => (
-            <div key={p} className="relative group aspect-square">
-              <img
-                src={p}
-                alt="review"
-                className="w-full h-full object-cover rounded-lg border border-slate-200"
-              />
-              <button
-                onClick={() => {
-                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                  // @ts-ignore
-                  if (window._adminRemovePhoto) window._adminRemovePhoto(review.id, p)
-                }}
-                className="absolute top-1 right-1 w-6 h-6 bg-red-600 text-white rounded-md opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center hover:bg-red-700"
-                title="Удалить фото"
+        <div className="mb-4 p-4 rounded-lg bg-slate-50 border border-slate-200">
+          <div className="grid grid-cols-4 gap-2">
+            {review.photos.map((photo, idx) => (
+              <div
+                key={photo}
+                className="relative group aspect-square cursor-pointer"
+                onClick={() => onShowPhotos?.(review.photos || [], idx)}
               >
-                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-          ))}
+                <img
+                  src={photo}
+                  alt={`review-${idx}`}
+                  className="w-full h-full object-cover rounded-lg border border-slate-200 group-hover:opacity-75 transition-opacity"
+                />
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-lg bg-black/50">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" />
+                  </svg>
+                </div>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-ignore
+                    if (window._adminRemovePhoto) window._adminRemovePhoto(review.id, photo)
+                  }}
+                  className="absolute -top-2 -right-2 w-6 h-6 bg-red-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-md hover:bg-red-700"
+                  title="Удалить фото"
+                >
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
@@ -371,13 +453,15 @@ function ReviewCard({ review, categories, onApprove, onDelete, onUpdateCategory,
             <input
               type="file"
               accept="image/*"
-              multiple
               onChange={(e) => {
                 const files = e.target.files
                 if (!files) return
+                // Берем только первый файл
+                const singleFile = new DataTransfer()
+                singleFile.items.add(files[0])
                 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                 // @ts-ignore
-                if (window._adminAddPhotos) window._adminAddPhotos(review.id, files)
+                if (window._adminAddPhotos) window._adminAddPhotos(review.id, singleFile.files)
               }}
               className="hidden"
             />
@@ -397,7 +481,7 @@ function ReviewCard({ review, categories, onApprove, onDelete, onUpdateCategory,
           <button
             onClick={() => onApprove(review.id)}
             disabled={processing}
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="flex-1 flex items-center justify-center gap-2 px-3 py-2 h-10 rounded-lg bg-emerald-600 text-white text-sm font-regular hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {processing ? (
               <>
@@ -420,7 +504,7 @@ function ReviewCard({ review, categories, onApprove, onDelete, onUpdateCategory,
         <button
           onClick={() => onDelete(review.id)}
           disabled={processing}
-          className="px-4 py-2 rounded-lg border border-slate-200 text-red-600 text-sm font-medium hover:bg-red-50 hover:border-red-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="px-3 py-2 h-10 rounded-lg border border-slate-200 text-red-600 text-sm font-regular hover:bg-red-50 hover:border-red-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           Удалить
         </button>
