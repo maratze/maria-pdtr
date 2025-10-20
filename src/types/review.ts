@@ -14,6 +14,7 @@ export interface Review {
   photos: string[]
   approved: boolean
   category_id: string | null
+  categories?: { name: string } | null
   created_at: string
 }
 

@@ -30,7 +30,7 @@ export async function addReview({ name, email, message, rating = 5, photos = [] 
 export async function listApprovedReviews() {
   const { data, error } = await supabase
     .from('reviews')
-    .select('*')
+    .select('*, categories(name)')
     .eq('approved', true)
     .order('created_at', { ascending: false })
 

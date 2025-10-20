@@ -43,7 +43,7 @@ const Testimonials = () => {
 					problem: review.message,
 					name: review.name || 'Аноним',
 					rating: review.rating,
-					category: review.category || 'Все', // Use category from database
+					category: review.categories?.name || 'Все', // Use category name from joined table
 					image: review.photos && review.photos.length > 0 ? review.photos[0] : null,
 					hasText: !!review.message,
 					hasImage: review.photos && review.photos.length > 0,
@@ -161,11 +161,11 @@ const Testimonials = () => {
 									<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
 								</svg>
 							</div>
-							<h3 className="text-lg sm:text-xl font-regular text-slate-700 mb-2 sm:mb-3">
+							<h3 className="text-lg sm:text-xl font-regular text-slate-700">
 								Отзывов пока нет
 							</h3>
 							<p className="text-sm sm:text-base text-slate-600 leading-relaxed">
-								В категории <br /><span className="font-medium text-ocean-600">"{activeCategory}"</span>
+								<span className="font-medium text-ocean-600">"{activeCategory}"</span>
 							</p>
 						</div>
 					</div>
