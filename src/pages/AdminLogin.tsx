@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAdminAuth } from '../contexts/AdminAuthContext'
+import Logo from '../components/Logo'
 
 export default function AdminLogin() {
 	const navigate = useNavigate()
@@ -35,70 +36,88 @@ export default function AdminLogin() {
 
 	if (authLoading) {
 		return (
-			<div className="flex h-screen items-center justify-center bg-gray-100">
-				<div className="text-lg text-gray-600">Загрузка...</div>
+			<div className="relative min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-ocean-900 overflow-hidden flex items-center justify-center">
+				<div className="text-lg text-slate-300">Загрузка...</div>
 			</div>
 		)
 	}
 
 	return (
-		<div className="flex h-screen items-center justify-center bg-gradient-to-br from-orange-50 to-amber-50 px-4">
-			<div className="w-full max-w-md rounded-lg bg-white p-8 shadow-lg">
-				<div className="mb-6 text-center">
-					<h1 className="text-3xl font-bold text-gray-800">Админ панель</h1>
-					<p className="mt-2 text-sm text-gray-600">Вход для администраторов</p>
+		<div className="relative min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-ocean-900 overflow-hidden flex items-center justify-center px-4 sm:px-6 lg:px-8">
+			{/* Animated background from Hero */}
+			<div className="absolute inset-0">
+				{/* Main gradient */}
+				<div className="absolute inset-0 bg-gradient-to-br from-ocean-600/20 via-transparent to-slate-800/30"></div>
+
+				{/* Static circles */}
+				<div className="absolute top-1/4 left-1/4 w-96 h-96 bg-ocean-400/10 rounded-full blur-3xl"></div>
+				<div className="absolute top-3/4 right-1/4 w-80 h-80 bg-blue-400/10 rounded-full blur-3xl"></div>
+				<div className="absolute bottom-1/4 left-1/3 w-64 h-64 bg-cyan-400/10 rounded-full blur-3xl"></div>
+
+				{/* Dot grid */}
+				<div className="absolute inset-0 opacity-30">
+					<div
+						className="w-full h-full"
+						style={{
+							backgroundImage: `radial-gradient(circle, rgba(59, 130, 246, 0.3) 1px, transparent 1px)`,
+							backgroundSize: '50px 50px'
+						}}
+					></div>
+				</div>
+			</div>
+
+			<div className="max-w-md w-full relative z-10">
+				{/* Logo */}
+				<div className="flex justify-center flex-col mb-8">
+					<Logo className="w-full !gap-0" />
 				</div>
 
-				<form onSubmit={handleSubmit} className="space-y-4">
-					{error && (
-						<div className="rounded bg-red-50 p-4 text-sm text-red-700 border border-red-200">
-							{error}
+				<div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20 shadow-2xl">
+					<form onSubmit={handleSubmit} className="space-y-5">
+						{error && (
+							<div className="rounded-lg bg-red-500/20 p-4 text-sm text-red-200 border border-red-500/30 backdrop-blur-sm">
+								{error}
+							</div>
+						)}
+
+						<div>
+							<label htmlFor="email" className="block text-sm font-light text-slate-200 mb-2">
+								Email
+							</label>
+							<input
+								id="email"
+								type="email"
+								value={email}
+								onChange={(e) => setEmail(e.target.value)}
+								disabled={loading}
+								placeholder="your@email.com"
+								className="w-full rounded-lg bg-white/10 border border-white/20 px-4 py-3 text-white placeholder-slate-400 focus:border-ocean-300 focus:outline-none focus:ring-1 focus:ring-ocean-300/50 disabled:opacity-50 backdrop-blur-sm transition-all duration-300"
+							/>
 						</div>
-					)}
 
-					<div>
-						<label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-							Email
-						</label>
-						<input
-							id="email"
-							type="email"
-							value={email}
-							onChange={(e) => setEmail(e.target.value)}
+						<div>
+							<label htmlFor="password" className="block text-sm font-light text-slate-200 mb-2">
+								Пароль
+							</label>
+							<input
+								id="password"
+								type="password"
+								value={password}
+								onChange={(e) => setPassword(e.target.value)}
+								disabled={loading}
+								placeholder="••••••••"
+								className="w-full rounded-lg bg-white/10 border border-white/20 px-4 py-3 text-white placeholder-slate-400 focus:border-ocean-300 focus:outline-none focus:ring-1 focus:ring-ocean-300/50 disabled:opacity-50 backdrop-blur-sm transition-all duration-300"
+							/>
+						</div>
+
+						<button
+							type="submit"
 							disabled={loading}
-							placeholder="admin@example.com"
-							className="w-full rounded border border-gray-300 px-4 py-2 text-gray-800 placeholder-gray-400 focus:border-orange-500 focus:outline-none disabled:bg-gray-100"
-						/>
-					</div>
-
-					<div>
-						<label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-							Пароль
-						</label>
-						<input
-							id="password"
-							type="password"
-							value={password}
-							onChange={(e) => setPassword(e.target.value)}
-							disabled={loading}
-							placeholder="••••••••"
-							className="w-full rounded border border-gray-300 px-4 py-2 text-gray-800 placeholder-gray-400 focus:border-orange-500 focus:outline-none disabled:bg-gray-100"
-						/>
-					</div>
-
-					<button
-						type="submit"
-						disabled={loading}
-						className="w-full rounded bg-orange-600 px-4 py-2 text-white font-medium hover:bg-orange-700 disabled:opacity-50 transition-colors"
-					>
-						{loading ? 'Вход...' : 'Войти'}
-					</button>
-				</form>
-
-				<div className="mt-6 border-t border-gray-200 pt-4">
-					<p className="text-xs text-gray-500 text-center">
-						Это закрытая область. Доступ только для администраторов.
-					</p>
+							className="w-full mt-6 bg-gradient-to-r from-ocean-600 to-ocean-600 text-white px-6 py-3 rounded-lg hover:bg-ocean-500 disabled:opacity-50 transition-all duration-300 shadow-lg hover:shadow-ocean-500/25 font-light transform hover:scale-[1.02]"
+						>
+							{loading ? 'Вход...' : 'Войти'}
+						</button>
+					</form>
 				</div>
 			</div>
 		</div>

@@ -2,6 +2,8 @@ import React from 'react'
 import { Routes, Route } from 'react-router-dom'
 import Navigation from './components/Navigation'
 import PrivateRoute from './components/PrivateRoute'
+import AuthLayout from './layouts/AuthLayout'
+import AdminLayout from './layouts/AdminLayout'
 import Hero from './components/Hero'
 import GiftCertificate from './components/GiftCertificate'
 import PDTRMethod from './components/PDTRMethod'
@@ -11,6 +13,7 @@ import Services from './components/Services'
 import Contacts from './components/Contacts'
 import AdminReviews from './pages/AdminReviews'
 import AdminLogin from './pages/AdminLogin'
+import AdminCategories from './pages/AdminCategories'
 import NotFound from './pages/NotFound'
 import './App.css'
 
@@ -30,22 +33,58 @@ function HomePage() {
 
 function App() {
 	return (
-		<div className="min-h-screen font-sans text-slate-800">
-			<Navigation />
-			<Routes>
-				<Route path="/" element={<HomePage />} />
-				<Route path="/admin/login" element={<AdminLogin />} />
-				<Route
-					path="/admin/reviews"
-					element={
-						<PrivateRoute>
+		<Routes>
+			{/* Public routes with Navigation */}
+			<Route
+				path="/"
+				element={
+					<div className="min-h-screen font-sans text-slate-800">
+						<Navigation />
+						<HomePage />
+					</div>
+				}
+			/>
+			<Route
+				path="*"
+				element={
+					<div className="min-h-screen font-sans text-slate-800">
+						<NotFound />
+					</div>
+				}
+			/>
+
+			{/* Auth routes without Navigation */}
+			<Route
+				path="/admin/login"
+				element={
+					<AuthLayout>
+						<AdminLogin />
+					</AuthLayout>
+				}
+			/>
+
+			{/* Admin routes with Admin Layout */}
+			<Route
+				path="/admin/reviews"
+				element={
+					<PrivateRoute>
+						<AdminLayout>
 							<AdminReviews />
-						</PrivateRoute>
-					}
-				/>
-				<Route path="*" element={<NotFound />} />
-			</Routes>
-		</div>
+						</AdminLayout>
+					</PrivateRoute>
+				}
+			/>
+			<Route
+				path="/admin/categories"
+				element={
+					<PrivateRoute>
+						<AdminLayout>
+							<AdminCategories />
+						</AdminLayout>
+					</PrivateRoute>
+				}
+			/>
+		</Routes>
 	)
 }
 

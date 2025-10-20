@@ -1,12 +1,8 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useAdminAuth } from '../contexts/AdminAuthContext'
 import { listAllReviews, approveReview, deleteReview, uploadPhoto, updateReview, getCategories } from '../lib/reviews'
 import type { Review, Category } from '../types/review'
 
 export default function AdminReviews() {
-  const navigate = useNavigate()
-  const { signOut } = useAdminAuth()
   const [reviews, setReviews] = useState<Review[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
@@ -162,24 +158,9 @@ export default function AdminReviews() {
   const pendingReviews = reviews.filter(r => !r.approved)
   const approvedReviews = reviews.filter(r => r.approved)
 
-  const handleLogout = async () => {
-    const { error } = await signOut()
-    if (!error) {
-      navigate('/admin/login')
-    }
-  }
-
   return (
-    <div className="mx-auto max-w-6xl p-4">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Модерация отзывов</h1>
-        <button
-          onClick={handleLogout}
-          className="rounded bg-red-600 px-4 py-2 text-sm text-white hover:bg-red-700 transition-colors"
-        >
-          Выход
-        </button>
-      </div>
+    <div>
+      <h1 className="mb-6 text-3xl font-bold">Модерация отзывов</h1>
 
       {/* Pending Reviews */}
       <section className="mb-8">
