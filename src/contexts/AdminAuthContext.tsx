@@ -21,6 +21,9 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
 		supabase.auth.getSession().then(({ data: { session } }) => {
 			setSession(session)
 			setLoading(false)
+		}).catch((error) => {
+			console.error('Error getting session:', error)
+			setLoading(false)
 		})
 
 		// Listen for auth changes
@@ -28,16 +31,20 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
 			data: { subscription }
 		} = supabase.auth.onAuthStateChange((_event, session) => {
 			setSession(session)
+			setLoading(false)
 		})
 
 		return () => subscription?.unsubscribe()
 	}, [])
 
 	const signIn = async (email: string, password: string) => {
-		const { error } = await supabase.auth.signInWithPassword({
+		const { error, data } = await supabase.auth.signInWithPassword({
 			email,
 			password
 		})
+		if (!error && data?.session) {
+			setSession(data.session)
+		}
 		return { error }
 	}
 
