@@ -124,12 +124,12 @@ export default function ReviewsForm({ onSubmitted }: ReviewsFormProps) {
       {/* Modal */}
       <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
         <div
-          className="bg-white rounded-xl sm:rounded-2xl max-w-4xl w-full max-h-[90vh] flex flex-col"
+          className="bg-white rounded-xl sm:rounded-2xl max-w-xl w-full max-h-[90vh] flex flex-col"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Modal Header - как в Cases */}
           <div className="flex-shrink-0 bg-white border-b border-gray-200 p-4 sm:p-6 flex items-center justify-between rounded-t-xl sm:rounded-t-2xl">
-            <h3 className="text-base sm:text-xl lg:text-2xl font-medium text-slate-700">Оставить отзыв</h3>
+            <h3 className="text-base sm:text-xl lg:text-2xl font-regular text-slate-700">Оставить отзыв</h3>
             <button
               onClick={() => setIsOpen(false)}
               className="flex-shrink-0 p-1.5 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -237,7 +237,7 @@ export default function ReviewsForm({ onSubmitted }: ReviewsFormProps) {
                   />
                   <label
                     htmlFor="photo-upload"
-                    className="flex items-center justify-center gap-2 w-full px-3 py-2.5 h-10 rounded-lg border border-dashed border-slate-300 hover:border-ocean-600 bg-slate-50 hover:bg-ocean-50 transition-all cursor-pointer group"
+                    className="flex items-center justify-center gap-2 w-full px-3 py-3 h-11 rounded-lg border border-dashed border-slate-300 hover:border-ocean-600 bg-slate-50 hover:bg-ocean-50 transition-all cursor-pointer group"
                   >
                     <svg
                       className="w-4 h-4 text-slate-400 group-hover:text-ocean-600 transition-colors"
@@ -311,7 +311,7 @@ export default function ReviewsForm({ onSubmitted }: ReviewsFormProps) {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                   <div>
-                    <p className="text-xs sm:text-sm font-medium text-green-800">Спасибо за отзыв!</p>
+                    <p className="text-xs sm:text-sm font-medium text-green-800 text-left">Спасибо за отзыв!</p>
                     <p className="text-xs text-green-700 mt-0.5">
                       Отзыв отправлен на модерацию
                     </p>

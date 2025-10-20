@@ -1,49 +1,35 @@
 import React, { useState, useEffect } from 'react'
-import { listApprovedReviews } from '../lib/reviews'
-import review1 from '../assets/images/review-1.png'
-import review2 from '../assets/images/review-2.png'
-import review3 from '../assets/images/review-3.png'
-import review4 from '../assets/images/review-4.png'
-import review5 from '../assets/images/review-5.png'
-import review6 from '../assets/images/review-6.png'
-import review7 from '../assets/images/review-7.png'
-import review8 from '../assets/images/review-8.png'
-import review9 from '../assets/images/review-9.png'
-import review10 from '../assets/images/review-10.png'
-import review11 from '../assets/images/review-11.png'
-import review12 from '../assets/images/review-12.png'
-import review13 from '../assets/images/review-13.png'
-import review14 from '../assets/images/review-14.png'
-import review15 from '../assets/images/review-15.png'
-import review16 from '../assets/images/review-16.png'
-import review17 from '../assets/images/review-17.png'
-import review18 from '../assets/images/review-18.png'
-import review19 from '../assets/images/review-19.png'
-import review20 from '../assets/images/review-20.png'
-import review21 from '../assets/images/review-21.png'
-import review22 from '../assets/images/review-22.png'
-import review23 from '../assets/images/review-23.png'
-import review24 from '../assets/images/review-24.png'
+import { listApprovedReviews, getCategories } from '../lib/reviews'
 import SectionHeader from './SectionHeader'
 import SectionDescription from './SectionDescription'
 import ReviewsForm from './ReviewsForm'
 
-const categories = [
-	'Все',
-	'Физическая боль',
-	'Эмоциональные проблемы',
-	'Финансовые блоки',
-	'Отношения',
-	'Карьера',
-	'Здоровье'
-]
-
 const Testimonials = () => {
 	const [visibleCount, setVisibleCount] = useState(4)
 	const [activeCategory, setActiveCategory] = useState('Все')
+	const [categories, setCategories] = useState(['Все'])
+	const [loadingCategories, setLoadingCategories] = useState(true)
 	const [dynamicReviews, setDynamicReviews] = useState([])
 	const [loadingReviews, setLoadingReviews] = useState(true)
 	const [selectedImage, setSelectedImage] = useState(null) // For image popup
+
+	// Load categories from database
+	useEffect(() => {
+		async function loadCategories() {
+			setLoadingCategories(true)
+			const { data, error } = await getCategories()
+			if (!error && data) {
+				const categoryNames = data.map(cat => cat.name)
+				setCategories(['Все', ...categoryNames])
+				// Set first category as active if it exists
+				if (categoryNames.length > 0) {
+					setActiveCategory('Все')
+				}
+			}
+			setLoadingCategories(false)
+		}
+		loadCategories()
+	}, [])
 
 	// Load dynamic reviews from database
 	useEffect(() => {
@@ -57,7 +43,7 @@ const Testimonials = () => {
 					problem: review.message,
 					name: review.name || 'Аноним',
 					rating: review.rating,
-					category: 'Все', // Default category for dynamic reviews
+					category: review.category || 'Все', // Use category from database
 					image: review.photos && review.photos.length > 0 ? review.photos[0] : null,
 					hasText: !!review.message,
 					hasImage: review.photos && review.photos.length > 0,
@@ -71,227 +57,8 @@ const Testimonials = () => {
 		load()
 	}, [])
 
-	const testimonials = [
-		{
-			id: 1,
-			problem: "Работа с эмоциональными блоками",
-			image: review1,
-			rating: 5,
-			category: "Эмоциональные проблемы",
-			hasText: true,
-			hasImage: true
-		},
-		{
-			id: 2,
-			problem: "Боль в плечах, водянка, давление",
-			image: review2,
-			rating: 5,
-			category: "Физическая боль",
-			hasText: true,
-			hasImage: true
-		},
-		{
-			id: 3,
-			problem: "Мигрень, психоэмоциональная коррекция",
-			image: review3,
-			rating: 5,
-			category: "Физическая боль",
-			hasText: true,
-			hasImage: true
-		},
-		{
-			id: 4,
-			problem: "Психоэмоциональная коррекция",
-			image: review4,
-			rating: 5,
-			category: "Эмоциональные проблемы",
-			hasText: true,
-			hasImage: true
-		},
-		{
-			id: 5,
-			problem: "Косоглазие у ребенка",
-			image: review5,
-			rating: 5,
-			category: "Здоровье",
-			hasText: true,
-			hasImage: true
-		},
-		{
-			id: 6,
-			problem: "Страх моря",
-			image: review6,
-			rating: 5,
-			category: "Эмоциональные проблемы",
-			hasText: true,
-			hasImage: true
-		},
-		{
-			id: 7,
-			problem: "Боль в руке",
-			image: review7,
-			rating: 5,
-			category: "Физическая боль",
-			hasText: true,
-			hasImage: true
-		},
-		{
-			id: 8,
-			problem: "Психоэмоциональная коррекция",
-			image: review8,
-			rating: 5,
-			category: "Эмоциональные проблемы",
-			hasText: true,
-			hasImage: true
-		},
-		{
-			id: 9,
-			problem: "Эмоциональный блок на деньги, проявленность",
-			image: review9,
-			rating: 5,
-			category: "Финансовые блоки",
-			hasText: true,
-			hasImage: true
-		},
-		{
-			id: 10,
-			problem: "Эмоциональный блок на деньги, проявленность",
-			image: review10,
-			rating: 5,
-			category: "Финансовые блоки",
-			hasText: true,
-			hasImage: true
-		},
-		{
-			id: 11,
-			problem: "Эмоциональный блок на деньги, проявленность",
-			image: review11,
-			rating: 5,
-			category: "Финансовые блоки",
-			hasText: true,
-			hasImage: true
-		},
-		{
-			id: 12,
-			problem: "Эмоциональный блок на деньги, проявленность",
-			image: review12,
-			rating: 5,
-			category: "Финансовые блоки",
-			hasText: true,
-			hasImage: true
-		},
-		{
-			id: 13,
-			problem: "Боль в шее",
-			image: review13,
-			rating: 5,
-			category: "Физическая боль",
-			hasText: true,
-			hasImage: true
-		},
-		{
-			id: 14,
-			problem: "Боль в спине",
-			image: review14,
-			rating: 5,
-			category: "Физическая боль",
-			hasText: true,
-			hasImage: true
-		},
-		{
-			id: 15,
-			problem: "Эмоции",
-			image: review15,
-			rating: 5,
-			category: "Эмоциональные проблемы",
-			hasText: true,
-			hasImage: true
-		},
-		{
-			id: 16,
-			problem: "Эмоции",
-			image: review1,
-			rating: 5,
-			category: "Эмоциональные проблемы",
-			hasText: true,
-			hasImage: true
-		},
-		{
-			id: 17,
-			problem: "Боль в ноге",
-			image: review1,
-			rating: 5,
-			category: "Физическая боль",
-			hasText: true,
-			hasImage: true
-		},
-		{
-			id: 18,
-			problem: "Последствия операции",
-			image: review18,
-			rating: 5,
-			category: "Физическая боль",
-			hasText: true,
-			hasImage: true
-		},
-		{
-			id: 19,
-			problem: "Невралгия",
-			image: review19,
-			rating: 5,
-			category: "Физическая боль",
-			hasText: true,
-			hasImage: true
-		},
-		{
-			id: 20,
-			problem: "Психоэмоциональная коррекция",
-			image: review20,
-			rating: 5,
-			category: "Эмоциональные проблемы",
-			hasText: true,
-			hasImage: true
-		},
-		{
-			id: 21,
-			problem: "Психоэмоциональная коррекция",
-			image: review21,
-			rating: 5,
-			category: "Эмоциональные проблемы",
-			hasText: true,
-			hasImage: true
-		},
-		{
-			id: 22,
-			problem: "Эмоции",
-			image: review22,
-			rating: 5,
-			category: "Эмоциональные проблемы",
-			hasText: true,
-			hasImage: true
-		},
-		{
-			id: 23,
-			problem: "Эмоции",
-			image: review23,
-			rating: 5,
-			category: "Эмоциональные проблемы",
-			hasText: true,
-			hasImage: true
-		},
-		{
-			id: 24,
-			problem: "Эмоции",
-			image: review24,
-			rating: 5,
-			category: "Эмоциональные проблемы",
-			hasText: true,
-			hasImage: true
-		}
-	]
-
-	// Combine static and dynamic reviews
-	const allTestimonials = [...testimonials, ...dynamicReviews]
+	// Combine static and dynamic reviews (only dynamic reviews now)
+	const allTestimonials = [...dynamicReviews]
 
 	const filteredTestimonials = activeCategory === 'Все'
 		? allTestimonials
@@ -321,67 +88,62 @@ const Testimonials = () => {
 					<SectionDescription text="Что говорят люди, которые уже испытали на себе эффективность P-DTR метода" />
 				</div>
 
-				{/* Category Tabs - Hidden on mobile */}
-				<div className="hidden sm:flex flex-wrap justify-center gap-2 mb-8">
-					{categories.map((category) => (
-						<button
-							key={category}
-							onClick={() => {
-								setActiveCategory(category)
-								setVisibleCount(4) // Reset pagination when changing category
-							}}
-							className={`px-3 py-2 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-regular transition-all duration-300 ${activeCategory === category
-								? 'bg-gradient-to-r from-ocean-600 to-ocean-600 text-white shadow-lg'
-								: 'bg-white text-slate-900 hover:bg-ocean-50 hover:text-ocean-600 border border-slate-200'
-								}`}
-						>
-							{category}
-						</button>
-					))}
-				</div>
-
-				{/* Category Select - Visible only on mobile */}
-				<div className="sm:hidden mb-6">
-					<select
-						value={activeCategory}
-						onChange={(e) => {
-							setActiveCategory(e.target.value)
-							setVisibleCount(4) // Reset pagination when changing category
-						}}
-						className="w-full px-4 py-3 rounded-xl text-sm font-medium bg-white text-slate-700 border-2 border-slate-200 focus:border-ocean-600 focus:outline-none focus:ring-2 focus:ring-ocean-600/20 transition-all duration-300 appearance-none cursor-pointer"
-						style={{
-							backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%232563eb'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
-							backgroundRepeat: 'no-repeat',
-							backgroundPosition: 'right 0.75rem center',
-							backgroundSize: '1.25rem'
-						}}
-					>
-						{categories.map((category) => (
-							<option key={category} value={category}>
-								{category}
-							</option>
-						))}
-					</select>
-				</div>
-
-				{/* Testimonials Grid or Empty State */}
-				{filteredTestimonials.length === 0 ? (
-					<div className="flex items-center justify-center">
-						<div className="bg-white rounded-xl sm:rounded-2xl p-8 sm:p-12 shadow-md border border-ocean-100 max-w-md mx-auto text-center">
-							<div className="w-16 h-16 sm:w-20 sm:h-20 bg-ocean-100 rounded-full flex items-center justify-center mb-4 sm:mb-6 mx-auto">
-								<svg className="w-8 h-8 sm:w-10 sm:h-10 text-ocean-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-								</svg>
-							</div>
-							<h3 className="text-lg sm:text-xl font-regular text-slate-700 mb-2 sm:mb-3">
-								Отзывов пока нет
-							</h3>
-							<p className="text-sm sm:text-base text-slate-600 leading-relaxed">
-								В категории <span className="font-semibold text-ocean-600">"{activeCategory}"</span> еще нет отзывов
-							</p>
+				{/* Categories Loading Preloader */}
+				{loadingCategories ? (
+					<div className="flex items-center justify-center mb-8 h-12">
+						<div className="inline-flex items-center justify-center">
+							<div className="w-8 h-8 border-3 border-slate-200 border-t-ocean-600 rounded-full animate-spin"></div>
 						</div>
 					</div>
-				) : loadingReviews ? (
+				) : (
+					<>
+						{/* Category Tabs - Hidden on mobile */}
+						<div className="hidden sm:flex flex-wrap justify-center gap-2 mb-8">
+							{categories.map((category) => (
+								<button
+									key={category}
+									onClick={() => {
+										setActiveCategory(category)
+										setVisibleCount(4) // Reset pagination when changing category
+									}}
+									className={`px-3 py-2 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-regular transition-all duration-300 ${activeCategory === category
+										? 'bg-gradient-to-r from-ocean-600 to-ocean-600 text-white shadow-lg'
+										: 'bg-white text-slate-900 hover:bg-ocean-50 hover:text-ocean-600 border border-slate-200'
+										}`}
+								>
+									{category}
+								</button>
+							))}
+						</div>
+
+						{/* Category Select - Visible only on mobile */}
+						<div className="sm:hidden mb-6">
+							<select
+								value={activeCategory}
+								onChange={(e) => {
+									setActiveCategory(e.target.value)
+									setVisibleCount(4) // Reset pagination when changing category
+								}}
+								className="w-full px-4 py-3 rounded-xl text-sm font-medium bg-white text-slate-700 border-2 border-slate-200 focus:border-ocean-600 focus:outline-none focus:ring-2 focus:ring-ocean-600/20 transition-all duration-300 appearance-none cursor-pointer"
+								style={{
+									backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%232563eb'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
+									backgroundRepeat: 'no-repeat',
+									backgroundPosition: 'right 0.75rem center',
+									backgroundSize: '1.25rem'
+								}}
+							>
+								{categories.map((category) => (
+									<option key={category} value={category}>
+										{category}
+									</option>
+								))}
+							</select>
+						</div>
+					</>
+				)}
+
+				{/* Testimonials Grid or Empty State */}
+				{loadingReviews || loadingCategories ? (
 					// Preloader
 					<div className="flex items-center justify-center py-12">
 						<div className="text-center">
@@ -391,12 +153,28 @@ const Testimonials = () => {
 							<p className="text-slate-600 mt-4">Загрузка отзывов...</p>
 						</div>
 					</div>
+				) : filteredTestimonials.length === 0 ? (
+					<div className="flex items-center justify-center">
+						<div className="p-8 sm:p-12 max-w-md mx-auto text-center">
+							<div className="w-16 h-16 sm:w-20 sm:h-20 bg-ocean-100 rounded-full flex items-center justify-center mb-4 sm:mb-6 mx-auto">
+								<svg className="w-8 h-8 sm:w-10 sm:h-10 text-ocean-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+								</svg>
+							</div>
+							<h3 className="text-lg sm:text-xl font-regular text-slate-700 mb-2 sm:mb-3">
+								Отзывов пока нет
+							</h3>
+							<p className="text-sm sm:text-base text-slate-600 leading-relaxed">
+								В категории <br /><span className="font-medium text-ocean-600">"{activeCategory}"</span>
+							</p>
+						</div>
+					</div>
 				) : (
 					<>
-						<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-6">
+						<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-4">
 							{displayedTestimonials.map((testimonial) => (
 								<div key={testimonial.id} className="group h-full">
-									<div className="bg-white rounded-xl sm:rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 h-full flex flex-col">
+									<div className="bg-white rounded-xl sm:rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform  h-full flex flex-col">
 
 										{/* CASE 1: Text + Image - show text with image link */}
 										{testimonial.hasText && testimonial.hasImage ? (
@@ -548,11 +326,11 @@ const Testimonials = () => {
 						{/* Image Popup Modal */}
 						{selectedImage && (
 							<div
-								className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4"
+								className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-2"
 								onClick={() => setSelectedImage(null)}
 							>
 								<div
-									className="relative max-w-2xl w-full"
+									className="relative w-full max-w-[400px]"
 									onClick={(e) => e.stopPropagation()}
 								>
 									<button
