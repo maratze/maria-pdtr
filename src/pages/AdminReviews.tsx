@@ -10,6 +10,9 @@ export default function AdminReviews() {
   const [error, setError] = useState<string | null>(null)
   const [processingId, setProcessingId] = useState<string | null>(null)
   const [selectedImageReview, setSelectedImageReview] = useState<{ photos: string[], index: number } | null>(null)
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
+  const [deleteConfirmType, setDeleteConfirmType] = useState<'review' | 'photo' | null>(null)
+  const [deleteConfirmPhotoUrl, setDeleteConfirmPhotoUrl] = useState<string | null>(null)
 
   function goToNextPhoto() {
     if (!selectedImageReview) return
@@ -47,24 +50,29 @@ export default function AdminReviews() {
       return
     }
 
-    // Refresh list
-    await load()
+    // Реактивно обновляем отзыв в списке
+    setReviews(reviews.map(r => r.id === reviewId ? { ...r, approved: true } : r))
   }
 
   async function handleDelete(reviewId: string) {
-    if (!confirm('Вы уверены, что хотите удалить этот отзыв?')) return
+    setDeleteConfirmId(reviewId)
+    setDeleteConfirmType('review')
+  }
 
+  async function confirmDeleteReview(reviewId: string) {
     setProcessingId(reviewId)
     const { error } = await deleteReview(reviewId)
     setProcessingId(null)
+    setDeleteConfirmId(null)
+    setDeleteConfirmType(null)
 
     if (error) {
       alert('Ошибка: ' + error.message)
       return
     }
 
-    // Refresh list
-    await load()
+    // Реактивно удаляем отзыв из списка
+    setReviews(reviews.filter(r => r.id !== reviewId))
   }
 
   async function handleAddPhotos(reviewId: string, files: FileList | null) {
@@ -91,7 +99,9 @@ export default function AdminReviews() {
       alert('Ошибка при обновлении отзыва: ' + error.message)
       return
     }
-    await load()
+
+    // Реактивно обновляем отзыв в списке
+    setReviews(reviews.map(r => r.id === reviewId ? { ...r, photos: newPhotos } : r))
   }
 
   async function handleUpdateCategory(reviewId: string, categoryId: string | null) {
@@ -104,23 +114,38 @@ export default function AdminReviews() {
       return
     }
 
-    // Refresh list
-    await load()
+    // Реактивно обновляем отзыв в списке
+    setReviews(reviews.map(r => r.id === reviewId ? { ...r, category_id: categoryId } : r))
+  }
+
+  async function handleUpdateMessage(reviewId: string, message: string) {
+    // Реактивно обновляем отзыв в списке
+    setReviews(reviews.map(r => r.id === reviewId ? { ...r, message } : r))
   }
 
   async function handleRemovePhoto(reviewId: string, photoUrl: string) {
+    setDeleteConfirmId(reviewId)
+    setDeleteConfirmType('photo')
+    setDeleteConfirmPhotoUrl(photoUrl)
+  }
+
+  async function confirmRemovePhoto(reviewId: string, photoUrl: string) {
     setProcessingId(reviewId)
     const review = reviews.find(r => r.id === reviewId)
     const newPhotos = (review?.photos || []).filter(p => p !== photoUrl)
     const { error } = await updateReview(reviewId, { photos: newPhotos })
     setProcessingId(null)
+    setDeleteConfirmId(null)
+    setDeleteConfirmType(null)
+    setDeleteConfirmPhotoUrl(null)
 
     if (error) {
       alert('Ошибка при удалении фото: ' + error.message)
       return
     }
 
-    await load()
+    // Реактивно обновляем отзыв в списке
+    setReviews(reviews.map(r => r.id === reviewId ? { ...r, photos: newPhotos } : r))
   }
 
   useEffect(() => {
@@ -223,6 +248,7 @@ export default function AdminReviews() {
                 onApprove={handleApprove}
                 onDelete={handleDelete}
                 onUpdateCategory={handleUpdateCategory}
+                onUpdateMessage={handleUpdateMessage}
                 processing={processingId === review.id}
                 onShowPhotos={(photos, index) => setSelectedImageReview({ photos, index })}
               />
@@ -246,6 +272,7 @@ export default function AdminReviews() {
                 categories={categories}
                 onDelete={handleDelete}
                 onUpdateCategory={handleUpdateCategory}
+                onUpdateMessage={handleUpdateMessage}
                 processing={processingId === review.id}
                 onShowPhotos={(photos, index) => setSelectedImageReview({ photos, index })}
               />
@@ -318,6 +345,82 @@ export default function AdminReviews() {
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirmId && deleteConfirmType === 'review' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white rounded-xl border border-slate-200 shadow-lg p-6 max-w-sm mx-4">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-red-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-md font-medium text-slate-900">Удалить отзыв?</h3>
+                <p className="text-sm text-slate-500 mt-0.5">от {reviews.find(r => r.id === deleteConfirmId)?.name || 'Аноним'}</p>
+              </div>
+            </div>
+            <p className="text-sm text-slate-600 mb-4">Это действие невозможно будет отменить</p>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => {
+                  setDeleteConfirmId(null)
+                  setDeleteConfirmType(null)
+                }}
+                className="flex-1 px-4 py-2 h-10 rounded-lg border border-slate-200 text-slate-600 text-sm font-regular hover:bg-slate-50 transition-colors"
+              >
+                Отмена
+              </button>
+              <button
+                onClick={() => deleteConfirmId && confirmDeleteReview(deleteConfirmId)}
+                disabled={processingId === deleteConfirmId}
+                className="flex-1 px-4 py-2 h-10 rounded-lg bg-red-600 text-white text-sm font-regular hover:bg-red-700 disabled:opacity-50 transition-colors"
+              >
+                {processingId === deleteConfirmId ? '...' : 'Удалить'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Photo Confirmation Modal */}
+      {deleteConfirmId && deleteConfirmType === 'photo' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white rounded-xl border border-slate-200 shadow-lg p-6 max-w-sm mx-4">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-red-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-md font-medium text-slate-900">Удалить фото?</h3>
+              </div>
+            </div>
+            <p className="text-sm text-slate-600 mb-4">Это действие невозможно будет отменить</p>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => {
+                  setDeleteConfirmId(null)
+                  setDeleteConfirmType(null)
+                  setDeleteConfirmPhotoUrl(null)
+                }}
+                className="flex-1 px-4 py-2 h-10 rounded-lg border border-slate-200 text-slate-600 text-sm font-regular hover:bg-slate-50 transition-colors"
+              >
+                Отмена
+              </button>
+              <button
+                onClick={() => deleteConfirmId && deleteConfirmPhotoUrl && confirmRemovePhoto(deleteConfirmId, deleteConfirmPhotoUrl)}
+                disabled={processingId === deleteConfirmId}
+                className="flex-1 px-4 py-2 h-10 rounded-lg bg-red-600 text-white text-sm font-regular hover:bg-red-700 disabled:opacity-50 transition-colors"
+              >
+                {processingId === deleteConfirmId ? '...' : 'Удалить'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -328,13 +431,45 @@ interface ReviewCardProps {
   onApprove?: (id: string) => void
   onDelete: (id: string) => void
   onUpdateCategory?: (id: string, categoryId: string | null) => void
+  onUpdateMessage?: (id: string, message: string) => void
   processing: boolean
   onShowPhotos?: (photos: string[], index: number) => void
 }
 
-function ReviewCard({ review, categories, onApprove, onDelete, onUpdateCategory, processing, onShowPhotos }: ReviewCardProps) {
+function ReviewCard({ review, categories, onApprove, onDelete, onUpdateCategory, onUpdateMessage, processing, onShowPhotos }: ReviewCardProps) {
+  const [editedMessage, setEditedMessage] = useState(review.message)
+  const [saveLoading, setSaveLoading] = useState(false)
+
+  // Синхронизируем editedMessage с review.message
+  useEffect(() => {
+    setEditedMessage(review.message)
+  }, [review.message])
+
+  async function handleSaveMessage() {
+    if (editedMessage === review.message) {
+      return
+    }
+
+    setSaveLoading(true)
+    const { error } = await updateReview(review.id, { message: editedMessage })
+    setSaveLoading(false)
+
+    if (error) {
+      alert('Ошибка при сохранении: ' + error.message)
+      setEditedMessage(review.message)
+      return
+    }
+
+    // Уведомляем родительский компонент об обновлении
+    onUpdateMessage?.(review.id, editedMessage)
+  }
+
+  function handleCancelEdit() {
+    setEditedMessage(review.message)
+  }
+
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-5 hover:border-slate-300 transition-colors">
+    <div className="bg-white rounded-xl border border-slate-200 p-5 hover:border-slate-300 transition-colors flex flex-col">
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-start gap-3 flex-1 min-w-0">
@@ -372,7 +507,7 @@ function ReviewCard({ review, categories, onApprove, onDelete, onUpdateCategory,
             </div>
           </div>
         </div>
-        <time className="text-xs text-slate-500 flex-shrink-0 ml-2">
+        <time className="text-[13px] text-slate-500">
           {new Date(review.created_at).toLocaleDateString('ru-RU', {
             day: 'numeric',
             month: 'short',
@@ -384,7 +519,38 @@ function ReviewCard({ review, categories, onApprove, onDelete, onUpdateCategory,
       </div>
 
       {/* Message */}
-      <p className="text-md text-slate-700 leading-relaxed mb-4">{review.message}</p>
+      <div className="mb-4">
+        <textarea
+          value={editedMessage}
+          onChange={(e) => setEditedMessage(e.target.value)}
+          className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:border-ocean-400 focus:outline-none focus:ring-2 focus:ring-ocean-100 text-md text-slate-700 resize-none"
+          rows={4}
+        />
+        {editedMessage !== review.message && (
+          <div className="flex gap-2 mt-2 justify-end">
+            <button
+              onClick={handleSaveMessage}
+              disabled={saveLoading}
+              className="p-2 w-10 h-10 flex items-center justify-center rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              title="Сохранить"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </button>
+            <button
+              onClick={handleCancelEdit}
+              disabled={saveLoading}
+              className="p-2 w-10 h-10 flex items-center justify-center rounded-lg border border-slate-200 text-red-600 hover:bg-red-50 hover:border-red-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              title="Отмена"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        )}
+      </div>
 
       {/* Photos Gallery */}
       {review.photos && review.photos.length > 0 && (
@@ -427,28 +593,12 @@ function ReviewCard({ review, categories, onApprove, onDelete, onUpdateCategory,
       )}
 
       {/* Controls */}
-      <div className="grid grid-cols-2 gap-3 pt-4 border-t border-slate-100">
-        {/* Category */}
+      <div className="space-y-3 pt-4 border-t border-slate-100 mt-auto">
+        {/* Add/Update photos */}
         <div>
-          <label className="block text-xs font-medium text-slate-700 mb-1.5">Категория</label>
-          <select
-            value={review.category_id || ''}
-            onChange={(e) => onUpdateCategory?.(review.id, e.target.value || null)}
-            disabled={processing}
-            className="w-full text-sm rounded-lg border border-slate-200 px-3 py-2 text-slate-900 focus:border-ocean-400 focus:outline-none focus:ring-2 focus:ring-ocean-100 disabled:opacity-50 disabled:bg-slate-50"
-          >
-            <option value="">Без категории</option>
-            {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Add photos */}
-        <div>
-          <label className="block text-xs font-medium text-slate-700 mb-1.5">Добавить фото</label>
+          <label className="block text-sm font-medium text-slate-700 mb-1.5">
+            {review.photos && review.photos.length > 0 ? 'Обновить фото' : 'Добавить фото'}
+          </label>
           <label className="block">
             <input
               type="file"
@@ -465,13 +615,36 @@ function ReviewCard({ review, categories, onApprove, onDelete, onUpdateCategory,
               }}
               className="hidden"
             />
-            <div className="w-full h-9 rounded-lg border-2 border-dashed border-slate-300 hover:border-ocean-400 flex items-center justify-center gap-1.5 cursor-pointer transition-colors text-slate-600 hover:text-ocean-600">
+            <div className="w-full h-10 rounded-lg border-2 border-dashed border-slate-300 hover:border-ocean-400 flex items-center justify-center gap-1.5 cursor-pointer transition-colors text-slate-600 hover:text-ocean-600">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              <span className="text-xs font-medium">Выбрать</span>
+              <span className="text-sm font-medium">Выбрать</span>
             </div>
           </label>
+        </div>
+
+        {/* Category */}
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1.5">Категория</label>
+          <div className="relative">
+            <select
+              value={review.category_id || ''}
+              onChange={(e) => onUpdateCategory?.(review.id, e.target.value || null)}
+              disabled={processing}
+              className="w-full h-10 appearance-none text-sm rounded-lg border border-slate-200 px-3 py-2 pr-8 text-slate-900 bg-white hover:border-ocean-300 focus:border-ocean-400 focus:outline-none focus:ring-2 focus:ring-ocean-100 disabled:opacity-50 disabled:bg-slate-50 transition-colors cursor-pointer"
+            >
+              <option value="">Без категории</option>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.name}
+                </option>
+              ))}
+            </select>
+            <svg className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+            </svg>
+          </div>
         </div>
       </div>
 
