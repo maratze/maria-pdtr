@@ -24,18 +24,18 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 		<div className="relative min-h-screen font-sans bg-slate-50">
 			{/* Sidebar */}
 			<aside className="fixed left-0 top-0 bottom-0 w-64 bg-white border-r border-slate-200 flex flex-col z-20">
-				{/* Logo */}
-				<div className="h-16 flex items-center px-6 border-b border-slate-200">
+				{/* Logo in navigation */}
+				<div className="px-4 py-3 border-b border-slate-200 h-14">
 					<Link to="/" className="flex items-center gap-2 group">
 						<div className="w-8 h-8 bg-gradient-to-br from-ocean-500 to-ocean-600 rounded-lg flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
 							<span className="text-white text-sm font-semibold">P</span>
 						</div>
-						<span className="text-slate-900 font-medium text-sm">P-DTR Admin</span>
+						<span className="text-slate-800 font-normal text-sm">P-DTR Admin</span>
 					</Link>
 				</div>
 
 				{/* User info */}
-				<div className="px-4 py-4 border-b border-slate-200">
+				<div className="px-4 py-3 border-b border-slate-200">
 					<div className="flex items-center gap-3">
 						<div className="w-9 h-9 bg-gradient-to-br from-ocean-400 to-ocean-600 rounded-full flex items-center justify-center text-white text-sm font-medium shadow-sm">
 							{session?.user?.email?.[0].toUpperCase() || 'A'}
@@ -48,12 +48,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 				</div>
 
 				{/* Navigation */}
-				<nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+				<nav className="flex-1 px-3 py-3 space-y-1 overflow-y-auto">
 					<Link
 						to="/admin/reviews"
-						className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${isActive('/admin/reviews')
-								? 'bg-ocean-50 text-ocean-700 shadow-sm'
-								: 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+						className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-normal transition-all duration-200 ${isActive('/admin/reviews')
+							? 'bg-ocean-50 text-ocean-700 shadow-sm'
+							: 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
 							}`}
 					>
 						<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -66,9 +66,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 					</Link>
 					<Link
 						to="/admin/categories"
-						className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${isActive('/admin/categories')
-								? 'bg-ocean-50 text-ocean-700 shadow-sm'
-								: 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+						className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-normal transition-all duration-200 ${isActive('/admin/categories')
+							? 'bg-ocean-50 text-ocean-700 shadow-sm'
+							: 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
 							}`}
 					>
 						<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -82,10 +82,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 				</nav>
 
 				{/* Logout button */}
-				<div className="p-4 border-t border-slate-200">
+				<div className="p-3 border-t border-slate-200">
 					<button
 						onClick={handleLogout}
-						className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-colors duration-200"
+						className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-normal text-red-600 hover:bg-red-50 transition-colors duration-200"
 					>
 						<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -97,27 +97,25 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
 			{/* Main Content */}
 			<main className="ml-64 min-h-screen bg-slate-50">
-				{/* Top bar */}
-				<div className="sticky top-0 z-10 bg-white border-b border-slate-200 px-8 py-4">
-					<div className="flex items-center justify-between">
-						<div className="flex items-center gap-4">
-							<h1 className="text-lg font-semibold text-slate-900">
-								{isActive('/admin/reviews') && 'Модерация отзывов'}
-								{isActive('/admin/categories') && 'Управление категориями'}
-							</h1>
-						</div>
-						<div className="flex items-center gap-2 text-xs text-slate-500">
-							<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-							</svg>
-							{new Date().toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })}
-						</div>
+				{/* Unified Top bar */}
+				<div className="sticky top-0 z-10 bg-white border-b border-slate-200 px-6 h-14 flex items-center justify-between w-full">
+					<h1 className="text-md font-normal text-slate-800">
+						{isActive('/admin/reviews') && 'Модерация отзывов'}
+						{isActive('/admin/categories') && 'Управление категориями'}
+					</h1>
+					<div className="flex items-center gap-2 text-sm text-slate-500">
+						<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+						</svg>
+						{new Date().toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })}
 					</div>
 				</div>
 
 				{/* Content */}
-				<div className="p-8">
-					{children}
+				<div className="p-4 flex justify-center">
+					<div className="w-full max-w-[1000px]">
+						{children}
+					</div>
 				</div>
 			</main>
 		</div>
