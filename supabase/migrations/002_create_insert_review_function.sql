@@ -16,6 +16,7 @@ RETURNS TABLE (
   rating integer,
   photos jsonb,
   approved boolean,
+  category_id uuid,
   created_at timestamptz
 )
 LANGUAGE plpgsql
@@ -27,7 +28,7 @@ BEGIN
   INSERT INTO public.reviews (name, email, message, rating, photos, approved)
   VALUES (p_name, p_email, p_message, p_rating, p_photos, false)
   RETURNING reviews.id, reviews.name, reviews.email, reviews.message, 
-            reviews.rating, reviews.photos, reviews.approved, reviews.created_at;
+            reviews.rating, reviews.photos, reviews.approved, reviews.category_id, reviews.created_at;
 END;
 $$;
 

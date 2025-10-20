@@ -1,3 +1,10 @@
+export interface Category {
+  id: string
+  name: string
+  display_order: number
+  created_at: string
+}
+
 export interface Review {
   id: string
   name: string | null
@@ -6,6 +13,7 @@ export interface Review {
   rating: number
   photos: string[]
   approved: boolean
+  category_id: string | null
   created_at: string
 }
 

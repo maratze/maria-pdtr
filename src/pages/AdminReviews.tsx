@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react'
-import { listAllReviews, approveReview, deleteReview, uploadPhoto, deletePhoto, updateReview } from '../lib/reviews'
-import type { Review } from '../types/review'
+import { listAllReviews, approveReview, deleteReview, uploadPhoto, updateReview, getCategories } from '../lib/reviews'
+import type { Review, Category } from '../types/review'
 
 export default function AdminReviews() {
   const [reviews, setReviews] = useState<Review[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [processingId, setProcessingId] = useState<number | null>(null)
+  const [processingId, setProcessingId] = useState<string | null>(null)
 
   async function load() {
     setLoading(true)
@@ -22,7 +23,7 @@ export default function AdminReviews() {
     setReviews(data || [])
   }
 
-  async function handleApprove(reviewId: number) {
+  async function handleApprove(reviewId: string) {
     setProcessingId(reviewId)
     const { error } = await approveReview(reviewId)
     setProcessingId(null)
@@ -36,7 +37,7 @@ export default function AdminReviews() {
     await load()
   }
 
-  async function handleDelete(reviewId: number) {
+  async function handleDelete(reviewId: string) {
     if (!confirm('Вы уверены, что хотите удалить этот отзыв?')) return
 
     setProcessingId(reviewId)
@@ -52,7 +53,7 @@ export default function AdminReviews() {
     await load()
   }
 
-  async function handleAddPhotos(reviewId: number, files: FileList | null) {
+  async function handleAddPhotos(reviewId: string, files: FileList | null) {
     if (!files) return
     setProcessingId(reviewId)
 
@@ -79,43 +80,33 @@ export default function AdminReviews() {
     await load()
   }
 
-  async function handleRemovePhoto(reviewId: number, photoUrl: string) {
-    if (!confirm('Удалить фото?')) return
+  async function handleUpdateCategory(reviewId: string, categoryId: string | null) {
     setProcessingId(reviewId)
+    const { error } = await updateReview(reviewId, { category_id: categoryId })
+    setProcessingId(null)
 
-    // Derive storage path from URL (assuming public URL)
-    // supabase public URL format: https://<project>.supabase.co/storage/v1/object/public/<bucket>/<path>
-    try {
-      const parts = photoUrl.split('/storage/v1/object/public/')[1]
-      if (!parts) throw new Error('Невалидный URL')
-      const path = parts.split('/').slice(1).join('/')
-      // remove expects array of paths
-      const delRes = await deletePhoto(path)
-      if (delRes.error) {
-        alert('Ошибка удаления фото: ' + delRes.error.message)
-        setProcessingId(null)
-        return
-      }
-
-      // Remove from DB photos array
-      const review = reviews.find(r => r.id === reviewId)
-      const newPhotos = (review?.photos || []).filter(p => p !== photoUrl)
-      const { error } = await updateReview(reviewId, { photos: newPhotos })
-      setProcessingId(null)
-      if (error) {
-        alert('Ошибка при обновлении отзыва: ' + error.message)
-        return
-      }
-      await load()
-    } catch (err: any) {
-      setProcessingId(null)
-      alert('Ошибка при обработке URL: ' + err.message)
+    if (error) {
+      alert('Ошибка: ' + error.message)
+      return
     }
+
+    // Refresh list
+    await load()
   }
 
   useEffect(() => {
     load()
+    loadCategories()
   }, [])
+
+  async function loadCategories() {
+    const { data, error } = await getCategories()
+    if (error) {
+      console.error('Ошибка загрузки категорий:', error)
+      return
+    }
+    setCategories(data || [])
+  }
 
   // Expose handlers to ReviewCard file inputs via global functions (small shortcut)
   useEffect(() => {
@@ -172,8 +163,10 @@ export default function AdminReviews() {
               <ReviewCard
                 key={review.id}
                 review={review}
+                categories={categories}
                 onApprove={handleApprove}
                 onDelete={handleDelete}
+                onUpdateCategory={handleUpdateCategory}
                 processing={processingId === review.id}
               />
             ))}
@@ -197,7 +190,9 @@ export default function AdminReviews() {
               <ReviewCard
                 key={review.id}
                 review={review}
+                categories={categories}
                 onDelete={handleDelete}
+                onUpdateCategory={handleUpdateCategory}
                 processing={processingId === review.id}
               />
             ))}
@@ -210,12 +205,14 @@ export default function AdminReviews() {
 
 interface ReviewCardProps {
   review: Review
-  onApprove?: (id: number) => void
-  onDelete: (id: number) => void
+  categories: Category[]
+  onApprove?: (id: string) => void
+  onDelete: (id: string) => void
+  onUpdateCategory?: (id: string, categoryId: string | null) => void
   processing: boolean
 }
 
-function ReviewCard({ review, onApprove, onDelete, processing }: ReviewCardProps) {
+function ReviewCard({ review, categories, onApprove, onDelete, onUpdateCategory, processing }: ReviewCardProps) {
   return (
     <div className="rounded border bg-white p-4 shadow">
       <div className="mb-3 flex items-start justify-between">
@@ -245,6 +242,25 @@ function ReviewCard({ review, onApprove, onDelete, processing }: ReviewCardProps
       </div>
 
       <p className="mb-4 whitespace-pre-wrap text-gray-700">{review.message}</p>
+
+      {/* Category selector */}
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700 mb-2">Категория</label>
+        <select
+          value={review.category_id || ''}
+          onChange={(e) => onUpdateCategory?.(review.id, e.target.value || null)}
+          disabled={processing}
+          className="w-full rounded border border-gray-300 px-3 py-2 text-sm disabled:opacity-50"
+        >
+          <option value="">Без категории</option>
+          {categories.map((cat) => (
+            <option key={cat.id} value={cat.id}>
+              {cat.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
       {/* Photos */}
       {review.photos && review.photos.length > 0 && (
         <div className="mb-4 grid grid-cols-3 gap-2">

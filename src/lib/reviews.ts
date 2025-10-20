@@ -1,5 +1,15 @@
 import { supabase, supabaseAdmin } from './supabaseClient'
-import type { Review, NewReview } from '../types/review'
+import type { Review, NewReview, Category } from '../types/review'
+
+// Public API: Get all categories
+export async function getCategories() {
+  const { data, error } = await supabase
+    .from('categories')
+    .select('*')
+    .order('display_order', { ascending: true })
+
+  return { data: data as Category[] | null, error }
+}
 
 // Public API: Add a review (will be pending approval)
 export async function addReview({ name, email, message, rating = 5, photos = [] }: NewReview) {
