@@ -60,24 +60,56 @@ export default function ReviewsForm({ onSubmitted }: ReviewsFormProps) {
 
   if (!isOpen) {
     return (
-      <div className="flex flex-col items-center gap-4 py-8 sm:py-12">
-        <div className="text-center">
-          <p className="text-sm sm:text-base text-slate-600 max-w-md mb-6">
-            Поделитесь своим опытом работы с P-DTR методом.
-            <br />
-            Ваш отзыв очень важен для нас!
-          </p>
+      <>
+        <div className="flex flex-col items-center gap-4 py-8 sm:py-12">
+          <div className="text-center">
+            <p className="text-sm sm:text-base text-slate-600 max-w-md mb-6">
+              Поделитесь своим опытом работы с P-DTR методом.
+              <br />
+              Ваш отзыв очень важен для нас!
+            </p>
+          </div>
+          <button
+            onClick={() => setIsOpen(true)}
+            className="inline-flex items-center gap-2 bg-gradient-to-r from-ocean-600 to-ocean-600 text-white px-8 py-4 rounded-full hover:shadow-lg hover:shadow-ocean-600/30 transition-all duration-300 text-sm sm:text-base font-medium transform "
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            Оставить отзыв
+          </button>
         </div>
-        <button
-          onClick={() => setIsOpen(true)}
-          className="inline-flex items-center gap-2 bg-gradient-to-r from-ocean-600 to-ocean-600 text-white px-8 py-4 rounded-full hover:shadow-lg hover:shadow-ocean-600/30 transition-all duration-300 text-sm sm:text-base font-medium transform "
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-          </svg>
-          Оставить отзыв
-        </button>
-      </div>
+
+        {/* Global toast notification - fixed top-right */}
+        {success && (
+          <div className="fixed top-4 right-4 z-50 animate-slide-in-right">
+            <div className="flex items-start gap-3 p-4 rounded-lg bg-white shadow-lg border border-green-200 max-w-sm">
+              <div className="flex-shrink-0 w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                <svg
+                  className="w-5 h-5 text-green-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <div className="flex-1 text-left">
+                <p className="text-sm font-semibold text-slate-900">Спасибо — отзыв отправлен!</p>
+                <p className="text-xs text-slate-600 mt-1">Появится в списке после модерации.</p>
+              </div>
+              <button
+                onClick={() => setSuccess(false)}
+                className="flex-shrink-0 text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
+      </>
     )
   }
 
