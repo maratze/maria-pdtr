@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { listApprovedReviews } from '../lib/reviews'
 import review1 from '../assets/images/review-1.png'
 import review2 from '../assets/images/review-2.png'
 import review3 from '../assets/images/review-3.png'
@@ -38,8 +39,37 @@ const categories = [
 ]
 
 const Testimonials = () => {
-	const [visibleCount, setVisibleCount] = useState(3)
+	const [visibleCount, setVisibleCount] = useState(4)
 	const [activeCategory, setActiveCategory] = useState('Все')
+	const [dynamicReviews, setDynamicReviews] = useState([])
+	const [loadingReviews, setLoadingReviews] = useState(true)
+	const [selectedImage, setSelectedImage] = useState(null) // For image popup
+
+	// Load dynamic reviews from database
+	useEffect(() => {
+		async function load() {
+			setLoadingReviews(true)
+			const { data, error } = await listApprovedReviews()
+			if (!error && data) {
+				// Transform database reviews to match testimonial format
+				const transformed = data.map(review => ({
+					id: `db-${review.id}`,
+					problem: review.message,
+					name: review.name || 'Аноним',
+					rating: review.rating,
+					category: 'Все', // Default category for dynamic reviews
+					image: review.photos && review.photos.length > 0 ? review.photos[0] : null,
+					hasText: !!review.message,
+					hasImage: review.photos && review.photos.length > 0,
+					created_at: review.created_at,
+					email: review.email
+				}))
+				setDynamicReviews(transformed)
+			}
+			setLoadingReviews(false)
+		}
+		load()
+	}, [])
 
 	const testimonials = [
 		{
@@ -47,176 +77,240 @@ const Testimonials = () => {
 			problem: "Работа с эмоциональными блоками",
 			image: review1,
 			rating: 5,
-			category: "Эмоциональные проблемы"
+			category: "Эмоциональные проблемы",
+			hasText: true,
+			hasImage: true
 		},
 		{
 			id: 2,
 			problem: "Боль в плечах, водянка, давление",
 			image: review2,
 			rating: 5,
-			category: "Физическая боль"
+			category: "Физическая боль",
+			hasText: true,
+			hasImage: true
 		},
 		{
 			id: 3,
 			problem: "Мигрень, психоэмоциональная коррекция",
 			image: review3,
 			rating: 5,
-			category: "Физическая боль"
+			category: "Физическая боль",
+			hasText: true,
+			hasImage: true
 		},
 		{
 			id: 4,
 			problem: "Психоэмоциональная коррекция",
 			image: review4,
 			rating: 5,
-			category: "Эмоциональные проблемы"
+			category: "Эмоциональные проблемы",
+			hasText: true,
+			hasImage: true
 		},
 		{
 			id: 5,
 			problem: "Косоглазие у ребенка",
 			image: review5,
 			rating: 5,
-			category: "Здоровье"
+			category: "Здоровье",
+			hasText: true,
+			hasImage: true
 		},
 		{
 			id: 6,
 			problem: "Страх моря",
 			image: review6,
 			rating: 5,
-			category: "Эмоциональные проблемы"
+			category: "Эмоциональные проблемы",
+			hasText: true,
+			hasImage: true
 		},
 		{
 			id: 7,
 			problem: "Боль в руке",
 			image: review7,
 			rating: 5,
-			category: "Физическая боль"
+			category: "Физическая боль",
+			hasText: true,
+			hasImage: true
 		},
 		{
 			id: 8,
 			problem: "Психоэмоциональная коррекция",
 			image: review8,
 			rating: 5,
-			category: "Эмоциональные проблемы"
+			category: "Эмоциональные проблемы",
+			hasText: true,
+			hasImage: true
 		},
 		{
 			id: 9,
 			problem: "Эмоциональный блок на деньги, проявленность",
 			image: review9,
 			rating: 5,
-			category: "Финансовые блоки"
+			category: "Финансовые блоки",
+			hasText: true,
+			hasImage: true
 		},
 		{
 			id: 10,
 			problem: "Эмоциональный блок на деньги, проявленность",
 			image: review10,
 			rating: 5,
-			category: "Финансовые блоки"
+			category: "Финансовые блоки",
+			hasText: true,
+			hasImage: true
 		},
 		{
 			id: 11,
 			problem: "Эмоциональный блок на деньги, проявленность",
 			image: review11,
 			rating: 5,
-			category: "Финансовые блоки"
+			category: "Финансовые блоки",
+			hasText: true,
+			hasImage: true
 		},
 		{
 			id: 12,
 			problem: "Эмоциональный блок на деньги, проявленность",
 			image: review12,
 			rating: 5,
-			category: "Финансовые блоки"
+			category: "Финансовые блоки",
+			hasText: true,
+			hasImage: true
 		},
 		{
 			id: 13,
 			problem: "Боль в шее",
 			image: review13,
 			rating: 5,
-			category: "Физическая боль"
+			category: "Физическая боль",
+			hasText: true,
+			hasImage: true
 		},
 		{
 			id: 14,
 			problem: "Боль в спине",
 			image: review14,
 			rating: 5,
-			category: "Физическая боль"
+			category: "Физическая боль",
+			hasText: true,
+			hasImage: true
 		},
 		{
 			id: 15,
 			problem: "Эмоции",
 			image: review15,
 			rating: 5,
-			category: "Эмоциональные проблемы"
+			category: "Эмоциональные проблемы",
+			hasText: true,
+			hasImage: true
 		},
 		{
 			id: 16,
 			problem: "Эмоции",
 			image: review1,
 			rating: 5,
-			category: "Эмоциональные проблемы"
+			category: "Эмоциональные проблемы",
+			hasText: true,
+			hasImage: true
 		},
 		{
 			id: 17,
 			problem: "Боль в ноге",
 			image: review1,
 			rating: 5,
-			category: "Физическая боль"
+			category: "Физическая боль",
+			hasText: true,
+			hasImage: true
 		},
 		{
 			id: 18,
 			problem: "Последствия операции",
 			image: review18,
 			rating: 5,
-			category: "Физическая боль"
+			category: "Физическая боль",
+			hasText: true,
+			hasImage: true
 		},
 		{
 			id: 19,
 			problem: "Невралгия",
 			image: review19,
 			rating: 5,
-			category: "Физическая боль"
+			category: "Физическая боль",
+			hasText: true,
+			hasImage: true
 		},
 		{
 			id: 20,
 			problem: "Психоэмоциональная коррекция",
 			image: review20,
 			rating: 5,
-			category: "Эмоциональные проблемы"
+			category: "Эмоциональные проблемы",
+			hasText: true,
+			hasImage: true
 		},
 		{
 			id: 21,
 			problem: "Психоэмоциональная коррекция",
 			image: review21,
 			rating: 5,
-			category: "Эмоциональные проблемы"
+			category: "Эмоциональные проблемы",
+			hasText: true,
+			hasImage: true
 		},
 		{
 			id: 22,
 			problem: "Эмоции",
 			image: review22,
 			rating: 5,
-			category: "Эмоциональные проблемы"
+			category: "Эмоциональные проблемы",
+			hasText: true,
+			hasImage: true
 		},
 		{
 			id: 23,
 			problem: "Эмоции",
 			image: review23,
 			rating: 5,
-			category: "Эмоциональные проблемы"
+			category: "Эмоциональные проблемы",
+			hasText: true,
+			hasImage: true
 		},
 		{
 			id: 24,
 			problem: "Эмоции",
 			image: review24,
 			rating: 5,
-			category: "Эмоциональные проблемы"
+			category: "Эмоциональные проблемы",
+			hasText: true,
+			hasImage: true
 		}
 	]
 
-	const filteredTestimonials = activeCategory === 'Все'
-		? testimonials
-		: testimonials.filter(testimonial => testimonial.category === activeCategory)
+	// Combine static and dynamic reviews
+	const allTestimonials = [...testimonials, ...dynamicReviews]
 
-	const displayedTestimonials = filteredTestimonials.slice(0, visibleCount)
+	const filteredTestimonials = activeCategory === 'Все'
+		? allTestimonials
+		: allTestimonials.filter(testimonial => testimonial.category === activeCategory)
+
+	// Sort from newest to oldest (dynamic reviews have created_at, static don't)
+	const sortedTestimonials = [...filteredTestimonials].sort((a, b) => {
+		// Dynamic reviews with created_at come first (newest first)
+		if (a.created_at && b.created_at) {
+			return new Date(b.created_at) - new Date(a.created_at)
+		}
+		// If only one has created_at, it comes first
+		if (a.created_at) return -1
+		if (b.created_at) return 1
+		// Static reviews keep their order
+		return 0
+	})
+
+	const displayedTestimonials = sortedTestimonials.slice(0, visibleCount)
 
 	return (
 		<section id="testimonials" className="py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-slate-50 to-ocean-50">
@@ -234,7 +328,7 @@ const Testimonials = () => {
 							key={category}
 							onClick={() => {
 								setActiveCategory(category)
-								setVisibleCount(3) // Reset pagination when changing category
+								setVisibleCount(4) // Reset pagination when changing category
 							}}
 							className={`px-3 py-2 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-regular transition-all duration-300 ${activeCategory === category
 								? 'bg-gradient-to-r from-ocean-600 to-ocean-600 text-white shadow-lg'
@@ -252,7 +346,7 @@ const Testimonials = () => {
 						value={activeCategory}
 						onChange={(e) => {
 							setActiveCategory(e.target.value)
-							setVisibleCount(3) // Reset pagination when changing category
+							setVisibleCount(4) // Reset pagination when changing category
 						}}
 						className="w-full px-4 py-3 rounded-xl text-sm font-medium bg-white text-slate-700 border-2 border-slate-200 focus:border-ocean-600 focus:outline-none focus:ring-2 focus:ring-ocean-600/20 transition-all duration-300 appearance-none cursor-pointer"
 						style={{
@@ -287,51 +381,204 @@ const Testimonials = () => {
 							</p>
 						</div>
 					</div>
+				) : loadingReviews ? (
+					// Preloader
+					<div className="flex items-center justify-center py-12">
+						<div className="text-center">
+							<div className="inline-flex items-center justify-center">
+								<div className="w-12 h-12 border-4 border-slate-200 border-t-ocean-600 rounded-full animate-spin"></div>
+							</div>
+							<p className="text-slate-600 mt-4">Загрузка отзывов...</p>
+						</div>
+					</div>
 				) : (
-					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-						{displayedTestimonials.map((testimonial) => (
-							<div key={testimonial.id} className="group h-full">
-								<div className="bg-white rounded-xl sm:rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 h-full flex flex-col">
-									{/* Review Image */}
-									<div className="aspect-[4/5] bg-gradient-to-br from-ocean-100 to-slate-100 relative overflow-hidden flex-shrink-0">
-										{testimonial.image ? (
-											<img
-												src={testimonial.image}
-												alt={`Отзыв: ${testimonial.problem}`}
-												className="w-full h-full object-cover"
-											/>
-										) : (
-											<div className="absolute inset-0 flex items-center justify-center">
-												<div className="text-center p-4 sm:p-6">
-													<div className="w-12 h-12 sm:w-16 sm:h-16 bg-ocean-200 rounded-full flex items-center justify-center mb-3 sm:mb-4 mx-auto">
-														<svg className="w-6 h-6 sm:w-8 sm:h-8 text-ocean-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-															<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+					<>
+						<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-6">
+							{displayedTestimonials.map((testimonial) => (
+								<div key={testimonial.id} className="group h-full">
+									<div className="bg-white rounded-xl sm:rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 h-full flex flex-col">
+
+										{/* CASE 1: Text + Image - show text with image link */}
+										{testimonial.hasText && testimonial.hasImage ? (
+											<div className="p-6 flex-1 flex flex-col">
+												{/* Stars */}
+												<div className="flex items-center gap-1 mb-3">
+													{[...Array(testimonial.rating)].map((_, i) => (
+														<svg key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" viewBox="0 0 24 24">
+															<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
 														</svg>
-													</div>
-													<p className="text-xs sm:text-sm font-medium text-slate-700 leading-relaxed">{testimonial.problem}</p>
+													))}
 												</div>
+
+												{/* Message */}
+												<p className="text-sm text-slate-700 leading-relaxed mb-4 flex-1">{testimonial.problem}</p>
+
+												{/* View Image Button */}
+												<button
+													onClick={() => setSelectedImage(testimonial.image)}
+													className="inline-flex items-center gap-2 text-ocean-600 hover:text-ocean-700 font-medium text-sm mb-4 transition-colors"
+												>
+													<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+														<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+													</svg>
+													Просмотреть фото
+												</button>
+
+												{/* Author & Date - only if name exists */}
+												{testimonial.name && (
+													<div className="pt-3 border-t border-slate-100">
+														<div className="flex items-center gap-2">
+															<div className="w-8 h-8 bg-ocean-100 rounded-full flex items-center justify-center flex-shrink-0">
+																<svg className="w-4 h-4 text-ocean-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+																	<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+																</svg>
+															</div>
+															<div className="flex-1 min-w-0">
+																<p className="text-sm font-medium text-slate-900 truncate">{testimonial.name}</p>
+																{testimonial.created_at && (
+																	<p className="text-xs text-slate-500">
+																		{new Date(testimonial.created_at).toLocaleDateString('ru-RU', {
+																			year: 'numeric',
+																			month: 'short',
+																			day: 'numeric'
+																		})}
+																	</p>
+																)}
+															</div>
+														</div>
+													</div>
+												)}
+											</div>
+										) : testimonial.hasImage && !testimonial.hasText ? (
+											// CASE 2: Only Image - show image with author, date, rating below
+											<>
+												<div className="aspect-[4/5] bg-gradient-to-br from-ocean-100 to-slate-100 relative overflow-hidden flex-shrink-0">
+													<img
+														src={testimonial.image}
+														alt={`Отзыв: ${testimonial.name}`}
+														className="w-full h-full object-cover cursor-pointer"
+														onClick={() => setSelectedImage(testimonial.image)}
+													/>
+													<div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300"></div>
+												</div>
+
+												{/* Card footer */}
+												<div className="p-4 flex-1 flex flex-col">
+													{/* Stars */}
+													<div className="flex items-center gap-1 mb-3">
+														{[...Array(testimonial.rating)].map((_, i) => (
+															<svg key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" viewBox="0 0 24 24">
+																<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+															</svg>
+														))}
+													</div>
+
+													{/* Author & Date - only if name exists */}
+													{testimonial.name && (
+														<div className="pt-3 border-t border-slate-100">
+															<div className="flex items-center gap-2">
+																<div className="w-8 h-8 bg-ocean-100 rounded-full flex items-center justify-center flex-shrink-0">
+																	<svg className="w-4 h-4 text-ocean-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+																		<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+																	</svg>
+																</div>
+																<div className="flex-1 min-w-0">
+																	<p className="text-sm font-medium text-slate-900 truncate">{testimonial.name}</p>
+																	{testimonial.created_at && (
+																		<p className="text-xs text-slate-500">
+																			{new Date(testimonial.created_at).toLocaleDateString('ru-RU', {
+																				year: 'numeric',
+																				month: 'short',
+																				day: 'numeric'
+																			})}
+																		</p>
+																	)}
+																</div>
+															</div>
+														</div>
+													)}
+												</div>
+											</>
+										) : (
+											// CASE 3: Only Text - show text with author, date, rating
+											<div className="p-6 flex-1 flex flex-col">
+												{/* Stars */}
+												<div className="flex items-center gap-1 mb-3">
+													{[...Array(testimonial.rating)].map((_, i) => (
+														<svg key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" viewBox="0 0 24 24">
+															<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+														</svg>
+													))}
+												</div>
+
+												{/* Message */}
+												<p className="text-sm text-slate-700 leading-relaxed mb-4 flex-1">{testimonial.problem}</p>
+
+												{/* Author & Date - only if name exists */}
+												{testimonial.name && (
+													<div className="pt-3 border-t border-slate-100">
+														<div className="flex items-center gap-2">
+															<div className="w-8 h-8 bg-ocean-100 rounded-full flex items-center justify-center flex-shrink-0">
+																<svg className="w-4 h-4 text-ocean-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+																	<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+																</svg>
+															</div>
+															<div className="flex-1 min-w-0">
+																<p className="text-sm font-medium text-slate-900 truncate">{testimonial.name}</p>
+																{testimonial.created_at && (
+																	<p className="text-xs text-slate-500">
+																		{new Date(testimonial.created_at).toLocaleDateString('ru-RU', {
+																			year: 'numeric',
+																			month: 'short',
+																			day: 'numeric'
+																		})}
+																	</p>
+																)}
+															</div>
+														</div>
+													</div>
+												)}
 											</div>
 										)}
-
-										{/* Overlay for hover effect */}
-										<div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300"></div>
-									</div>
-
-									{/* Card footer */}
-									<div className="p-3 sm:p-4 flex-1 flex items-start">
-										<p className="text-md font-regular text-slate-900 leading-relaxed">{testimonial.problem}</p>
 									</div>
 								</div>
+							))}
+						</div>
+
+						{/* Image Popup Modal */}
+						{selectedImage && (
+							<div
+								className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4"
+								onClick={() => setSelectedImage(null)}
+							>
+								<div
+									className="relative max-w-2xl w-full"
+									onClick={(e) => e.stopPropagation()}
+								>
+									<button
+										onClick={() => setSelectedImage(null)}
+										className="absolute -top-10 right-0 text-white hover:text-gray-300 transition-colors"
+									>
+										<svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+										</svg>
+									</button>
+									<img
+										src={selectedImage}
+										alt="Full review"
+										className="w-full h-auto rounded-lg"
+									/>
+								</div>
 							</div>
-						))}
-					</div>
+						)}
+					</>
 				)}
 
 				{/* Show More Button */}
 				{visibleCount < filteredTestimonials.length && (
 					<div className="text-center mt-8 sm:mt-12">
 						<button
-							onClick={() => setVisibleCount(prev => prev + 3)}
+							onClick={() => setVisibleCount(prev => prev + 4)}
 							className="inline-flex items-center gap-2 bg-gradient-to-r from-ocean-600 to-ocean-600 text-white px-6 py-3 sm:px-8 sm:py-4 rounded-full hover:bg-ocean-500 transition-all duration-300 shadow-lg hover:shadow-ocean-500/25 text-sm sm:text-base"
 						>
 							<svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -363,7 +610,28 @@ const Testimonials = () => {
 
 				{/* Review Form */}
 				<div className="mt-12 sm:mt-16 text-center">
-					<ReviewsForm />
+					<ReviewsForm onSubmitted={() => {
+						// Reload reviews when a new one is submitted
+						async function reload() {
+							const { data, error } = await listApprovedReviews()
+							if (!error && data) {
+								const transformed = data.map(review => ({
+									id: `db-${review.id}`,
+									problem: review.message,
+									name: review.name || 'Аноним',
+									rating: review.rating,
+									category: 'Все',
+									image: review.photos && review.photos.length > 0 ? review.photos[0] : null,
+									hasText: !!review.message,
+									hasImage: review.photos && review.photos.length > 0,
+									created_at: review.created_at,
+									email: review.email
+								}))
+								setDynamicReviews(transformed)
+							}
+						}
+						reload()
+					}} />
 				</div>
 			</div>
 		</section>
