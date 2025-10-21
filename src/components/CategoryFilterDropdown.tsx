@@ -13,22 +13,43 @@ export default function CategoryFilterDropdown({ categories, value, onChange }: 
 	const [position, setPosition] = useState({ top: 0, left: 0, width: 0 })
 	const containerRef = useRef<HTMLDivElement>(null)
 	const buttonRef = useRef<HTMLButtonElement>(null)
+	const dropdownRef = useRef<HTMLDivElement>(null)
 
 	const selectedCategory = value ? categories.find(c => c.id === value) : null
 
 	// Calculate dropdown position
 	useEffect(() => {
 		if (isOpen && buttonRef.current) {
-			const rect = buttonRef.current.getBoundingClientRect()
-			setPosition({
-				top: rect.bottom + 8,
-				left: rect.left,
-				width: rect.width
+			const updatePosition = () => {
+				if (!buttonRef.current) return
+
+				const rect = buttonRef.current.getBoundingClientRect()
+				const viewportHeight = window.innerHeight
+				const dropdownHeight = dropdownRef.current?.offsetHeight || 300
+				const spaceBelow = viewportHeight - rect.bottom
+				const spaceAbove = rect.top
+
+				// Определяем, открывать вверх или вниз
+				const shouldOpenUpwards = spaceBelow < dropdownHeight && spaceAbove > spaceBelow
+
+				setPosition({
+					top: shouldOpenUpwards ? rect.top - dropdownHeight - 8 : rect.bottom + 8,
+					left: rect.left,
+					width: rect.width
+				})
+			}
+
+			// Сначала устанавливаем начальную позицию
+			updatePosition()
+
+			// Затем пересчитываем после рендера dropdown (двойной RAF для гарантии)
+			requestAnimationFrame(() => {
+				requestAnimationFrame(() => {
+					updatePosition()
+				})
 			})
 		}
-	}, [isOpen])
-
-	// Close dropdown when clicking outside
+	}, [isOpen])	// Close dropdown when clicking outside
 	useEffect(() => {
 		function handleClickOutside(event: MouseEvent) {
 			if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
@@ -70,6 +91,7 @@ export default function CategoryFilterDropdown({ categories, value, onChange }: 
 			{/* Dropdown Menu via Portal */}
 			{isOpen && createPortal(
 				<div
+					ref={dropdownRef}
 					data-dropdown-portal
 					className="fixed bg-white border border-slate-200 rounded-lg shadow-lg z-50 overflow-hidden"
 					style={{
