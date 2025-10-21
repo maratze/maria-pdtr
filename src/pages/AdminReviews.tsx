@@ -313,11 +313,11 @@ export default function AdminReviews() {
       {/* Image Popup Modal */}
       {selectedImageReview && (
         <div
-          className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-2"
+          className="fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-2"
           onClick={() => setSelectedImageReview(null)}
         >
           <div
-            className="relative w-full max-w-[600px]"
+            className="relative w-full max-w-[460px]"
             onClick={(e) => e.stopPropagation()}
           >
             <button

@@ -180,6 +180,31 @@ const Testimonials = () => {
 										{/* CASE 1: Text + Image - show text with photos gallery */}
 										{testimonial.hasText && testimonial.hasImage ? (
 											<div className="p-6 flex-1 flex flex-col">
+												{/* Author & Date - only if name exists */}
+												{testimonial.name && (
+													<div className="pb-3 mb-3 border-b border-slate-100">
+														<div className="flex items-center gap-2">
+															<div className="w-8 h-8 bg-ocean-100 rounded-full flex items-center justify-center flex-shrink-0">
+																<svg className="w-4 h-4 text-ocean-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+																	<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+																</svg>
+															</div>
+															<div className="flex-1 min-w-0">
+																<p className="text-sm font-medium text-slate-900 truncate">{testimonial.name}</p>
+																{testimonial.created_at && (
+																	<p className="text-xs text-slate-500">
+																		{new Date(testimonial.created_at).toLocaleDateString('ru-RU', {
+																			year: 'numeric',
+																			month: 'short',
+																			day: 'numeric'
+																		})}
+																	</p>
+																)}
+															</div>
+														</div>
+													</div>
+												)}
+
 												{/* Stars */}
 												<div className="flex items-center gap-1 mb-3">
 													{[...Array(testimonial.rating)].map((_, i) => (
@@ -194,7 +219,7 @@ const Testimonials = () => {
 
 												{/* Photos Gallery */}
 												{testimonial.photos && testimonial.photos.length > 0 && (
-													<div className="mb-4 p-2 rounded-lg bg-slate-50 border border-slate-200">
+													<div className="p-2 rounded-lg bg-slate-50 border border-slate-200">
 														<div className="grid grid-cols-3 gap-2">
 															{testimonial.photos.map((photo, idx) => (
 																<div
@@ -214,31 +239,6 @@ const Testimonials = () => {
 																	</div>
 																</div>
 															))}
-														</div>
-													</div>
-												)}
-
-												{/* Author & Date - only if name exists */}
-												{testimonial.name && (
-													<div className="pt-3 border-t border-slate-100">
-														<div className="flex items-center gap-2">
-															<div className="w-8 h-8 bg-ocean-100 rounded-full flex items-center justify-center flex-shrink-0">
-																<svg className="w-4 h-4 text-ocean-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-																	<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-																</svg>
-															</div>
-															<div className="flex-1 min-w-0">
-																<p className="text-sm font-medium text-slate-900 truncate">{testimonial.name}</p>
-																{testimonial.created_at && (
-																	<p className="text-xs text-slate-500">
-																		{new Date(testimonial.created_at).toLocaleDateString('ru-RU', {
-																			year: 'numeric',
-																			month: 'short',
-																			day: 'numeric'
-																		})}
-																	</p>
-																)}
-															</div>
 														</div>
 													</div>
 												)}
@@ -358,11 +358,11 @@ const Testimonials = () => {
 						{/* Image Popup Modal */}
 						{selectedImageReview && (
 							<div
-								className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-2"
+								className="fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-2"
 								onClick={() => { setSelectedImageReview(null); setImageLoading(false) }}
 							>
 								<div
-									className="relative w-full max-w-[600px]"
+									className="relative w-full max-w-[460px]"
 									onClick={(e) => e.stopPropagation()}
 								>
 									<button
