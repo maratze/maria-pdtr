@@ -11,7 +11,7 @@ const Testimonials = () => {
 	const [loadingCategories, setLoadingCategories] = useState(true)
 	const [dynamicReviews, setDynamicReviews] = useState([])
 	const [loadingReviews, setLoadingReviews] = useState(true)
-	const [selectedImage, setSelectedImage] = useState(null) // For image popup
+	const [selectedImageReview, setSelectedImageReview] = useState(null) // For gallery popup: { photos: [], index: 0 }
 	const [imageLoading, setImageLoading] = useState(false)
 
 	// Load categories from database
@@ -45,7 +45,7 @@ const Testimonials = () => {
 					name: review.name || 'Аноним',
 					rating: review.rating,
 					category: review.categories?.name || 'Все', // Use category name from joined table
-					image: review.photos && review.photos.length > 0 ? review.photos[0] : null,
+					photos: review.photos || [],
 					hasText: !!review.message,
 					hasImage: review.photos && review.photos.length > 0,
 					created_at: review.created_at,
@@ -177,7 +177,7 @@ const Testimonials = () => {
 								<div key={testimonial.id} className="group h-full">
 									<div className="bg-white rounded-xl sm:rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform  h-full flex flex-col">
 
-										{/* CASE 1: Text + Image - show text with image link */}
+										{/* CASE 1: Text + Image - show text with photos gallery */}
 										{testimonial.hasText && testimonial.hasImage ? (
 											<div className="p-6 flex-1 flex flex-col">
 												{/* Stars */}
@@ -192,16 +192,31 @@ const Testimonials = () => {
 												{/* Message */}
 												<p className="text-[15px] text-slate-700 leading-[18px] mb-4 flex-1">{testimonial.problem}</p>
 
-												{/* View Image Button */}
-												<button
-													onClick={() => { setImageLoading(true); setSelectedImage(testimonial.image) }}
-													className="inline-flex items-center gap-2 text-ocean-600 hover:text-ocean-700 font-medium text-sm mb-4 transition-colors"
-												>
-													<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-														<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-													</svg>
-													Просмотреть фото
-												</button>
+												{/* Photos Gallery */}
+												{testimonial.photos && testimonial.photos.length > 0 && (
+													<div className="mb-4 p-2 rounded-lg bg-slate-50 border border-slate-200">
+														<div className="grid grid-cols-3 gap-2">
+															{testimonial.photos.map((photo, idx) => (
+																<div
+																	key={photo}
+																	className="relative group aspect-square cursor-pointer"
+																	onClick={() => setSelectedImageReview({ photos: testimonial.photos, index: idx })}
+																>
+																	<img
+																		src={photo}
+																		alt={`отзыв-${idx}`}
+																		className="w-full h-full object-cover rounded-lg border border-slate-200 group-hover:opacity-75 transition-opacity"
+																	/>
+																	<div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-lg bg-black/50">
+																		<svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+																			<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" />
+																		</svg>
+																	</div>
+																</div>
+															))}
+														</div>
+													</div>
+												)}
 
 												{/* Author & Date - only if name exists */}
 												{testimonial.name && (
@@ -229,17 +244,33 @@ const Testimonials = () => {
 												)}
 											</div>
 										) : testimonial.hasImage && !testimonial.hasText ? (
-											// CASE 2: Only Image - show image with author, date, rating below
+											// CASE 2: Only Images - show photos gallery with author, date, rating below
 											<>
-												<div className="aspect-[4/5] bg-gradient-to-br from-ocean-100 to-slate-100 relative overflow-hidden flex-shrink-0">
-													<img
-														src={testimonial.image}
-														alt={`Отзыв: ${testimonial.name}`}
-														className="w-full h-full object-cover cursor-pointer"
-														onClick={() => { setImageLoading(true); setSelectedImage(testimonial.image) }}
-													/>
-													<div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300"></div>
-												</div>
+												{/* Photos Gallery */}
+												{testimonial.photos && testimonial.photos.length > 0 && (
+													<div className="p-4 bg-slate-50 border-b border-slate-200">
+														<div className="grid grid-cols-4 gap-2">
+															{testimonial.photos.map((photo, idx) => (
+																<div
+																	key={photo}
+																	className="relative group aspect-square cursor-pointer"
+																	onClick={() => setSelectedImageReview({ photos: testimonial.photos, index: idx })}
+																>
+																	<img
+																		src={photo}
+																		alt={`отзыв-${idx}`}
+																		className="w-full h-full object-cover rounded-lg border border-slate-200 group-hover:opacity-75 transition-opacity"
+																	/>
+																	<div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-lg bg-black/50">
+																		<svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+																			<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" />
+																		</svg>
+																	</div>
+																</div>
+															))}
+														</div>
+													</div>
+												)}
 
 												{/* Card footer */}
 												<div className="p-4 flex-1 flex flex-col">
@@ -325,17 +356,17 @@ const Testimonials = () => {
 						</div>
 
 						{/* Image Popup Modal */}
-						{selectedImage && (
+						{selectedImageReview && (
 							<div
 								className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-2"
-								onClick={() => { setSelectedImage(null); setImageLoading(false) }}
+								onClick={() => { setSelectedImageReview(null); setImageLoading(false) }}
 							>
 								<div
-									className="relative w-full max-w-[400px]"
+									className="relative w-full max-w-[600px]"
 									onClick={(e) => e.stopPropagation()}
 								>
 									<button
-										onClick={() => { setSelectedImage(null); setImageLoading(false) }}
+										onClick={() => { setSelectedImageReview(null); setImageLoading(false) }}
 										className="absolute -top-10 right-0 text-white hover:text-gray-300 transition-colors"
 									>
 										<svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -348,12 +379,47 @@ const Testimonials = () => {
 										</div>
 									)}
 									<img
-										src={selectedImage}
+										src={selectedImageReview.photos[selectedImageReview.index]}
 										alt="Full review"
 										className={`w-full h-auto rounded-lg ${imageLoading ? 'hidden' : ''}`}
 										onLoad={() => setImageLoading(false)}
 										onError={() => setImageLoading(false)}
 									/>
+
+									{/* Navigation and Counter */}
+									{selectedImageReview.photos.length > 1 && (
+										<>
+											<button
+												onClick={() => {
+													setSelectedImageReview({
+														...selectedImageReview,
+														index: (selectedImageReview.index - 1 + selectedImageReview.photos.length) % selectedImageReview.photos.length
+													})
+												}}
+												className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/50 hover:bg-black/75 text-white rounded-full flex items-center justify-center transition-colors"
+											>
+												<svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+													<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+												</svg>
+											</button>
+											<button
+												onClick={() => {
+													setSelectedImageReview({
+														...selectedImageReview,
+														index: (selectedImageReview.index + 1) % selectedImageReview.photos.length
+													})
+												}}
+												className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/50 hover:bg-black/75 text-white rounded-full flex items-center justify-center transition-colors"
+											>
+												<svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+													<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+												</svg>
+											</button>
+											<div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
+												{selectedImageReview.index + 1} / {selectedImageReview.photos.length}
+											</div>
+										</>
+									)}
 								</div>
 							</div>
 						)}
@@ -407,7 +473,7 @@ const Testimonials = () => {
 									name: review.name || 'Аноним',
 									rating: review.rating,
 									category: review.categories?.name || 'Все',
-									image: review.photos && review.photos.length > 0 ? review.photos[0] : null,
+									photos: review.photos || [],
 									hasText: !!review.message,
 									hasImage: review.photos && review.photos.length > 0,
 									created_at: review.created_at,
