@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { listAllReviews, approveReview, deleteReview, uploadPhoto, updateReview, getCategories } from '../lib/reviews'
 import AdminPreloader from '../components/AdminPreloader'
 import CategoryDropdown from '../components/CategoryDropdown'
+import Toast from '../components/Toast'
 import type { Review, Category } from '../types/review'
 
 export default function AdminReviews() {
@@ -16,6 +17,7 @@ export default function AdminReviews() {
   const [deleteConfirmPhotoUrl, setDeleteConfirmPhotoUrl] = useState<string | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 10
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'warning' | 'info' } | null>(null)
 
   function goToNextPhoto() {
     if (!selectedImageReview) return
@@ -49,12 +51,13 @@ export default function AdminReviews() {
     setProcessingId(null)
 
     if (error) {
-      alert('Ошибка: ' + error.message)
+      setToast({ message: error.message, type: 'error' })
       return
     }
 
     // Реактивно обновляем отзыв в списке
     setReviews(reviews.map(r => r.id === reviewId ? { ...r, approved: true } : r))
+    setToast({ message: 'Отзыв одобрен', type: 'success' })
   }
 
   async function handleRejectReview(reviewId: string) {
@@ -63,12 +66,13 @@ export default function AdminReviews() {
     setProcessingId(null)
 
     if (error) {
-      alert('Ошибка: ' + error.message)
+      setToast({ message: error.message, type: 'error' })
       return
     }
 
     // Реактивно обновляем отзыв в списке
     setReviews(reviews.map(r => r.id === reviewId ? { ...r, approved: false } : r))
+    setToast({ message: 'Отзыв возвращен на модерацию', type: 'warning' })
   }
 
   async function handleDelete(reviewId: string) {
@@ -84,12 +88,13 @@ export default function AdminReviews() {
     setDeleteConfirmType(null)
 
     if (error) {
-      alert('Ошибка: ' + error.message)
+      setToast({ message: error.message, type: 'error' })
       return
     }
 
     // Реактивно удаляем отзыв из списка
     setReviews(reviews.filter(r => r.id !== reviewId))
+    setToast({ message: 'Отзыв удален', type: 'success' })
   }
 
   async function handleAddPhotos(reviewId: string, files: FileList | null) {
@@ -100,7 +105,7 @@ export default function AdminReviews() {
     for (const f of Array.from(files)) {
       const res = await uploadPhoto(f, String(reviewId))
       if (res.error) {
-        alert('Ошибка загрузки фото: ' + res.error.message)
+        setToast({ message: 'Ошибка загрузки фото: ' + res.error.message, type: 'error' })
         setProcessingId(null)
         return
       }
@@ -113,12 +118,13 @@ export default function AdminReviews() {
     const { error } = await updateReview(reviewId, { photos: newPhotos })
     setProcessingId(null)
     if (error) {
-      alert('Ошибка при обновлении отзыва: ' + error.message)
+      setToast({ message: 'Ошибка при обновлении отзыва: ' + error.message, type: 'error' })
       return
     }
 
     // Реактивно обновляем отзыв в списке
     setReviews(reviews.map(r => r.id === reviewId ? { ...r, photos: newPhotos } : r))
+    setToast({ message: 'Фото добавлено', type: 'success' })
   }
 
   async function handleUpdateCategory(reviewId: string, categoryId: string | null) {
@@ -127,12 +133,13 @@ export default function AdminReviews() {
     setProcessingId(null)
 
     if (error) {
-      alert('Ошибка: ' + error.message)
+      setToast({ message: error.message, type: 'error' })
       return
     }
 
     // Реактивно обновляем отзыв в списке
     setReviews(reviews.map(r => r.id === reviewId ? { ...r, category_id: categoryId } : r))
+    setToast({ message: 'Категория обновлена', type: 'success' })
   }
 
   async function handleUpdateMessage(reviewId: string, message: string) {
@@ -157,12 +164,13 @@ export default function AdminReviews() {
     setDeleteConfirmPhotoUrl(null)
 
     if (error) {
-      alert('Ошибка при удалении фото: ' + error.message)
+      setToast({ message: 'Ошибка при удалении фото: ' + error.message, type: 'error' })
       return
     }
 
     // Реактивно обновляем отзыв в списке
     setReviews(reviews.map(r => r.id === reviewId ? { ...r, photos: newPhotos } : r))
+    setToast({ message: 'Фото удалено', type: 'success' })
   }
 
   useEffect(() => {
@@ -288,6 +296,7 @@ export default function AdminReviews() {
                       onUpdateMessage={handleUpdateMessage}
                       processing={processingId === review.id}
                       onShowPhotos={(photos, index) => setSelectedImageReview({ photos, index })}
+                      onShowToast={(message, type) => setToast({ message, type })}
                     />
                   ))}
                 </tbody>
@@ -298,9 +307,11 @@ export default function AdminReviews() {
                 <button
                   onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className="px-3 py-2 rounded-lg border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="w-10 h-10 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
                 >
-                  Назад
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
                 </button>
                 <div className="flex items-center gap-1">
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
@@ -319,9 +330,11 @@ export default function AdminReviews() {
                 <button
                   onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
-                  className="px-3 py-2 rounded-lg border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="w-10 h-10 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
                 >
-                  Вперед
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
                 </button>
               </div>
             )}
@@ -476,6 +489,15 @@ export default function AdminReviews() {
           </div>
         </div>
       )}
+
+      {/* Toast Notification */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
     </div>
   )
 }
@@ -490,9 +512,10 @@ interface ReviewTableRowProps {
   onUpdateMessage?: (id: string, message: string) => void
   processing: boolean
   onShowPhotos?: (photos: string[], index: number) => void
+  onShowToast?: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void
 }
 
-function ReviewTableRow({ review, categories, onApprove, onReject, onDelete, onUpdateCategory, onUpdateMessage, processing, onShowPhotos }: ReviewTableRowProps) {
+function ReviewTableRow({ review, categories, onApprove, onReject, onDelete, onUpdateCategory, onUpdateMessage, processing, onShowPhotos, onShowToast }: ReviewTableRowProps) {
   const [editedMessage, setEditedMessage] = useState(review.message)
   const [saveLoading, setSaveLoading] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
@@ -515,7 +538,7 @@ function ReviewTableRow({ review, categories, onApprove, onReject, onDelete, onU
     setSaveLoading(false)
 
     if (error) {
-      alert('Ошибка при сохранении: ' + error.message)
+      onShowToast?.('Ошибка при сохранении: ' + error.message, 'error')
       setEditedMessage(review.message)
       return
     }
@@ -523,6 +546,7 @@ function ReviewTableRow({ review, categories, onApprove, onReject, onDelete, onU
     // Уведомляем родительский компонент об обновлении
     onUpdateMessage?.(review.id, editedMessage)
     setShowEditModal(false)
+    onShowToast?.('Отзыв обновлен', 'success')
   }
 
   function handleCancelEdit() {
@@ -749,7 +773,7 @@ function ReviewTableRow({ review, categories, onApprove, onReject, onDelete, onU
       {/* Статус */}
       <td className="px-4 py-4 whitespace-nowrap">
         {review.approved ? (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-regular bg-emerald-50 text-emerald-700">
             <span className="w-2 h-2 bg-emerald-500 rounded-full"></span>
             Одобрено
           </span>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { getCategories } from '../lib/reviews'
 import AdminPreloader from '../components/AdminPreloader'
+import Toast from '../components/Toast'
 import { supabaseAdmin } from '../lib/supabaseClient'
 import type { Category } from '../types/review'
 
@@ -17,6 +18,7 @@ export default function AdminCategories() {
 	const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
 	const [deleteConfirmName, setDeleteConfirmName] = useState('')
 	const [deleteLoading, setDeleteLoading] = useState(false)
+	const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'warning' | 'info' } | null>(null)
 
 	async function load() {
 		setLoading(true)
@@ -35,7 +37,7 @@ export default function AdminCategories() {
 	async function handleAddCategory(e: React.FormEvent) {
 		e.preventDefault()
 		if (!newCategoryName.trim()) {
-			alert('Введите название категории')
+			setToast({ message: 'Введите название категории', type: 'warning' })
 			return
 		}
 
@@ -48,7 +50,7 @@ export default function AdminCategories() {
 		setFormLoading(false)
 
 		if (result?.error) {
-			alert('Ошибка: ' + result.error.message)
+			setToast({ message: result.error.message, type: 'error' })
 			return
 		}
 
@@ -62,11 +64,12 @@ export default function AdminCategories() {
 
 		setNewCategoryName('')
 		setShowForm(false)
+		setToast({ message: 'Категория создана', type: 'success' })
 	}
 
 	async function handleUpdateCategory(categoryId: string) {
 		if (!editingName.trim()) {
-			alert('Введите название категории')
+			setToast({ message: 'Введите название категории', type: 'warning' })
 			return
 		}
 
@@ -79,7 +82,7 @@ export default function AdminCategories() {
 		setEditLoading(false)
 
 		if (result?.error) {
-			alert('Ошибка: ' + result.error.message)
+			setToast({ message: result.error.message, type: 'error' })
 			return
 		}
 
@@ -89,6 +92,7 @@ export default function AdminCategories() {
 		))
 		setEditingId(null)
 		setEditingName('')
+		setToast({ message: 'Категория обновлена', type: 'success' })
 	}
 
 	async function handleDeleteCategory(categoryId: string) {
@@ -101,7 +105,7 @@ export default function AdminCategories() {
 		setDeleteLoading(false)
 
 		if (result?.error) {
-			alert('Ошибка: ' + result.error.message)
+			setToast({ message: result.error.message, type: 'error' })
 			return
 		}
 
@@ -109,6 +113,7 @@ export default function AdminCategories() {
 		setCategories(categories.filter(cat => cat.id !== categoryId))
 		setDeleteConfirmId(null)
 		setDeleteConfirmName('')
+		setToast({ message: 'Категория удалена', type: 'success' })
 	}
 
 	useEffect(() => {
@@ -313,6 +318,15 @@ export default function AdminCategories() {
 						</div>
 					</div>
 				</div>
+			)}
+
+			{/* Toast Notification */}
+			{toast && (
+				<Toast
+					message={toast.message}
+					type={toast.type}
+					onClose={() => setToast(null)}
+				/>
 			)}
 		</>
 	)

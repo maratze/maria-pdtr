@@ -95,7 +95,7 @@ export default function ReviewsForm({ onSubmitted }: ReviewsFormProps) {
                 </svg>
               </div>
               <div className="flex-1 text-left">
-                <p className="text-sm font-semibold text-slate-900">Спасибо — отзыв отправлен!</p>
+                <p className="text-sm font-regular text-slate-900">Спасибо — отзыв отправлен!</p>
                 <p className="text-xs text-slate-600 mt-1">Появится в списке после модерации.</p>
               </div>
               <button
