@@ -42,7 +42,7 @@ export default function AdminCategories() {
 		setFormLoading(true)
 		const result = await supabaseAdmin
 			?.from('categories')
-			.insert([{ name: newCategoryName }])
+			.insert([{ name: newCategoryName }] as any)
 			.select()
 
 		setFormLoading(false)
@@ -73,7 +73,7 @@ export default function AdminCategories() {
 		setEditLoading(true)
 		const result = await supabaseAdmin
 			?.from('categories')
-			.update({ name: editingName })
+			.update({ name: editingName } as never)
 			.eq('id', categoryId)
 
 		setEditLoading(false)
