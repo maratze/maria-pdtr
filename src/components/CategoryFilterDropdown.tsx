@@ -2,14 +2,13 @@ import { useState, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import type { Category } from '../types/review'
 
-interface CategoryDropdownProps {
+interface CategoryFilterDropdownProps {
 	categories: Category[]
 	value: string | null
 	onChange: (categoryId: string | null) => void
-	disabled?: boolean
 }
 
-export default function CategoryDropdown({ categories, value, onChange, disabled = false }: CategoryDropdownProps) {
+export default function CategoryFilterDropdown({ categories, value, onChange }: CategoryFilterDropdownProps) {
 	const [isOpen, setIsOpen] = useState(false)
 	const [position, setPosition] = useState({ top: 0, left: 0, width: 0 })
 	const containerRef = useRef<HTMLDivElement>(null)
@@ -33,7 +32,6 @@ export default function CategoryDropdown({ categories, value, onChange, disabled
 	useEffect(() => {
 		function handleClickOutside(event: MouseEvent) {
 			if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-				// Проверяем, что клик не внутри портала
 				const portal = document.querySelector('[data-dropdown-portal]')
 				if (portal && portal.contains(event.target as Node)) {
 					return
@@ -53,12 +51,11 @@ export default function CategoryDropdown({ categories, value, onChange, disabled
 			{/* Button */}
 			<button
 				ref={buttonRef}
-				onClick={() => !disabled && setIsOpen(!isOpen)}
-				disabled={disabled}
-				className="w-full h-10 px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-900 text-sm font-regular flex items-center justify-between hover:border-ocean-300 focus:border-ocean-400 focus:outline-none focus:ring-2 focus:ring-ocean-100 disabled:opacity-50 disabled:bg-slate-50 disabled:cursor-not-allowed transition-colors"
+				onClick={() => setIsOpen(!isOpen)}
+				className="w-full h-10 px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-900 text-sm font-regular flex items-center justify-between hover:border-ocean-300 focus:border-ocean-400 focus:outline-none focus:ring-2 focus:ring-ocean-100 transition-colors"
 			>
 				<span className={selectedCategory ? 'text-slate-900' : 'text-slate-500'}>
-					{selectedCategory ? selectedCategory.name : 'Без категории'}
+					{selectedCategory ? selectedCategory.name : 'Все категории'}
 				</span>
 				<svg
 					className={`w-4 h-4 text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
@@ -81,7 +78,7 @@ export default function CategoryDropdown({ categories, value, onChange, disabled
 						width: `${position.width}px`
 					}}
 				>
-					{/* "Без категории" option */}
+					{/* "Все категории" option */}
 					<button
 						onClick={() => {
 							onChange(null)
@@ -97,7 +94,7 @@ export default function CategoryDropdown({ categories, value, onChange, disabled
 								<path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
 							</svg>
 						)}
-						<span className="flex-1">Без категории</span>
+						<span className="flex-1">Все категории</span>
 					</button>
 
 					{/* Divider if there are categories */}

@@ -2,6 +2,9 @@ import { useEffect, useState } from 'react'
 import { listAllReviews, approveReview, deleteReview, uploadPhoto, updateReview, getCategories } from '../lib/reviews'
 import AdminPreloader from '../components/AdminPreloader'
 import CategoryDropdown from '../components/CategoryDropdown'
+import StatusDropdown from '../components/StatusDropdown'
+import CategoryFilterDropdown from '../components/CategoryFilterDropdown'
+import ItemsPerPageDropdown from '../components/ItemsPerPageDropdown'
 import Toast from '../components/Toast'
 import type { Review, Category } from '../types/review'
 
@@ -16,7 +19,9 @@ export default function AdminReviews() {
   const [deleteConfirmType, setDeleteConfirmType] = useState<'review' | 'photo' | null>(null)
   const [deleteConfirmPhotoUrl, setDeleteConfirmPhotoUrl] = useState<string | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
-  const itemsPerPage = 10
+  const [itemsPerPage, setItemsPerPage] = useState(10)
+  const [filterCategory, setFilterCategory] = useState<string | null>(null)
+  const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'approved'>('all')
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'warning' | 'info' } | null>(null)
 
   function goToNextPhoto() {
@@ -205,6 +210,11 @@ export default function AdminReviews() {
     }
   }, [reviews])
 
+  // Сброс на первую страницу при изменении фильтров или количества элементов
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [filterCategory, filterStatus, itemsPerPage])
+
   if (loading) {
     return <AdminPreloader message="Загрузка отзывов..." />
   }
@@ -225,8 +235,23 @@ export default function AdminReviews() {
   const allPendingReviews = reviews.filter(r => !r.approved)
   const allApprovedReviews = reviews.filter(r => r.approved)
 
+  // Применяем фильтры
+  let filteredReviews = reviews
+
+  // Фильтр по статусу
+  if (filterStatus === 'pending') {
+    filteredReviews = filteredReviews.filter(r => !r.approved)
+  } else if (filterStatus === 'approved') {
+    filteredReviews = filteredReviews.filter(r => r.approved)
+  }
+
+  // Фильтр по категории
+  if (filterCategory) {
+    filteredReviews = filteredReviews.filter(r => r.category_id === filterCategory)
+  }
+
   // Сортируем: сначала на модерации, потом одобренные
-  const sortedReviews = [...allPendingReviews, ...allApprovedReviews]
+  const sortedReviews = [...filteredReviews.filter(r => !r.approved), ...filteredReviews.filter(r => r.approved)]
 
   const start = (currentPage - 1) * itemsPerPage
   const end = start + itemsPerPage
@@ -234,9 +259,9 @@ export default function AdminReviews() {
   const totalPages = Math.ceil(sortedReviews.length / itemsPerPage)
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       {/* Stats */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-3">
         <div className="bg-white rounded-xl border border-slate-200 p-5">
           <div className="flex items-center justify-between">
             <div>
@@ -265,10 +290,61 @@ export default function AdminReviews() {
         </div>
       </div>
 
-      {/* All Reviews Table */}
+      {/* Filters */}
+      {sortedReviews.length > 0 && (
+        <div className="bg-white rounded-xl border border-slate-200 p-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+              </svg>
+              <span className="text-sm font-medium text-slate-700">Фильтры:</span>
+            </div>
+
+            {/* Filter by Status */}
+            <div className="w-[160px]">
+              <StatusDropdown
+                value={filterStatus}
+                onChange={setFilterStatus}
+              />
+            </div>
+
+            {/* Filter by Category */}
+            <div className="w-[200px]">
+              <CategoryFilterDropdown
+                categories={categories}
+                value={filterCategory}
+                onChange={setFilterCategory}
+              />
+            </div>
+
+            {/* Reset Filters */}
+            {(filterStatus !== 'all' || filterCategory) && (
+              <button
+                onClick={() => {
+                  setFilterStatus('all')
+                  setFilterCategory(null)
+                }}
+                className="px-3 py-2 text-sm rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors flex items-center gap-1.5"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                Сбросить
+              </button>
+            )}
+
+            {/* Results count */}
+            <div className="ml-auto text-sm text-slate-500">
+              Показано: <span className="font-medium text-slate-700">{sortedReviews.length}</span> из <span className="font-medium text-slate-700">{reviews.length}</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reviews Table */}
       {sortedReviews.length > 0 && (
         <section>
-          <h2 className="text-lg font-medium text-slate-900 mb-3">Все отзывы</h2>
           <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
             <div className="overflow-x-auto overflow-y-visible">
               <table className="w-full">
@@ -302,49 +378,88 @@ export default function AdminReviews() {
                 </tbody>
               </table>
             </div>
-            {totalPages > 1 && (
-              <div className="flex items-center justify-center gap-2 px-4 py-4 border-t border-slate-200">
-                <button
-                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                  disabled={currentPage === 1}
-                  className="w-10 h-10 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                  </svg>
-                </button>
-                <div className="flex items-center gap-1">
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                    <button
-                      key={page}
-                      onClick={() => setCurrentPage(page)}
-                      className={`w-10 h-10 rounded-lg text-sm font-medium transition-colors ${page === currentPage
-                        ? 'bg-ocean-600 text-white'
-                        : 'border border-slate-200 text-slate-600 hover:bg-slate-50'
-                        }`}
-                    >
-                      {page}
-                    </button>
-                  ))}
-                </div>
-                <button
-                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                  disabled={currentPage === totalPages}
-                  className="w-10 h-10 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
+
+            {/* Pagination and Items per page */}
+            <div className="flex items-center justify-between gap-4 px-4 py-3 border-t border-slate-200">
+              {/* Items per page selector */}
+              <div className="w-[80px]">
+                <ItemsPerPageDropdown
+                  value={itemsPerPage}
+                  onChange={setItemsPerPage}
+                />
               </div>
-            )}
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-2">
+                  <button
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    className="w-10 h-10 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                  </button>
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                      <button
+                        key={page}
+                        onClick={() => setCurrentPage(page)}
+                        className={`w-10 h-10 rounded-lg text-sm font-medium transition-colors ${page === currentPage
+                          ? 'bg-ocean-600 text-white'
+                          : 'border border-slate-200 text-slate-600 hover:bg-slate-50'
+                          }`}
+                      >
+                        {page}
+                      </button>
+                    ))}
+                  </div>
+                  <button
+                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                    disabled={currentPage === totalPages}
+                    className="w-10 h-10 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                </div>
+              )}
+
+              {/* Page info */}
+              <div className="text-sm text-slate-600">
+                Страница <span className="font-medium text-slate-900">{currentPage}</span> из <span className="font-medium text-slate-900">{totalPages}</span>
+              </div>
+            </div>
           </div>
         </section>
       )}
 
       {/* Empty state */}
+      {sortedReviews.length === 0 && reviews.length > 0 && (
+        <div className="text-center py-12 bg-white rounded-xl border border-slate-200">
+          <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+          <h3 className="text-sm font-medium text-slate-900 mb-1">Ничего не найдено</h3>
+          <p className="text-sm text-slate-500 mb-3">Попробуйте изменить фильтры</p>
+          <button
+            onClick={() => {
+              setFilterStatus('all')
+              setFilterCategory(null)
+            }}
+            className="px-4 py-2 text-sm rounded-lg bg-ocean-600 text-white hover:bg-ocean-700 transition-colors"
+          >
+            Сбросить фильтры
+          </button>
+        </div>
+      )}
+
       {allPendingReviews.length === 0 && allApprovedReviews.length === 0 && (
-        <div className="text-center py-12">
+        <div className="text-center py-12 bg-white rounded-xl border border-slate-200">
           <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
