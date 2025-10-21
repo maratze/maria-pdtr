@@ -108,7 +108,7 @@ export default function AdminReviews() {
 
     const urls: string[] = []
     for (const f of Array.from(files)) {
-      const res = await uploadPhoto(f, String(reviewId))
+      const res = await uploadPhoto(f, String(reviewId), true)
       if (res.error) {
         setToast({ message: 'Ошибка загрузки фото: ' + res.error.message, type: 'error' })
         setProcessingId(null)
@@ -832,17 +832,52 @@ function ReviewTableRow({ review, categories, onApprove, onReject, onDelete, onU
           <div className="flex items-center gap-2">
             <div className="flex -space-x-2">
               {review.photos.slice(0, 3).map((photo, idx) => (
-                <img
+                <div
                   key={photo}
-                  src={photo}
-                  alt={`preview-${idx}`}
-                  className="w-10 h-10 object-cover rounded-lg border-2 border-white cursor-pointer hover:z-10 hover:scale-110 transition-transform"
-                  onClick={() => onShowPhotos?.(review.photos || [], idx)}
-                />
+                  className="relative group"
+                >
+                  <img
+                    src={photo}
+                    alt={`preview-${idx}`}
+                    className="w-12 h-16 object-cover rounded-lg border-2 border-white cursor-pointer transition-all"
+                  />
+                  {/* Overlay with icons on hover */}
+                  <div className="absolute inset-0 rounded-lg bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    {/* Magnifying glass in center */}
+                    <button
+                      onClick={() => onShowPhotos?.(review.photos || [], idx)}
+                      className="absolute w-6 h-6 rounded-full bg-white/90 hover:bg-white flex items-center justify-center text-slate-700 transition-colors"
+                      title="Увеличить"
+                    >
+                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                        <circle cx="11" cy="11" r="8" />
+                        <path d="M21 21l-4.35-4.35" strokeLinecap="round" strokeLinejoin="round" />
+                        <path d="M11 8v6M8 11h6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+                      </svg>
+                    </button>
+                  </div>
+                  {/* X button in top right corner */}
+                  <button
+                    onClick={() => {
+                      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                      // @ts-ignore
+                      if (window._adminRemovePhoto) window._adminRemovePhoto(review.id, photo)
+                    }}
+                    className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-red-500 hover:bg-red-600 flex items-center justify-center text-white transition-colors opacity-0 group-hover:opacity-100 shadow-md z-20"
+                    title="Удалить фото"
+                  >
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
               ))}
             </div>
             {review.photos.length > 3 && (
-              <div className="w-10 h-10 rounded-lg bg-slate-100 border-2 border-white flex items-center justify-center text-xs font-medium text-slate-600 hover:bg-slate-200 transition-colors cursor-pointer" onClick={() => onShowPhotos?.(review.photos || [], 3)}>
+              <div
+                className="relative group w-10 h-10 rounded-lg bg-slate-100 border-2 border-white flex items-center justify-center text-xs font-medium text-slate-600 cursor-pointer hover:bg-slate-200 transition-colors"
+                onClick={() => onShowPhotos?.(review.photos || [], 3)}
+              >
                 +{review.photos.length - 3}
               </div>
             )}
@@ -864,7 +899,7 @@ function ReviewTableRow({ review, categories, onApprove, onReject, onDelete, onU
                 }}
                 className="hidden"
               />
-              <div className="w-10 h-10 rounded-lg border border-dashed border-slate-300 hover:border-ocean-400 flex items-center justify-center text-ocean-600 hover:text-ocean-700 transition-colors">
+              <div className="w-12 h-16 rounded-lg border border-dashed border-slate-300 hover:border-ocean-400 flex items-center justify-center text-ocean-600 hover:text-ocean-700 transition-colors">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
                 </svg>

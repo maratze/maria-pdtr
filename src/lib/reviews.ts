@@ -38,16 +38,20 @@ export async function listApprovedReviews() {
 }
 
 // Upload photo to Supabase Storage (bucket: 'review-photos')
-export async function uploadPhoto(file: File, userId = 'anon') {
+export async function uploadPhoto(file: File, userId = 'anon', isAdmin = false) {
   const fileExt = file.name.split('.').pop()
   const fileName = `${userId}/${Date.now()}.${fileExt}`
-  const uploadRes = await supabase.storage
+
+  // Use admin client for admin uploads to bypass RLS, regular client for public users
+  const client = isAdmin && supabaseAdmin ? supabaseAdmin : supabase
+
+  const uploadRes = await client.storage
     .from('review-photos')
     .upload(fileName, file, { cacheControl: '3600', upsert: false })
 
   if (uploadRes.error) return { data: null, error: uploadRes.error }
 
-  const { data: urlData } = supabase.storage.from('review-photos').getPublicUrl(fileName)
+  const { data: urlData } = client.storage.from('review-photos').getPublicUrl(fileName)
   // getPublicUrl returns { data: { publicUrl } }
   return { data: urlData.publicUrl, error: null }
 }
