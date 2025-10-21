@@ -111,7 +111,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
 				{/* Content */}
 				<div className="p-4 flex justify-center">
-					<div className="w-full max-w-[1000px]">
+					<div className="w-full max-w-[1100px]">
 						{children}
 					</div>
 				</div>
