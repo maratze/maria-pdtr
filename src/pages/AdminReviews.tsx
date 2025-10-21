@@ -345,7 +345,7 @@ export default function AdminReviews() {
       {/* Image Popup Modal */}
       {selectedImageReview && (
         <div
-          className="fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-2"
+          className="fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-2 !m-0"
           onClick={() => setSelectedImageReview(null)}
         >
           <div
