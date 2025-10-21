@@ -292,7 +292,7 @@ export default function AdminReviews() {
       </div>
 
       {/* Filters */}
-      {sortedReviews.length > 0 && (
+      {reviews.length > 0 && (
         <div className="bg-white rounded-xl border border-slate-200 p-3">
           <div className="flex flex-col gap-3">
             {/* Header row with filters label and results count */}
@@ -461,7 +461,7 @@ export default function AdminReviews() {
           </div>
 
           {/* Mobile Pagination */}
-          <div className="lg:hidden bg-white rounded-xl border border-slate-200 p-3">
+          <div className="lg:hidden bg-white rounded-xl border border-slate-200 p-3 mt-4">
             <div className="flex flex-col gap-3">
               {/* Items per page and Page info */}
               <div className="flex items-center justify-between gap-3">
@@ -487,7 +487,6 @@ export default function AdminReviews() {
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                     </svg>
-                    Назад
                   </button>
                   <div className="flex items-center gap-1">
                     {currentPage > 2 && (
@@ -535,7 +534,6 @@ export default function AdminReviews() {
                     disabled={currentPage === totalPages}
                     className="flex-1 max-w-[120px] px-3 py-2 h-10 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 text-sm"
                   >
-                    Вперёд
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>

@@ -26,7 +26,7 @@ export default function Toast({ message, type = 'success', onClose, duration = 5
 			titleColor: 'text-slate-900',
 			icon: (
 				<svg
-					className="w-5 h-5 text-green-600"
+					className="w-4 h-4 text-green-600"
 					fill="none"
 					stroke="currentColor"
 					viewBox="0 0 24 24"
@@ -43,7 +43,7 @@ export default function Toast({ message, type = 'success', onClose, duration = 5
 			titleColor: 'text-slate-900',
 			icon: (
 				<svg
-					className="w-5 h-5 text-red-600"
+					className="w-4 h-4 text-red-600"
 					fill="none"
 					stroke="currentColor"
 					viewBox="0 0 24 24"
@@ -60,7 +60,7 @@ export default function Toast({ message, type = 'success', onClose, duration = 5
 			titleColor: 'text-slate-900',
 			icon: (
 				<svg
-					className="w-5 h-5 text-amber-600"
+					className="w-4 h-4 text-amber-600"
 					fill="none"
 					stroke="currentColor"
 					viewBox="0 0 24 24"
@@ -77,7 +77,7 @@ export default function Toast({ message, type = 'success', onClose, duration = 5
 			titleColor: 'text-slate-900',
 			icon: (
 				<svg
-					className="w-5 h-5 text-blue-600"
+					className="w-4 h-4 text-blue-600"
 					fill="none"
 					stroke="currentColor"
 					viewBox="0 0 24 24"
@@ -92,16 +92,16 @@ export default function Toast({ message, type = 'success', onClose, duration = 5
 
 	return (
 		<div className="fixed top-4 right-4 z-50 animate-slide-in-right">
-			<div className={`flex items-start gap-3 p-4 rounded-lg ${style.bg} shadow-lg border ${style.border} max-w-sm`}>
-				<div className={`flex-shrink-0 w-8 h-8 ${style.iconBg} rounded-full flex items-center justify-center`}>
+			<div className={`flex items-center gap-3 p-3 rounded-lg ${style.bg} shadow-lg border ${style.border} max-w-sm`}>
+				<div className={`flex-shrink-0 w-6 h-6 ${style.iconBg} rounded-full flex items-center justify-center`}>
 					{style.icon}
 				</div>
-				<div className="flex-1 text-left">
-					<p className={`text-sm font-regular ${style.titleColor}`}>{message}</p>
+				<div className="flex-1 text-left min-w-0">
+					<p className={`text-sm font-regular ${style.titleColor} leading-tight`}>{message}</p>
 				</div>
 				<button
 					onClick={onClose}
-					className="flex-shrink-0 text-slate-400 hover:text-slate-600 transition-colors"
+					className="flex-shrink-0 text-slate-400 hover:text-slate-600 transition-colors p-0.5"
 				>
 					<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

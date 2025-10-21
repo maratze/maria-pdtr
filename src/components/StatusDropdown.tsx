@@ -79,9 +79,9 @@ export default function StatusDropdown({ value, onChange }: StatusDropdownProps)
 				onClick={() => setIsOpen(!isOpen)}
 				className="w-full h-10 px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-900 text-sm font-regular flex items-center justify-between hover:border-ocean-300 focus:border-ocean-400 focus:outline-none focus:ring-2 focus:ring-ocean-100 transition-colors"
 			>
-				<span>{selectedOption?.label}</span>
+				<span className="text-slate-900 truncate">{selectedOption?.label}</span>
 				<svg
-					className={`w-4 h-4 text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+					className={`w-4 h-4 text-slate-400 transition-transform flex-shrink-0 ml-2 ${isOpen ? 'rotate-180' : ''}`}
 					fill="none"
 					stroke="currentColor"
 					viewBox="0 0 24 24"
