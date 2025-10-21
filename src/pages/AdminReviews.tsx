@@ -666,7 +666,7 @@ function ReviewTableRow({ review, categories, onApprove, onReject, onDelete, onU
                 rows={8}
                 autoFocus
               />
-              <div className="flex items-center gap-3 mt-4">
+              <div className="flex items-center gap-3 mt-4 max-w-xs justify-self-end">
                 <button
                   onClick={handleCancelEdit}
                   disabled={saveLoading}
@@ -703,7 +703,9 @@ function ReviewTableRow({ review, categories, onApprove, onReject, onDelete, onU
               ))}
             </div>
             {review.photos.length > 3 && (
-              <span className="text-xs text-slate-500">+{review.photos.length - 3}</span>
+              <div className="w-10 h-10 rounded-lg bg-slate-100 border-2 border-white flex items-center justify-center text-xs font-medium text-slate-600 hover:bg-slate-200 transition-colors cursor-pointer" onClick={() => onShowPhotos?.(review.photos || [], 3)}>
+                +{review.photos.length - 3}
+              </div>
             )}
           </div>
         ) : (
@@ -723,11 +725,10 @@ function ReviewTableRow({ review, categories, onApprove, onReject, onDelete, onU
                 }}
                 className="hidden"
               />
-              <div className="inline-flex items-center gap-1 px-3 py-1 rounded-lg border border-dashed border-slate-300 hover:border-ocean-400 text-xs text-slate-600 hover:text-ocean-600 transition-colors">
-                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              <div className="w-10 h-10 rounded-lg border border-dashed border-slate-300 hover:border-ocean-400 flex items-center justify-center text-ocean-600 hover:text-ocean-700 transition-colors">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
                 </svg>
-                Добавить
               </div>
             </label>
           )
