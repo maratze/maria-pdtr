@@ -6,6 +6,7 @@ import StatusDropdown from '../components/StatusDropdown'
 import CategoryFilterDropdown from '../components/CategoryFilterDropdown'
 import ItemsPerPageDropdown from '../components/ItemsPerPageDropdown'
 import Toast from '../components/Toast'
+import ReviewMobileCard from '../components/ReviewMobileCard'
 import type { Review, Category } from '../types/review'
 
 export default function AdminReviews() {
@@ -261,7 +262,7 @@ export default function AdminReviews() {
   return (
     <div className="space-y-3">
       {/* Stats */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div className="bg-white rounded-xl border border-slate-200 p-5">
           <div className="flex items-center justify-between">
             <div>
@@ -293,59 +294,65 @@ export default function AdminReviews() {
       {/* Filters */}
       {sortedReviews.length > 0 && (
         <div className="bg-white rounded-xl border border-slate-200 p-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="flex items-center gap-2">
-              <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-              </svg>
-              <span className="text-sm font-medium text-slate-700">Фильтры:</span>
-            </div>
-
-            {/* Filter by Status */}
-            <div className="w-[160px]">
-              <StatusDropdown
-                value={filterStatus}
-                onChange={setFilterStatus}
-              />
-            </div>
-
-            {/* Filter by Category */}
-            <div className="w-[200px]">
-              <CategoryFilterDropdown
-                categories={categories}
-                value={filterCategory}
-                onChange={setFilterCategory}
-              />
-            </div>
-
-            {/* Reset Filters */}
-            {(filterStatus !== 'all' || filterCategory) && (
-              <button
-                onClick={() => {
-                  setFilterStatus('all')
-                  setFilterCategory(null)
-                }}
-                className="px-3 py-2 text-sm rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors flex items-center gap-1.5"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          <div className="flex flex-col gap-3">
+            {/* Header row with filters label and results count */}
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <svg className="w-5 h-5 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
                 </svg>
-                Сбросить
-              </button>
-            )}
+                <span className="text-sm font-medium text-slate-700">Фильтры:</span>
+              </div>
 
-            {/* Results count */}
-            <div className="ml-auto text-sm text-slate-500">
-              Показано: <span className="font-medium text-slate-700">{sortedReviews.length}</span> из <span className="font-medium text-slate-700">{reviews.length}</span>
+              {/* Results count - always visible */}
+              <div className="text-xs sm:text-sm text-slate-500 flex-shrink-0">
+                <span className="font-medium text-slate-700">{sortedReviews.length}</span> из <span className="font-medium text-slate-700">{reviews.length}</span>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-2 lg:gap-2">
+              {/* Filter by Status */}
+              <div className="w-full sm:w-[160px]">
+                <StatusDropdown
+                  value={filterStatus}
+                  onChange={setFilterStatus}
+                />
+              </div>
+
+              {/* Filter by Category */}
+              <div className="w-full sm:w-[200px]">
+                <CategoryFilterDropdown
+                  categories={categories}
+                  value={filterCategory}
+                  onChange={setFilterCategory}
+                />
+              </div>
+
+              {/* Reset Filters */}
+              {(filterStatus !== 'all' || filterCategory) && (
+                <button
+                  onClick={() => {
+                    setFilterStatus('all')
+                    setFilterCategory(null)
+                  }}
+                  className="px-3 py-2 text-sm rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors flex items-center justify-center gap-1.5"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                  Сбросить
+                </button>
+              )}
             </div>
           </div>
         </div>
       )}
 
-      {/* Reviews Table */}
+      {/* Reviews Table - Desktop */}
       {sortedReviews.length > 0 && (
         <section>
-          <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+          {/* Desktop Table View */}
+          <div className="hidden lg:block bg-white rounded-xl border border-slate-200 overflow-hidden">
             <div className="overflow-x-auto overflow-y-visible">
               <table className="w-full">
                 <thead className="bg-slate-50 border-b border-slate-200">
@@ -433,6 +440,110 @@ export default function AdminReviews() {
               </div>
             </div>
           </div>
+
+          {/* Mobile Card View */}
+          <div className="lg:hidden space-y-3">
+            {paginatedReviews.map((review) => (
+              <ReviewMobileCard
+                key={review.id}
+                review={review}
+                categories={categories}
+                onApprove={handleApprove}
+                onReject={handleRejectReview}
+                onDelete={handleDelete}
+                onUpdateCategory={handleUpdateCategory}
+                onUpdateMessage={handleUpdateMessage}
+                processing={processingId === review.id}
+                onShowPhotos={(photos, index) => setSelectedImageReview({ photos, index })}
+                onShowToast={(message, type) => setToast({ message, type })}
+              />
+            ))}
+          </div>
+
+          {/* Mobile Pagination */}
+          <div className="lg:hidden bg-white rounded-xl border border-slate-200 p-3">
+            <div className="flex flex-col gap-3">
+              {/* Items per page and Page info */}
+              <div className="flex items-center justify-between gap-3">
+                <div className="w-[80px]">
+                  <ItemsPerPageDropdown
+                    value={itemsPerPage}
+                    onChange={setItemsPerPage}
+                  />
+                </div>
+                <div className="text-sm text-slate-600 text-center">
+                  Страница <span className="font-medium text-slate-900">{currentPage}</span> из <span className="font-medium text-slate-900">{totalPages}</span>
+                </div>
+              </div>
+
+              {/* Pagination Controls */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-2">
+                  <button
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    className="flex-1 max-w-[120px] px-3 py-2 h-10 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 text-sm"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                    Назад
+                  </button>
+                  <div className="flex items-center gap-1">
+                    {currentPage > 2 && (
+                      <button
+                        onClick={() => setCurrentPage(1)}
+                        className="w-10 h-10 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 text-sm font-medium transition-colors"
+                      >
+                        1
+                      </button>
+                    )}
+                    {currentPage > 3 && <span className="text-slate-400 px-1">...</span>}
+                    {currentPage > 1 && (
+                      <button
+                        onClick={() => setCurrentPage(currentPage - 1)}
+                        className="w-10 h-10 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 text-sm font-medium transition-colors"
+                      >
+                        {currentPage - 1}
+                      </button>
+                    )}
+                    <button
+                      className="w-10 h-10 rounded-lg bg-ocean-600 text-white text-sm font-medium"
+                    >
+                      {currentPage}
+                    </button>
+                    {currentPage < totalPages && (
+                      <button
+                        onClick={() => setCurrentPage(currentPage + 1)}
+                        className="w-10 h-10 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 text-sm font-medium transition-colors"
+                      >
+                        {currentPage + 1}
+                      </button>
+                    )}
+                    {currentPage < totalPages - 2 && <span className="text-slate-400 px-1">...</span>}
+                    {currentPage < totalPages - 1 && (
+                      <button
+                        onClick={() => setCurrentPage(totalPages)}
+                        className="w-10 h-10 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 text-sm font-medium transition-colors"
+                      >
+                        {totalPages}
+                      </button>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                    disabled={currentPage === totalPages}
+                    className="flex-1 max-w-[120px] px-3 py-2 h-10 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 text-sm"
+                  >
+                    Вперёд
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
         </section>
       )}
 
@@ -473,18 +584,18 @@ export default function AdminReviews() {
       {/* Image Popup Modal */}
       {selectedImageReview && (
         <div
-          className="fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-2 !m-0"
+          className="fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-3 sm:p-4 !m-0"
           onClick={() => setSelectedImageReview(null)}
         >
           <div
-            className="relative w-full max-w-[460px]"
+            className="relative w-full max-w-[360px] sm:max-w-[460px]"
             onClick={(e) => e.stopPropagation()}
           >
             <button
               onClick={() => setSelectedImageReview(null)}
-              className="absolute -top-10 right-0 text-white hover:text-gray-300 transition-colors"
+              className="absolute -top-8 sm:-top-10 right-0 text-white hover:text-gray-300 transition-colors"
             >
-              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-6 h-6 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
@@ -499,17 +610,17 @@ export default function AdminReviews() {
               <>
                 <button
                   onClick={goToPreviousPhoto}
-                  className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/50 hover:bg-black/75 text-white rounded-full flex items-center justify-center transition-colors"
+                  className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 bg-black/50 hover:bg-black/75 text-white rounded-full flex items-center justify-center transition-colors"
                 >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                   </svg>
                 </button>
                 <button
                   onClick={goToNextPhoto}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/50 hover:bg-black/75 text-white rounded-full flex items-center justify-center transition-colors"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 bg-black/50 hover:bg-black/75 text-white rounded-full flex items-center justify-center transition-colors"
                 >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                 </button>
@@ -524,37 +635,37 @@ export default function AdminReviews() {
 
       {/* Delete Confirmation Modal */}
       {deleteConfirmId && deleteConfirmType === 'review' && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => {
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 !m-0" onClick={() => {
           setDeleteConfirmId(null)
           setDeleteConfirmType(null)
         }}>
-          <div className="bg-white rounded-xl border border-slate-200 shadow-lg p-6 max-w-sm mx-4" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-white rounded-xl border border-slate-200 shadow-lg p-5 sm:p-6 max-w-sm w-full" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 bg-red-50 rounded-lg flex items-center justify-center flex-shrink-0">
-                <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 sm:w-6 sm:h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <div className="flex-1">
-                <h3 className="text-md font-medium text-slate-900">Удалить отзыв?</h3>
-                <p className="text-sm text-slate-500 mt-0.5">от {reviews.find(r => r.id === deleteConfirmId)?.name || 'Аноним'}</p>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-sm sm:text-md font-medium text-slate-900">Удалить отзыв?</h3>
+                <p className="text-xs sm:text-sm text-slate-500 mt-0.5 truncate">от {reviews.find(r => r.id === deleteConfirmId)?.name || 'Аноним'}</p>
               </div>
             </div>
-            <p className="text-sm text-slate-600 mb-4">Это действие невозможно будет отменить</p>
-            <div className="flex items-center gap-3">
+            <p className="text-xs sm:text-sm text-slate-600 mb-4">Это действие невозможно будет отменить</p>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
               <button
                 onClick={() => {
                   setDeleteConfirmId(null)
                   setDeleteConfirmType(null)
                 }}
-                className="flex-1 px-4 py-2 h-10 rounded-lg border border-slate-200 text-slate-600 text-sm font-regular hover:bg-slate-50 transition-colors"
+                className="flex-1 px-4 py-2 h-10 rounded-lg border border-slate-200 text-slate-600 text-sm font-regular hover:bg-slate-50 transition-colors order-2 sm:order-1"
               >
                 Отмена
               </button>
               <button
                 onClick={() => deleteConfirmId && confirmDeleteReview(deleteConfirmId)}
                 disabled={processingId === deleteConfirmId}
-                className="flex-1 px-4 py-2 h-10 rounded-lg bg-red-600 text-white text-sm font-regular hover:bg-red-700 disabled:opacity-50 transition-colors"
+                className="flex-1 px-4 py-2 h-10 rounded-lg bg-red-600 text-white text-sm font-regular hover:bg-red-700 disabled:opacity-50 transition-colors order-1 sm:order-2"
               >
                 {processingId === deleteConfirmId ? '...' : 'Удалить'}
               </button>
@@ -565,38 +676,38 @@ export default function AdminReviews() {
 
       {/* Delete Photo Confirmation Modal */}
       {deleteConfirmId && deleteConfirmType === 'photo' && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => {
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 !m-0" onClick={() => {
           setDeleteConfirmId(null)
           setDeleteConfirmType(null)
           setDeleteConfirmPhotoUrl(null)
         }}>
-          <div className="bg-white rounded-xl border border-slate-200 shadow-lg p-6 max-w-sm mx-4" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-white rounded-xl border border-slate-200 shadow-lg p-5 sm:p-6 max-w-sm w-full" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 bg-red-50 rounded-lg flex items-center justify-center flex-shrink-0">
-                <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 sm:w-6 sm:h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
               <div className="flex-1">
-                <h3 className="text-md font-medium text-slate-900">Удалить фото?</h3>
+                <h3 className="text-sm sm:text-md font-medium text-slate-900">Удалить фото?</h3>
               </div>
             </div>
-            <p className="text-sm text-slate-600 mb-4">Это действие невозможно будет отменить</p>
-            <div className="flex items-center gap-3">
+            <p className="text-xs sm:text-sm text-slate-600 mb-4">Это действие невозможно будет отменить</p>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
               <button
                 onClick={() => {
                   setDeleteConfirmId(null)
                   setDeleteConfirmType(null)
                   setDeleteConfirmPhotoUrl(null)
                 }}
-                className="flex-1 px-4 py-2 h-10 rounded-lg border border-slate-200 text-slate-600 text-sm font-regular hover:bg-slate-50 transition-colors"
+                className="flex-1 px-4 py-2 h-10 rounded-lg border border-slate-200 text-slate-600 text-sm font-regular hover:bg-slate-50 transition-colors order-2 sm:order-1"
               >
                 Отмена
               </button>
               <button
                 onClick={() => deleteConfirmId && deleteConfirmPhotoUrl && confirmRemovePhoto(deleteConfirmId, deleteConfirmPhotoUrl)}
                 disabled={processingId === deleteConfirmId}
-                className="flex-1 px-4 py-2 h-10 rounded-lg bg-red-600 text-white text-sm font-regular hover:bg-red-700 disabled:opacity-50 transition-colors"
+                className="flex-1 px-4 py-2 h-10 rounded-lg bg-red-600 text-white text-sm font-regular hover:bg-red-700 disabled:opacity-50 transition-colors order-1 sm:order-2"
               >
                 {processingId === deleteConfirmId ? '...' : 'Удалить'}
               </button>

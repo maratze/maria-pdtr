@@ -68,11 +68,11 @@ export default function AdminLogin() {
 
 			<div className="max-w-md w-full relative z-10">
 				{/* Logo */}
-				<div className="flex justify-center flex-col mb-8">
+				<div className="flex justify-center flex-col mb-6 sm:mb-8">
 					<Logo className="w-full !gap-0" />
 				</div>
 
-				<div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20 shadow-2xl">
+				<div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 sm:p-8 border border-white/20 shadow-2xl">
 					<form onSubmit={handleSubmit} className="space-y-5">
 						{error && (
 							<div className="rounded-lg bg-red-500/20 p-4 text-sm text-red-200 border border-red-500/30 backdrop-blur-sm">

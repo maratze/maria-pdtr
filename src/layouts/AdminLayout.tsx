@@ -1,4 +1,4 @@
-import { ReactNode } from 'react'
+import { ReactNode, useState } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAdminAuth } from '../contexts/AdminAuthContext'
 
@@ -10,6 +10,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 	const navigate = useNavigate()
 	const location = useLocation()
 	const { signOut, session } = useAdminAuth()
+	const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
 	const handleLogout = async () => {
 		const { error } = await signOut()
@@ -22,8 +23,17 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
 	return (
 		<div className="relative min-h-screen font-sans bg-slate-50">
+			{/* Mobile Menu Overlay */}
+			{isMobileMenuOpen && (
+				<div
+					className="fixed inset-0 bg-black/50 z-30 lg:hidden"
+					onClick={() => setIsMobileMenuOpen(false)}
+				/>
+			)}
+
 			{/* Sidebar */}
-			<aside className="fixed left-0 top-0 bottom-0 w-64 bg-white border-r border-slate-200 flex flex-col z-20">
+			<aside className={`fixed left-0 top-0 bottom-0 w-64 bg-white border-r border-slate-200 flex flex-col z-40 transition-transform duration-300 lg:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+				}`}>
 				{/* Logo in navigation */}
 				<div className="px-4 py-3 border-b border-slate-200 h-16 flex items-center">
 					<Link to="/" className="flex items-center gap-2 group">
@@ -38,6 +48,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 				<nav className="flex-1 px-3 py-3 space-y-1 overflow-y-auto">
 					<Link
 						to="/admin/categories"
+						onClick={() => setIsMobileMenuOpen(false)}
 						className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-normal transition-all duration-200 ${isActive('/admin/categories')
 							? 'bg-ocean-50 text-ocean-700 shadow-sm'
 							: 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
@@ -53,6 +64,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 					</Link>
 					<Link
 						to="/admin/reviews"
+						onClick={() => setIsMobileMenuOpen(false)}
 						className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-normal transition-all duration-200 ${isActive('/admin/reviews')
 							? 'bg-ocean-50 text-ocean-700 shadow-sm'
 							: 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
@@ -83,14 +95,28 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 			</aside>
 
 			{/* Main Content */}
-			<main className="ml-64 min-h-screen bg-slate-50">
+			<main className="lg:ml-64 min-h-screen bg-slate-50">
 				{/* Unified Top bar */}
-				<div className="sticky top-0 z-10 bg-white border-b border-slate-200 px-6 h-16 flex items-center justify-between w-full">
-					<h1 className="text-md font-normal text-slate-800">
+				<div className="sticky top-0 z-10 bg-white border-b border-slate-200 px-4 lg:px-6 h-16 flex items-center justify-between w-full">
+					{/* Mobile menu button */}
+					<button
+						onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+						className="lg:hidden p-2 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors"
+					>
+						<svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							{isMobileMenuOpen ? (
+								<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+							) : (
+								<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+							)}
+						</svg>
+					</button>
+
+					<h1 className="text-md font-normal text-slate-800 hidden lg:block">
 						{isActive('/admin/reviews') && 'Модерация отзывов'}
 						{isActive('/admin/categories') && 'Управление категориями'}
 					</h1>
-					<div className="flex items-center gap-2 text-sm text-slate-500">
+					<div className="hidden lg:flex items-center gap-2 text-sm text-slate-500">
 						<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
 						</svg>
@@ -98,11 +124,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 						<span>•</span>
 						<span>{new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}</span>
 					</div>
-					<div className="flex items-center gap-3">
-						<div className="w-10 h-10 bg-gradient-to-br from-ocean-400 to-ocean-600 rounded-full flex items-center justify-center text-white text-md font-regular shadow-sm">
+					<div className="flex items-center gap-2 lg:gap-3">
+						<div className="w-8 h-8 lg:w-10 lg:h-10 bg-gradient-to-br from-ocean-400 to-ocean-600 rounded-full flex items-center justify-center text-white text-sm lg:text-md font-regular shadow-sm">
 							{session?.user?.email?.[0].toUpperCase() || 'A'}
 						</div>
-						<div className="flex-1 min-w-0">
+						<div className="hidden lg:flex flex-col flex-1 min-w-0">
 							<p className="text-sm font-medium text-slate-900 truncate">{session?.user?.email || 'Admin'}</p>
 							<p className="text-xs text-slate-500">Администратор</p>
 						</div>
@@ -110,7 +136,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 				</div>
 
 				{/* Content */}
-				<div className="p-4 flex justify-center">
+				<div className="p-3 sm:p-4 lg:p-4 flex justify-center">
 					<div className="w-full max-w-[1100px]">
 						{children}
 					</div>
