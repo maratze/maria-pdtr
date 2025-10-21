@@ -11,26 +11,40 @@ if (!supabaseUrl || !supabaseAnonKey) {
   console.warn('Supabase URL or ANON KEY is missing. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY')
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  db: {
-    schema: 'public'
-  },
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true
+// Single instance of supabase client
+let supabaseInstance: ReturnType<typeof createClient> | null = null
+
+function getSupabaseClient() {
+  if (!supabaseInstance) {
+    supabaseInstance = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true
+      }
+    })
   }
-})
+  return supabaseInstance
+}
+
+export const supabase = getSupabaseClient()
 
 // Admin client - uses service role key (only use server-side or in protected admin routes)
 const supabaseServiceKey = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY || ''
 
-export const supabaseAdmin = supabaseServiceKey
-  ? createClient(supabaseUrl, supabaseServiceKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
-    }
-  })
-  : null
+let supabaseAdminInstance: ReturnType<typeof createClient> | null = null
+
+function getSupabaseAdmin() {
+  if (!supabaseAdminInstance && supabaseServiceKey) {
+    supabaseAdminInstance = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    })
+  }
+  return supabaseAdminInstance
+}
+
+export const supabaseAdmin = getSupabaseAdmin()
 
 export default supabase

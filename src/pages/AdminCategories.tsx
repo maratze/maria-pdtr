@@ -276,8 +276,11 @@ export default function AdminCategories() {
 				)}
 			</div>			{/* Delete Confirmation Modal */}
 			{deleteConfirmId && (
-				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-					<div className="bg-white rounded-xl border border-slate-200 shadow-lg p-6 max-w-sm mx-4">
+				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => {
+					setDeleteConfirmId(null)
+					setDeleteConfirmName('')
+				}}>
+					<div className="bg-white rounded-xl border border-slate-200 shadow-lg p-6 max-w-sm mx-4" onClick={(e) => e.stopPropagation()}>
 						<div className="flex items-center gap-3 mb-4">
 							<div className="w-10 h-10 bg-red-50 rounded-lg flex items-center justify-center flex-shrink-0">
 								<svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

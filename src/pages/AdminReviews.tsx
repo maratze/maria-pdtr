@@ -14,6 +14,8 @@ export default function AdminReviews() {
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
   const [deleteConfirmType, setDeleteConfirmType] = useState<'review' | 'photo' | null>(null)
   const [deleteConfirmPhotoUrl, setDeleteConfirmPhotoUrl] = useState<string | null>(null)
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 10
 
   function goToNextPhoto() {
     if (!selectedImageReview) return
@@ -212,8 +214,16 @@ export default function AdminReviews() {
     )
   }
 
-  const pendingReviews = reviews.filter(r => !r.approved)
-  const approvedReviews = reviews.filter(r => r.approved)
+  const allPendingReviews = reviews.filter(r => !r.approved)
+  const allApprovedReviews = reviews.filter(r => r.approved)
+
+  // Сортируем: сначала на модерации, потом одобренные
+  const sortedReviews = [...allPendingReviews, ...allApprovedReviews]
+
+  const start = (currentPage - 1) * itemsPerPage
+  const end = start + itemsPerPage
+  const paginatedReviews = sortedReviews.slice(start, end)
+  const totalPages = Math.ceil(sortedReviews.length / itemsPerPage)
 
   return (
     <div className="space-y-6">
@@ -223,7 +233,7 @@ export default function AdminReviews() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">На модерации</p>
-              <p className="text-2xl font-semibold text-slate-900 mt-1">{pendingReviews.length}</p>
+              <p className="text-2xl font-semibold text-slate-900 mt-1">{allPendingReviews.length}</p>
             </div>
             <div className="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center">
               <svg className="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -236,7 +246,7 @@ export default function AdminReviews() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Одобренные</p>
-              <p className="text-2xl font-semibold text-slate-900 mt-1">{approvedReviews.length}</p>
+              <p className="text-2xl font-semibold text-slate-900 mt-1">{allApprovedReviews.length}</p>
             </div>
             <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center">
               <svg className="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -247,15 +257,12 @@ export default function AdminReviews() {
         </div>
       </div>
 
-      {/* Pending Reviews */}
-      {pendingReviews.length > 0 && (
+      {/* All Reviews Table */}
+      {sortedReviews.length > 0 && (
         <section>
-          <h2 className="text-lg font-medium text-slate-900 mb-3 flex items-center gap-2">
-            <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
-            На модерации
-          </h2>
+          <h2 className="text-lg font-medium text-slate-900 mb-3">Все отзывы</h2>
           <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto overflow-y-visible">
               <table className="w-full">
                 <thead className="bg-slate-50 border-b border-slate-200">
                   <tr>
@@ -264,56 +271,17 @@ export default function AdminReviews() {
                     <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Отзыв</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Фото</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Дата</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Статус</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Действия</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200">
-                  {pendingReviews.map((review) => (
+                  {paginatedReviews.map((review) => (
                     <ReviewTableRow
                       key={review.id}
                       review={review}
                       categories={categories}
                       onApprove={handleApprove}
-                      onDelete={handleDelete}
-                      onUpdateCategory={handleUpdateCategory}
-                      onUpdateMessage={handleUpdateMessage}
-                      processing={processingId === review.id}
-                      onShowPhotos={(photos, index) => setSelectedImageReview({ photos, index })}
-                    />
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Approved Reviews */}
-      {approvedReviews.length > 0 && (
-        <section>
-          <h2 className="text-lg font-medium text-slate-900 mb-3 flex items-center gap-2">
-            <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-            Одобренные
-          </h2>
-          <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-slate-50 border-b border-slate-200">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Автор</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Категория</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Отзыв</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Фото</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Дата</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Действия</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-200">
-                  {approvedReviews.map((review) => (
-                    <ReviewTableRow
-                      key={review.id}
-                      review={review}
-                      categories={categories}
                       onReject={handleRejectReview}
                       onDelete={handleDelete}
                       onUpdateCategory={handleUpdateCategory}
@@ -325,12 +293,44 @@ export default function AdminReviews() {
                 </tbody>
               </table>
             </div>
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-2 px-4 py-4 border-t border-slate-200">
+                <button
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="px-3 py-2 rounded-lg border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  Назад
+                </button>
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`w-10 h-10 rounded-lg text-sm font-medium transition-colors ${page === currentPage
+                        ? 'bg-ocean-600 text-white'
+                        : 'border border-slate-200 text-slate-600 hover:bg-slate-50'
+                        }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-2 rounded-lg border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  Вперед
+                </button>
+              </div>
+            )}
           </div>
         </section>
       )}
 
       {/* Empty state */}
-      {pendingReviews.length === 0 && approvedReviews.length === 0 && (
+      {allPendingReviews.length === 0 && allApprovedReviews.length === 0 && (
         <div className="text-center py-12">
           <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -396,8 +396,11 @@ export default function AdminReviews() {
 
       {/* Delete Confirmation Modal */}
       {deleteConfirmId && deleteConfirmType === 'review' && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-xl border border-slate-200 shadow-lg p-6 max-w-sm mx-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => {
+          setDeleteConfirmId(null)
+          setDeleteConfirmType(null)
+        }}>
+          <div className="bg-white rounded-xl border border-slate-200 shadow-lg p-6 max-w-sm mx-4" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 bg-red-50 rounded-lg flex items-center justify-center flex-shrink-0">
                 <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -434,8 +437,12 @@ export default function AdminReviews() {
 
       {/* Delete Photo Confirmation Modal */}
       {deleteConfirmId && deleteConfirmType === 'photo' && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-xl border border-slate-200 shadow-lg p-6 max-w-sm mx-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => {
+          setDeleteConfirmId(null)
+          setDeleteConfirmType(null)
+          setDeleteConfirmPhotoUrl(null)
+        }}>
+          <div className="bg-white rounded-xl border border-slate-200 shadow-lg p-6 max-w-sm mx-4" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 bg-red-50 rounded-lg flex items-center justify-center flex-shrink-0">
                 <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -476,8 +483,8 @@ export default function AdminReviews() {
 interface ReviewTableRowProps {
   review: Review
   categories: Category[]
-  onApprove?: (id: string) => void
-  onReject?: (id: string) => void
+  onApprove: (id: string) => void
+  onReject: (id: string) => void
   onDelete: (id: string) => void
   onUpdateCategory?: (id: string, categoryId: string | null) => void
   onUpdateMessage?: (id: string, message: string) => void
@@ -548,7 +555,7 @@ function ReviewTableRow({ review, categories, onApprove, onReject, onDelete, onU
       </td>
 
       {/* Категория */}
-      <td className="px-4 py-4">
+      <td className="px-4 py-4" style={{ minWidth: '270px' }}>
         <CategoryDropdown
           categories={categories}
           value={review.category_id || null}
@@ -738,39 +745,54 @@ function ReviewTableRow({ review, categories, onApprove, onReject, onDelete, onU
         </time>
       </td>
 
+      {/* Статус */}
+      <td className="px-4 py-4 whitespace-nowrap">
+        {review.approved ? (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700">
+            <span className="w-2 h-2 bg-emerald-500 rounded-full"></span>
+            Одобрено
+          </span>
+        ) : (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-regular bg-amber-50 text-amber-700">
+            <span className="w-2 h-2 bg-amber-500 rounded-full"></span>
+            На модерации
+          </span>
+        )}
+      </td>
+
       {/* Действия */}
       <td className="px-4 py-4">
         <div className="flex items-center gap-1">
           {!review.approved && (
-            <button
-              onClick={() => setShowEditModal(true)}
-              disabled={processing}
-              className="p-2 rounded-lg text-slate-400 hover:text-ocean-600 hover:bg-ocean-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              title="Редактировать"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-              </svg>
-            </button>
+            <>
+              <button
+                onClick={() => onApprove(review.id)}
+                disabled={processing}
+                className="p-2 rounded-lg text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                title="Одобрить отзыв"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </button>
+              <button
+                onClick={() => setShowEditModal(true)}
+                disabled={processing}
+                className="p-2 rounded-lg text-slate-400 hover:text-ocean-600 hover:bg-ocean-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                title="Редактировать текст отзыва"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+              </button>
+            </>
           )}
-          {onApprove && !review.approved && (
-            <button
-              onClick={() => onApprove(review.id)}
-              disabled={processing}
-              className="p-2 rounded-lg text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              title="Одобрить"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-            </button>
-          )}
-          {onReject && review.approved && (
+          {review.approved && (
             <button
               onClick={() => onReject(review.id)}
               disabled={processing}
               className="p-2 rounded-lg text-slate-400 hover:text-amber-600 hover:bg-amber-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              title="На модерацию"
+              title="Вернуть на модерацию"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -781,7 +803,7 @@ function ReviewTableRow({ review, categories, onApprove, onReject, onDelete, onU
             onClick={() => onDelete(review.id)}
             disabled={processing}
             className="p-2 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            title="Удалить"
+            title="Удалить отзыв"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
