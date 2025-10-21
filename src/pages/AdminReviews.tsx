@@ -699,7 +699,7 @@ function ReviewTableRow({ review, categories, onApprove, onReject, onDelete, onU
           categories={categories}
           value={review.category_id || null}
           onChange={(categoryId) => onUpdateCategory?.(review.id, categoryId)}
-          disabled={processing}
+          disabled={processing || review.approved}
         />
       </td>
 
@@ -834,12 +834,12 @@ function ReviewTableRow({ review, categories, onApprove, onReject, onDelete, onU
               {review.photos.slice(0, 3).map((photo, idx) => (
                 <div
                   key={photo}
-                  className="relative group"
+                  className="relative group w-[42px]"
                 >
                   <img
                     src={photo}
                     alt={`preview-${idx}`}
-                    className="w-12 h-16 object-cover rounded-lg border-2 border-white cursor-pointer transition-all"
+                    className="w-[42px] h-16 object-cover rounded-lg border-2 border-white cursor-pointer transition-all"
                   />
                   {/* Overlay with icons on hover */}
                   <div className="absolute inset-0 rounded-lg bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -857,19 +857,21 @@ function ReviewTableRow({ review, categories, onApprove, onReject, onDelete, onU
                     </button>
                   </div>
                   {/* X button in top right corner */}
-                  <button
-                    onClick={() => {
-                      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                      // @ts-ignore
-                      if (window._adminRemovePhoto) window._adminRemovePhoto(review.id, photo)
-                    }}
-                    className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-red-500 hover:bg-red-600 flex items-center justify-center text-white transition-colors opacity-0 group-hover:opacity-100 shadow-md z-20"
-                    title="Удалить фото"
-                  >
-                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
+                  {!review.approved && (
+                    <button
+                      onClick={() => {
+                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                        // @ts-ignore
+                        if (window._adminRemovePhoto) window._adminRemovePhoto(review.id, photo)
+                      }}
+                      className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-red-500 hover:bg-red-600 flex items-center justify-center text-white transition-colors opacity-0 group-hover:opacity-100 shadow-md z-20"
+                      title="Удалить фото"
+                    >
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
@@ -899,7 +901,7 @@ function ReviewTableRow({ review, categories, onApprove, onReject, onDelete, onU
                 }}
                 className="hidden"
               />
-              <div className="w-12 h-16 rounded-lg border border-dashed border-slate-300 hover:border-ocean-400 flex items-center justify-center text-ocean-600 hover:text-ocean-700 transition-colors">
+              <div className="w-[42px] h-16 rounded-lg border border-dashed border-slate-300 hover:border-ocean-400 flex items-center justify-center text-ocean-600 hover:text-ocean-700 transition-colors">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
                 </svg>
