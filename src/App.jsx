@@ -44,14 +44,6 @@ function App() {
 					</div>
 				}
 			/>
-			<Route
-				path="*"
-				element={
-					<div className="min-h-screen font-sans text-slate-800">
-						<NotFound />
-					</div>
-				}
-			/>
 
 			{/* Auth routes without Navigation */}
 			<Route
@@ -82,6 +74,16 @@ function App() {
 							<AdminCategories />
 						</AdminLayout>
 					</PrivateRoute>
+				}
+			/>
+
+			{/* Catch-all route for 404 */}
+			<Route
+				path="*"
+				element={
+					<div className="min-h-screen font-sans text-slate-800">
+						<NotFound />
+					</div>
 				}
 			/>
 		</Routes>
