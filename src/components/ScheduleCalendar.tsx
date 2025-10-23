@@ -72,8 +72,11 @@ export default function ScheduleCalendar({
 		const daysInMonth = new Date(year, month + 1, 0).getDate()
 
 		for (let i = 1; i <= daysInMonth; i++) {
-			const date = new Date(year, month, i)
-			const dateStr = date.toISOString().split('T')[0]
+			// Используем локальную дату без конвертации в UTC
+			const year_str = String(year).padStart(4, '0')
+			const month_str = String(month + 1).padStart(2, '0')
+			const day_str = String(i).padStart(2, '0')
+			const dateStr = `${year_str}-${month_str}-${day_str}`
 			dayMap[dateStr] = {
 				date: dateStr,
 				dayOfMonth: i,
@@ -161,7 +164,10 @@ export default function ScheduleCalendar({
 		if (!dayInfo) return null
 
 		const hasPeriods = dayInfo.periods.length > 0
-		const isToday = dateStr === new Date().toISOString().split('T')[0]
+		// Получаем сегодняшнюю дату в локальном формате
+		const today = new Date()
+		const todayStr = `${String(today.getFullYear()).padStart(4, '0')}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
+		const isToday = dateStr === todayStr
 		const rangePosition = isDateInRange(dateStr)
 
 		return (
@@ -215,8 +221,12 @@ export default function ScheduleCalendar({
 		calendarDays.push(null)
 	}
 	for (let i = 1; i <= daysInMonth; i++) {
-		const date = new Date(year, month, i)
-		calendarDays.push(date.toISOString().split('T')[0])
+		// Используем локальную дату без конвертации в UTC
+		const year_str = String(year).padStart(4, '0')
+		const month_str = String(month + 1).padStart(2, '0')
+		const day_str = String(i).padStart(2, '0')
+		const dateStr = `${year_str}-${month_str}-${day_str}`
+		calendarDays.push(dateStr)
 	}
 
 	// Добавляем пустые ячейки в конец месяца для полной сетки
@@ -248,15 +258,60 @@ export default function ScheduleCalendar({
 			<div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
 				{/* Заголовок с месяцем и навигацией */}
 				<div className="flex items-center justify-between p-4 border-b border-slate-200 bg-slate-50">
-					<div className="flex items-center gap-3">
+					<div className="flex items-center gap-3 flex-1">
 						<svg className="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
 						</svg>
-						<h3 className="text-lg font-medium text-slate-800">
-							{monthNames[month]} {year}
-						</h3>
+						{dateRangeStart && dateRangeEnd ? (
+							<div className="text-sm">
+								<span className="font-medium text-slate-700">Выбрано: </span>
+								<span className="font-semibold text-ocean-700">
+									{new Date(dateRangeStart + 'T00:00:00').toLocaleDateString('ru-RU', {
+										day: 'numeric',
+										month: 'short',
+									})} - {new Date(dateRangeEnd + 'T00:00:00').toLocaleDateString('ru-RU', {
+										day: 'numeric',
+										month: 'short',
+									})}
+									{' '}({Math.floor((new Date(dateRangeEnd).getTime() - new Date(dateRangeStart).getTime()) / (1000 * 60 * 60 * 24)) + 1} дней)
+								</span>
+							</div>
+						) : (
+							<h3 className="text-lg font-medium text-slate-800">
+								{monthNames[month]} {year}
+							</h3>
+						)}
 					</div>
-					<div className="flex items-center gap-1">
+
+					{/* Кнопки действий при выборе диапазона */}
+					{dateRangeStart && dateRangeEnd && (
+						<div className="flex items-center gap-2 ml-4">
+							{onCreatePeriodForRange && (
+								<button
+									onClick={() => onCreatePeriodForRange(dateRangeStart, dateRangeEnd)}
+									className="px-3 py-1.5 bg-ocean-600 text-white rounded-lg hover:bg-ocean-700 transition-colors text-sm font-regular whitespace-nowrap"
+									title="Добавить период расписания"
+								>
+									+ Период
+								</button>
+							)}
+							<button
+								onClick={() => {
+									setDateRangeStart(null)
+									setDateRangeEnd(null)
+								}}
+								className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-200 transition-colors"
+								title="Отмена"
+							>
+								<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+								</svg>
+							</button>
+						</div>
+					)}
+
+					{/* Навигация по месяцам */}
+					<div className="flex items-center gap-1 ml-4">
 						<button
 							onClick={handlePrevMonth}
 							className="p-2 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors"
@@ -276,9 +331,7 @@ export default function ScheduleCalendar({
 							</svg>
 						</button>
 					</div>
-				</div>
-
-				{/* Легенда городов */}
+				</div>				{/* Легенда городов */}
 				<div className="p-3 bg-slate-50 border-b border-slate-200">
 					<div className="flex items-center gap-4 flex-wrap">
 						{cities.map((city, index) => {
@@ -331,46 +384,6 @@ export default function ScheduleCalendar({
 						})}
 					</div>
 				</div>
-
-				{/* Блок выбранного диапазона дат */}
-				{dateRangeStart && dateRangeEnd && (
-					<div className="px-6 py-4 bg-ocean-50 border-t border-slate-200">
-						<div className="flex items-center justify-between gap-4">
-							<div className="text-sm">
-								<span className="font-medium text-slate-700">Выбрано: </span>
-								<span className="font-semibold text-ocean-700">
-									{new Date(dateRangeStart + 'T00:00:00').toLocaleDateString('ru-RU', {
-										day: 'numeric',
-										month: 'long',
-									})} - {new Date(dateRangeEnd + 'T00:00:00').toLocaleDateString('ru-RU', {
-										day: 'numeric',
-										month: 'long',
-									})}
-									{' '}({Math.floor((new Date(dateRangeEnd).getTime() - new Date(dateRangeStart).getTime()) / (1000 * 60 * 60 * 24)) + 1} дней)
-								</span>
-							</div>
-							<div className="flex items-center gap-2">
-								{onCreatePeriodForRange && (
-									<button
-										onClick={() => onCreatePeriodForRange(dateRangeStart, dateRangeEnd)}
-										className="px-4 py-1.5 bg-ocean-600 text-white rounded-lg hover:bg-ocean-700 transition-colors text-sm font-medium"
-									>
-										+ Добавить период
-									</button>
-								)}
-								<button
-									onClick={() => {
-										setDateRangeStart(null)
-										setDateRangeEnd(null)
-									}}
-									className="px-3 py-1.5 bg-white text-slate-600 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors text-sm font-medium"
-								>
-									Отмена
-								</button>
-							</div>
-						</div>
-					</div>
-				)}
 			</div>
 		</div>
 	)
