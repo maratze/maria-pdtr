@@ -84,6 +84,9 @@ export default function EditPeriodDialog({
 	const handleTimeBlur = () => {
 		if (!period) return
 
+		// Если есть брони, не обновляем слоты
+		if (hasBookings) return
+
 		setTimeError(null)
 
 		if (startTime >= endTime) {
@@ -91,29 +94,8 @@ export default function EditPeriodDialog({
 			return
 		}
 
-		// Проверяем, есть ли забронированные слоты за этот день
-		const bookedSlots = daySlots.filter(slot => slot.isBooked)
-
-		if (bookedSlots.length > 0) {
-			// Проверяем, не пытаемся ли мы сократить время работы
-			const originalStartTime = period.work_start_time.slice(0, 5)
-			const originalEndTime = period.work_end_time.slice(0, 5)
-
-			const isReducingStart = startTime > originalStartTime
-			const isReducingEnd = endTime < originalEndTime
-
-			if (isReducingStart || isReducingEnd) {
-				setTimeError('Нельзя сократить время работы, так как есть забронированные слоты')
-				// Восстанавливаем исходные значения
-				setStartTime(originalStartTime)
-				setEndTime(originalEndTime)
-				return
-			}
-		}
-
-		// Обновляем слоты с новым временем
-		const slots = generateSlotsForDateAndCity(periods, bookings, period.start_date, selectedCity || period.city_id)
-		setDaySlots(slots)
+		// Не генерируем слоты автоматически - они будут пустыми после изменения
+		// Слоты нужно будет пересоздать через submit
 	}
 
 	if (!isOpen || !period) return null
@@ -209,11 +191,17 @@ export default function EditPeriodDialog({
 									options={cities.map(city => ({ id: city.id, label: city.name }))}
 									value={selectedCity ? selectedCity : null}
 									onChange={(value) => {
+										// Если есть брони, запрещаем изменение города
+										if (hasBookings) {
+											setTimeError('Нельзя изменить город, так как есть забронированные слоты')
+											return
+										}
+
 										if (value !== null && value !== undefined) {
 											setSelectedCity(String(value))
-											// Обновляем слоты для нового города
-											const slots = generateSlotsForDateAndCity(periods, bookings, period.start_date, String(value))
-											setDaySlots(slots)
+											// Очищаем слоты при изменении города
+											setDaySlots([])
+											setSelectedSlots([])
 										} else {
 											setSelectedCity('')
 										}
@@ -233,9 +221,20 @@ export default function EditPeriodDialog({
 									<input
 										type="time"
 										value={startTime}
-										onChange={(e) => setStartTime(e.target.value)}
+										onChange={(e) => {
+											// Если есть брони, запрещаем изменение времени
+											if (hasBookings) {
+												setTimeError('Нельзя изменить время, так как есть забронированные слоты')
+												return
+											}
+											setStartTime(e.target.value)
+											// Очищаем слоты при изменении времени
+											setDaySlots([])
+											setSelectedSlots([])
+										}}
 										onBlur={handleTimeBlur}
-										className="w-full h-10 px-3 py-2.5 border border-slate-300 rounded-lg text-slate-900 text-sm focus:ring-2 focus:ring-ocean-500 focus:border-transparent outline-none transition-colors"
+										disabled={hasBookings}
+										className="w-full h-10 px-3 py-2.5 border border-slate-300 rounded-lg text-slate-900 text-sm focus:ring-2 focus:ring-ocean-500 focus:border-transparent outline-none transition-colors disabled:bg-slate-100 disabled:cursor-not-allowed"
 									/>
 								</div>
 								<div>
@@ -245,9 +244,20 @@ export default function EditPeriodDialog({
 									<input
 										type="time"
 										value={endTime}
-										onChange={(e) => setEndTime(e.target.value)}
+										onChange={(e) => {
+											// Если есть брони, запрещаем изменение времени
+											if (hasBookings) {
+												setTimeError('Нельзя изменить время, так как есть забронированные слоты')
+												return
+											}
+											setEndTime(e.target.value)
+											// Очищаем слоты при изменении времени
+											setDaySlots([])
+											setSelectedSlots([])
+										}}
 										onBlur={handleTimeBlur}
-										className="w-full h-10 px-3 py-2.5 border border-slate-300 rounded-lg text-slate-900 text-sm focus:ring-2 focus:ring-ocean-500 focus:border-transparent outline-none transition-colors"
+										disabled={hasBookings}
+										className="w-full h-10 px-3 py-2.5 border border-slate-300 rounded-lg text-slate-900 text-sm focus:ring-2 focus:ring-ocean-500 focus:border-transparent outline-none transition-colors disabled:bg-slate-100 disabled:cursor-not-allowed"
 									/>
 								</div>
 							</div>
@@ -264,12 +274,13 @@ export default function EditPeriodDialog({
 								</div>
 							)}
 
-							{/* Разделитель */}
-							<div className="border-t border-slate-200"></div>
-
 							{/* Слоты за день */}
 							{daySlots.length > 0 && (
+
 								<div>
+									{/* Разделитель */}
+									<div className="border-t border-slate-200 mb-2"></div>
+
 									<p className="text-sm font-medium text-slate-700 mb-3">Слоты за день ({daySlots.length}) - выберите для бронирования</p>
 									<div className="grid grid-cols-2 gap-2">
 										{daySlots.map((slot, idx) => (
