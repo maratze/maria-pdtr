@@ -7,6 +7,7 @@ import type {
 import {
 	getSchedulePeriods,
 	deleteSchedulePeriod,
+	createSchedulePeriodsForDateRange,
 } from '../lib/schedule'
 import { getCities } from '../lib/cities'
 import { getTimeSlotsByPeriod } from '../lib/timeSlots'
@@ -15,6 +16,7 @@ import Toast from '../components/Toast'
 import ConfirmDialog from '../components/ConfirmDialog'
 import ScheduleCalendar from '../components/ScheduleCalendar'
 import SlotDetailsDialog from '../components/SlotDetailsDialog'
+import CreatePeriodDialog from '../components/CreatePeriodDialog'
 
 export default function AdminSchedule() {
 	const [periods, setPeriods] = useState<SchedulePeriodWithCity[]>([])
@@ -29,6 +31,11 @@ export default function AdminSchedule() {
 	const [periodSlots, setPeriodSlots] = useState<Record<string, TimeSlot[]>>({})
 	const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null)
 	const [showSlotDetails, setShowSlotDetails] = useState(false)
+
+	// Для создания периода на диапазон дат
+	const [showCreatePeriodDialog, setShowCreatePeriodDialog] = useState(false)
+	const [dateRangeForPeriod, setDateRangeForPeriod] = useState<{ start: string; end: string } | null>(null)
+	const [createPeriodLoading, setCreatePeriodLoading] = useState(false)
 
 	useEffect(() => {
 		loadInitialData()
@@ -106,6 +113,50 @@ export default function AdminSchedule() {
 		}
 	}
 
+	async function handleCreatePeriodForRange(startDate: string, endDate: string) {
+		setDateRangeForPeriod({ start: startDate, end: endDate })
+		setShowCreatePeriodDialog(true)
+	}
+
+	async function handleCreatePeriodSubmit(cityId: string, startTime: string, endTime: string) {
+		if (!dateRangeForPeriod) return
+
+		try {
+			setCreatePeriodLoading(true)
+			const newPeriods = await createSchedulePeriodsForDateRange(
+				dateRangeForPeriod.start,
+				dateRangeForPeriod.end,
+				cityId,
+				startTime,
+				endTime
+			)
+
+			// Обновляем список периодов
+			const updatedPeriods = await getSchedulePeriods()
+			setPeriods(updatedPeriods)
+
+			// Загружаем слоты для новых периодов
+			await Promise.all(
+				newPeriods.map(period => loadPeriodSlots(period.id))
+			)
+
+			setShowCreatePeriodDialog(false)
+			setDateRangeForPeriod(null)
+			setToast({
+				message: `Создано ${newPeriods.length} периодов расписания`,
+				type: 'success'
+			})
+		} catch (error) {
+			console.error('Error creating periods:', error)
+			setToast({
+				message: error instanceof Error ? error.message : 'Ошибка создания периодов',
+				type: 'error'
+			})
+		} finally {
+			setCreatePeriodLoading(false)
+		}
+	}
+
 	const filteredPeriods = selectedCityFilter
 		? periods.filter((p) => p.city_id === selectedCityFilter)
 		: periods
@@ -144,6 +195,7 @@ export default function AdminSchedule() {
 				}}
 				onPeriodEdit={handleEdit}
 				onPeriodDelete={handleDeletePeriod}
+				onCreatePeriodForRange={handleCreatePeriodForRange}
 			/>
 
 			{/* Модальное окно с информацией о слоте */}
@@ -154,6 +206,20 @@ export default function AdminSchedule() {
 					setShowSlotDetails(false)
 					setSelectedSlot(null)
 				}}
+			/>
+
+			{/* Диалог создания периода на диапазон дат */}
+			<CreatePeriodDialog
+				isOpen={showCreatePeriodDialog}
+				startDate={dateRangeForPeriod?.start ?? null}
+				endDate={dateRangeForPeriod?.end ?? null}
+				cities={cities}
+				onClose={() => {
+					setShowCreatePeriodDialog(false)
+					setDateRangeForPeriod(null)
+				}}
+				onSubmit={handleCreatePeriodSubmit}
+				isLoading={createPeriodLoading}
 			/>
 
 			{/* Модальное окно подтверждения удаления */}

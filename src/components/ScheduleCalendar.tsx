@@ -10,6 +10,7 @@ interface ScheduleCalendarProps {
 	onSlotClick: (slot: TimeSlot) => void
 	onPeriodEdit: (period: SchedulePeriodWithCity) => void
 	onPeriodDelete: (id: string) => void
+	onCreatePeriodForRange?: (startDate: string, endDate: string) => void
 }
 
 interface DayInfo {
@@ -48,11 +49,12 @@ export default function ScheduleCalendar({
 	onSlotClick,
 	onPeriodEdit,
 	onPeriodDelete,
+	onCreatePeriodForRange,
 }: ScheduleCalendarProps) {
 	const [currentMonth, setCurrentMonth] = useState<Date>(new Date())
 	const [daysInfo, setDaysInfo] = useState<Record<string, DayInfo>>({})
-	const [selectedDate, setSelectedDate] = useState<string | null>(null)
-	const [expandedPeriodOnDate, setExpandedPeriodOnDate] = useState<string | null>(null)
+	const [dateRangeStart, setDateRangeStart] = useState<string | null>(null)
+	const [dateRangeEnd, setDateRangeEnd] = useState<string | null>(null)
 
 	// Получаем цвет для города
 	const getCityColor = (cityId: string) => {
@@ -114,14 +116,44 @@ export default function ScheduleCalendar({
 
 	const handlePrevMonth = () => {
 		setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))
-		setSelectedDate(null)
-		setExpandedPeriodOnDate(null)
 	}
 
 	const handleNextMonth = () => {
 		setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))
-		setSelectedDate(null)
-		setExpandedPeriodOnDate(null)
+	}
+
+	const handleDateRangeClick = (dateStr: string) => {
+		if (!dateRangeStart) {
+			// Первый клик - устанавливаем начало
+			setDateRangeStart(dateStr)
+		} else if (dateRangeStart === dateStr) {
+			// Клик на ту же дату - отмена
+			setDateRangeStart(null)
+			setDateRangeEnd(null)
+		} else if (!dateRangeEnd) {
+			// Второй клик - устанавливаем конец (с сортировкой)
+			if (dateStr < dateRangeStart) {
+				setDateRangeEnd(dateRangeStart)
+				setDateRangeStart(dateStr)
+			} else {
+				setDateRangeEnd(dateStr)
+			}
+		} else {
+			// Уже есть диапазон - новый выбор
+			setDateRangeStart(dateStr)
+			setDateRangeEnd(null)
+		}
+	}
+
+	const isDateInRange = (dateStr: string): 'start' | 'middle' | 'end' | null => {
+		if (!dateRangeStart) return null
+		if (!dateRangeEnd) {
+			return dateStr === dateRangeStart ? 'start' : null
+		}
+		if (dateStr === dateRangeStart) return 'start'
+		if (dateStr === dateRangeEnd) return 'end'
+		if (dateStr > dateRangeStart && dateStr < dateRangeEnd) return 'middle'
+		return null
 	}
 
 	const getDayCell = (dateStr: string) => {
@@ -130,17 +162,21 @@ export default function ScheduleCalendar({
 
 		const hasPeriods = dayInfo.periods.length > 0
 		const isToday = dateStr === new Date().toISOString().split('T')[0]
+		const rangePosition = isDateInRange(dateStr)
 
 		return (
 			<div
 				key={dateStr}
-				className={`min-h-[100px] p-2 transition-all cursor-pointer hover:bg-slate-50 bg-white`}
-				onClick={() => setSelectedDate(dateStr)}
+				className={`min-h-[100px] p-2 transition-all cursor-pointer ${rangePosition ? 'bg-ocean-100' : 'bg-white hover:bg-slate-50'
+					}`}
+				onClick={() => handleDateRangeClick(dateStr)}
 			>
 				{/* День месяца */}
-				<div className={`text-xs font-semibold ${isToday
-					? 'text-white bg-ocean-600 w-6 h-6 rounded-full flex items-center justify-center mb-2'
-					: 'text-slate-700 mb-4'
+				<div className={`text-xs font-semibold w-6 h-6 rounded-full flex items-center justify-center mb-2 ${rangePosition === 'start' || rangePosition === 'end'
+					? 'text-white bg-ocean-600'
+					: isToday
+						? 'text-white bg-ocean-600'
+						: 'text-slate-700'
 					}`}>
 					{dayInfo.dayOfMonth}
 				</div>
@@ -205,8 +241,6 @@ export default function ScheduleCalendar({
 	]
 
 	const dayNames = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
-
-	const selectedDateInfo = selectedDate ? daysInfo[selectedDate] : null
 
 	return (
 		<div className="space-y-6">
@@ -297,6 +331,46 @@ export default function ScheduleCalendar({
 						})}
 					</div>
 				</div>
+
+				{/* Блок выбранного диапазона дат */}
+				{dateRangeStart && dateRangeEnd && (
+					<div className="px-6 py-4 bg-ocean-50 border-t border-slate-200">
+						<div className="flex items-center justify-between gap-4">
+							<div className="text-sm">
+								<span className="font-medium text-slate-700">Выбрано: </span>
+								<span className="font-semibold text-ocean-700">
+									{new Date(dateRangeStart + 'T00:00:00').toLocaleDateString('ru-RU', {
+										day: 'numeric',
+										month: 'long',
+									})} - {new Date(dateRangeEnd + 'T00:00:00').toLocaleDateString('ru-RU', {
+										day: 'numeric',
+										month: 'long',
+									})}
+									{' '}({Math.floor((new Date(dateRangeEnd).getTime() - new Date(dateRangeStart).getTime()) / (1000 * 60 * 60 * 24)) + 1} дней)
+								</span>
+							</div>
+							<div className="flex items-center gap-2">
+								{onCreatePeriodForRange && (
+									<button
+										onClick={() => onCreatePeriodForRange(dateRangeStart, dateRangeEnd)}
+										className="px-4 py-1.5 bg-ocean-600 text-white rounded-lg hover:bg-ocean-700 transition-colors text-sm font-medium"
+									>
+										+ Добавить период
+									</button>
+								)}
+								<button
+									onClick={() => {
+										setDateRangeStart(null)
+										setDateRangeEnd(null)
+									}}
+									className="px-3 py-1.5 bg-white text-slate-600 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors text-sm font-medium"
+								>
+									Отмена
+								</button>
+							</div>
+						</div>
+					</div>
+				)}
 			</div>
 		</div>
 	)

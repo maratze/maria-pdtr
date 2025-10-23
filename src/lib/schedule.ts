@@ -248,3 +248,62 @@ export async function getActiveSchedulePeriodsByCity(
 
 	return data || [];
 }
+
+/**
+ * Создать периоды расписания на каждый день в диапазоне
+ * Автоматически создаст слоты времени через триггер
+ */
+export async function createSchedulePeriodsForDateRange(
+	startDate: string,
+	endDate: string,
+	cityId: string,
+	workStartTime: string,
+	workEndTime: string
+): Promise<SchedulePeriod[]> {
+	if (!supabaseAdmin) {
+		throw new Error('Supabase admin client is not initialized');
+	}
+
+	const createdPeriods: SchedulePeriod[] = [];
+	const current = new Date(startDate + 'T00:00:00');
+	const end = new Date(endDate + 'T00:00:00');
+
+	while (current <= end) {
+		const dateStr = current.toISOString().split('T')[0];
+
+		const { data, error } = await supabaseAdmin
+			.from('schedule_periods')
+			.insert({
+				city_id: cityId,
+				start_date: dateStr,
+				end_date: dateStr,
+				work_start_time: workStartTime,
+				work_end_time: workEndTime,
+			} as never)
+			.select()
+			.single();
+
+		if (error) {
+			console.error(`Error creating schedule period for ${dateStr}:`, error);
+			throw error;
+		}
+
+		createdPeriods.push(data);
+
+		// Ждем немного, чтобы триггер срабатал
+		await new Promise(resolve => setTimeout(resolve, 300));
+
+		// Генерируем слоты явно
+		if ((data as any)?.id) {
+			try {
+				await generateSlotsForPeriod((data as any).id);
+			} catch (slotError) {
+				console.warn(`Slots may already be generating via trigger for ${dateStr}:`, slotError);
+			}
+		}
+
+		current.setDate(current.getDate() + 1);
+	}
+
+	return createdPeriods;
+}
