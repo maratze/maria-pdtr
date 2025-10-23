@@ -79,22 +79,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 						)}
 					</Link>
 					<Link
-						to="/admin/bookings"
-						onClick={() => setIsMobileMenuOpen(false)}
-						className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-normal transition-all duration-200 ${isActive('/admin/bookings')
-							? 'bg-ocean-50 text-ocean-700 shadow-sm'
-							: 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-							}`}
-					>
-						<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-						</svg>
-						<span>Бронирования</span>
-						{isActive('/admin/bookings') && (
-							<div className="ml-auto w-1.5 h-1.5 rounded-full bg-ocean-600"></div>
-						)}
-					</Link>
-					<Link
 						to="/admin/categories"
 						onClick={() => setIsMobileMenuOpen(false)}
 						className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-normal transition-all duration-200 ${isActive('/admin/categories')
@@ -165,7 +149,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 						{isActive('/admin/categories') && 'Управление категориями'}
 						{isActive('/admin/services') && 'Управление услугами'}
 						{isActive('/admin/schedule') && 'Управление расписанием'}
-						{isActive('/admin/bookings') && 'Управление бронированиями'}
 					</h1>
 					<div className="hidden lg:flex items-center gap-2 text-sm text-slate-500">
 						<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

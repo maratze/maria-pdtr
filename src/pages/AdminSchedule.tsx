@@ -214,6 +214,7 @@ export default function AdminSchedule() {
 				startDate={dateRangeForPeriod?.start ?? null}
 				endDate={dateRangeForPeriod?.end ?? null}
 				cities={cities}
+				existingPeriods={periods}
 				onClose={() => {
 					setShowCreatePeriodDialog(false)
 					setDateRangeForPeriod(null)
