@@ -13,6 +13,7 @@ interface EditPeriodDialogProps {
 	onClose: () => void
 	onSubmit: (periodId: string, cityId: string, startTime: string, endTime: string) => Promise<void>
 	isLoading?: boolean
+	onBookingSuccess?: () => Promise<void> | void
 }
 
 export default function EditPeriodDialog({
@@ -23,6 +24,7 @@ export default function EditPeriodDialog({
 	onClose,
 	onSubmit,
 	isLoading = false,
+	onBookingSuccess,
 }: EditPeriodDialogProps) {
 	const [selectedCity, setSelectedCity] = useState<string>('')
 	const [startTime, setStartTime] = useState('10:00')
@@ -185,8 +187,10 @@ export default function EditPeriodDialog({
 				return
 			}
 
-			// Успешно забронировано - просто закрываем диалог
-			// Данные будут обновлены при следующем открытии через loadBookingsForPeriod
+			// Успешно забронировано - обновляем данные и закрываем диалог
+			if (onBookingSuccess) {
+				await onBookingSuccess()
+			}
 			onClose()
 		} catch (error) {
 			console.error('Error booking slots:', error)

@@ -45,6 +45,28 @@ export default function AdminSchedule() {
 		loadInitialData()
 	}, [])
 
+	async function refreshBookings() {
+		try {
+			const bookingsData = await getAllBookings()
+			const optimizedBookings: OptimizedBooking[] = bookingsData.map(b => ({
+				id: b.id,
+				period_id: b.time_slot?.period_id || '',
+				booking_date: b.time_slot?.slot_date || '',
+				start_time: b.time_slot?.start_time?.slice(0, 5) || '',
+				end_time: b.time_slot?.end_time?.slice(0, 5) || '',
+				service_id: b.service_id,
+				client_name: b.client_name,
+				client_phone: b.client_phone,
+				client_email: b.client_email,
+				status: b.status as 'pending' | 'confirmed' | 'cancelled' | 'completed',
+				notes: b.notes || null,
+			}))
+			setBookings(optimizedBookings)
+		} catch (error) {
+			console.error('Error refreshing bookings:', error)
+		}
+	}
+
 	async function loadInitialData() {
 		try {
 			setLoading(true)
@@ -295,6 +317,7 @@ export default function AdminSchedule() {
 				}}
 				onSubmit={handleEditPeriodSubmit}
 				isLoading={editPeriodLoading}
+				onBookingSuccess={refreshBookings}
 			/>
 		</div>
 	)
