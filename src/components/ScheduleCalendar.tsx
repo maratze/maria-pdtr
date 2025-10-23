@@ -215,7 +215,23 @@ export default function ScheduleCalendar({
 					{dayInfo.dayOfMonth}
 				</div>
 
-				{/* Периоды на этот день */}
+				{/* Статус бронирований */}
+				{hasPeriods && (dayInfo.bookedSlots > 0 || dayInfo.freeSlots > 0) && (
+					<div className="mb-2 text-xs flex gap-2">
+						{dayInfo.bookedSlots > 0 && (
+							<div className="flex items-center gap-1">
+								<div className="w-2 h-2 rounded-full bg-red-500"></div>
+								<span className="text-red-600 font-medium">{dayInfo.bookedSlots}</span>
+							</div>
+						)}
+						{dayInfo.freeSlots > 0 && (
+							<div className="flex items-center gap-1">
+								<div className="w-2 h-2 rounded-full bg-green-500"></div>
+								<span className="text-green-600 font-medium">{dayInfo.freeSlots}</span>
+							</div>
+						)}
+					</div>
+				)}				{/* Периоды на этот день */}
 				{hasPeriods && (
 					<div className="space-y-1">
 						{dayInfo.periods.map((period) => {

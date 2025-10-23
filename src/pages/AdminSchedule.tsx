@@ -10,6 +10,7 @@ import {
 	updateSchedulePeriod,
 } from '../lib/schedule'
 import { getCities } from '../lib/cities'
+import { getAllBookings } from '../lib/bookings'
 import { type OptimizedBooking } from '../lib/slots'
 import AdminPreloader from '../components/AdminPreloader'
 import Toast from '../components/Toast'
@@ -21,7 +22,7 @@ import EditPeriodDialog from '../components/EditPeriodDialog'
 export default function AdminSchedule() {
 	const [periods, setPeriods] = useState<SchedulePeriodWithCity[]>([])
 	const [cities, setCities] = useState<City[]>([])
-	const [bookings] = useState<OptimizedBooking[]>([]) // Новое состояние для бронирований
+	const [bookings, setBookings] = useState<OptimizedBooking[]>([])
 	const [loading, setLoading] = useState(true)
 	const [selectedCityFilter, setSelectedCityFilter] = useState<string>('')
 	const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
@@ -47,14 +48,28 @@ export default function AdminSchedule() {
 	async function loadInitialData() {
 		try {
 			setLoading(true)
-			const [periodsData, citiesData] = await Promise.all([
+			const [periodsData, citiesData, bookingsData] = await Promise.all([
 				getSchedulePeriods(),
 				getCities(),
-				// TODO: загрузить бронирования когда создадим API
+				getAllBookings(),
 			])
 			setPeriods(periodsData)
 			setCities(citiesData)
-			// setBookings(bookingsData) // Пока пустой массив
+			// Преобразуем BookingFull в OptimizedBooking
+			const optimizedBookings: OptimizedBooking[] = bookingsData.map(b => ({
+				id: b.id,
+				period_id: b.time_slot?.period_id || '',
+				booking_date: b.time_slot?.slot_date || '',
+				start_time: b.time_slot?.start_time?.slice(0, 5) || '',
+				end_time: b.time_slot?.end_time?.slice(0, 5) || '',
+				service_id: b.service_id,
+				client_name: b.client_name,
+				client_phone: b.client_phone,
+				client_email: b.client_email,
+				status: b.status as 'pending' | 'confirmed' | 'cancelled' | 'completed',
+				notes: b.notes || null,
+			}))
+			setBookings(optimizedBookings)
 		} catch (error) {
 			console.error('Error loading data:', error)
 			setToast({ message: 'Ошибка загрузки данных', type: 'error' })
