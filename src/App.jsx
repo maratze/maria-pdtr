@@ -16,7 +16,6 @@ import AdminLogin from './pages/AdminLogin'
 import AdminCategories from './pages/AdminCategories'
 import NotFound from './pages/NotFound'
 import './App.css'
-import Test from './pages/Test'
 
 function HomePage() {
 	return (
@@ -75,14 +74,6 @@ function App() {
 							<AdminCategories />
 						</AdminLayout>
 					</PrivateRoute>
-				}
-			/>
-
-
-			<Route
-				path="/test"
-				element={
-					<Test />
 				}
 			/>
 
