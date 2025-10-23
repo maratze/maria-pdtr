@@ -26,18 +26,18 @@ interface DayInfo {
 
 // Палитра пастельных цветов для городов
 const cityColors = [
-	{ bg: 'bg-blue-100', border: 'border-blue-400', text: 'text-blue-700', solid: 'bg-blue-400' },
-	{ bg: 'bg-purple-100', border: 'border-purple-400', text: 'text-purple-700', solid: 'bg-purple-400' },
-	{ bg: 'bg-pink-100', border: 'border-pink-400', text: 'text-pink-700', solid: 'bg-pink-400' },
-	{ bg: 'bg-rose-100', border: 'border-rose-400', text: 'text-rose-700', solid: 'bg-rose-400' },
-	{ bg: 'bg-orange-100', border: 'border-orange-400', text: 'text-orange-700', solid: 'bg-orange-400' },
-	{ bg: 'bg-amber-100', border: 'border-amber-400', text: 'text-amber-700', solid: 'bg-amber-400' },
-	{ bg: 'bg-lime-100', border: 'border-lime-400', text: 'text-lime-700', solid: 'bg-lime-400' },
-	{ bg: 'bg-emerald-100', border: 'border-emerald-400', text: 'text-emerald-700', solid: 'bg-emerald-400' },
-	{ bg: 'bg-teal-100', border: 'border-teal-400', text: 'text-teal-700', solid: 'bg-teal-400' },
-	{ bg: 'bg-cyan-100', border: 'border-cyan-400', text: 'text-cyan-700', solid: 'bg-cyan-400' },
-	{ bg: 'bg-indigo-100', border: 'border-indigo-400', text: 'text-indigo-700', solid: 'bg-indigo-400' },
-	{ bg: 'bg-violet-100', border: 'border-violet-400', text: 'text-violet-700', solid: 'bg-violet-400' },
+	{ bg: 'bg-blue-100', border: 'border-blue-400', text: 'text-blue-600', solid: 'bg-blue-400' },
+	{ bg: 'bg-purple-100', border: 'border-purple-400', text: 'text-purple-600', solid: 'bg-purple-400' },
+	{ bg: 'bg-pink-100', border: 'border-pink-400', text: 'text-pink-600', solid: 'bg-pink-400' },
+	{ bg: 'bg-rose-100', border: 'border-rose-400', text: 'text-rose-600', solid: 'bg-rose-400' },
+	{ bg: 'bg-orange-100', border: 'border-orange-400', text: 'text-orange-600', solid: 'bg-orange-400' },
+	{ bg: 'bg-amber-100', border: 'border-amber-400', text: 'text-amber-600', solid: 'bg-amber-400' },
+	{ bg: 'bg-lime-100', border: 'border-lime-400', text: 'text-lime-600', solid: 'bg-lime-400' },
+	{ bg: 'bg-emerald-100', border: 'border-emerald-400', text: 'text-emerald-600', solid: 'bg-emerald-400' },
+	{ bg: 'bg-teal-100', border: 'border-teal-400', text: 'text-teal-600', solid: 'bg-teal-400' },
+	{ bg: 'bg-cyan-100', border: 'border-cyan-400', text: 'text-cyan-600', solid: 'bg-cyan-400' },
+	{ bg: 'bg-indigo-100', border: 'border-indigo-400', text: 'text-indigo-600', solid: 'bg-indigo-400' },
+	{ bg: 'bg-violet-100', border: 'border-violet-400', text: 'text-violet-600', solid: 'bg-violet-400' },
 ]
 
 export default function ScheduleCalendar({
@@ -134,13 +134,13 @@ export default function ScheduleCalendar({
 		return (
 			<div
 				key={dateStr}
-				className="min-h-[90px] p-2 transition-all cursor-pointer bg-white hover:bg-slate-50"
+				className={`min-h-[90px] p-2 transition-all cursor-pointer hover:bg-slate-50 bg-white`}
 				onClick={() => setSelectedDate(dateStr)}
 			>
 				{/* День месяца */}
-				<div className={`text-xs font-semibold mb-2 ${isToday
-					? 'text-white bg-ocean-600 w-6 h-6 rounded-full flex items-center justify-center'
-					: 'text-slate-700'
+				<div className={`text-xs font-semibold ${isToday
+					? 'text-white bg-ocean-600 w-6 h-6 rounded-full flex items-center justify-center mb-2'
+					: 'text-slate-700 mb-4'
 					}`}>
 					{dayInfo.dayOfMonth}
 				</div>
@@ -183,6 +183,12 @@ export default function ScheduleCalendar({
 		calendarDays.push(date.toISOString().split('T')[0])
 	}
 
+	// Добавляем пустые ячейки в конец месяца для полной сетки
+	const remainingCells = (7 - (calendarDays.length % 7)) % 7
+	for (let i = 0; i < remainingCells; i++) {
+		calendarDays.push(null)
+	}
+
 	const monthNames = [
 		'Январь',
 		'Февраль',
@@ -207,12 +213,12 @@ export default function ScheduleCalendar({
 			{/* Календарь */}
 			<div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
 				{/* Заголовок с месяцем и навигацией */}
-				<div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50">
+				<div className="flex items-center justify-between p-4 border-b border-slate-200 bg-slate-50">
 					<div className="flex items-center gap-3">
 						<svg className="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
 						</svg>
-						<h3 className="text-lg font-bold text-slate-900">
+						<h3 className="text-lg font-medium text-slate-800">
 							{monthNames[month]} {year}
 						</h3>
 					</div>
@@ -239,7 +245,7 @@ export default function ScheduleCalendar({
 				</div>
 
 				{/* Легенда городов */}
-				<div className="px-6 py-3 bg-slate-50 border-b border-slate-200">
+				<div className="p-3 bg-slate-50 border-b border-slate-200">
 					<div className="flex items-center gap-4 flex-wrap">
 						{cities.map((city, index) => {
 							const cityColor = cityColors[index % cityColors.length]
@@ -257,14 +263,14 @@ export default function ScheduleCalendar({
 										}`}
 								>
 									<div className={`w-3 h-3 rounded-sm ${cityColor.solid}`}></div>
-									<span className="text-xs font-medium text-slate-700">{city.name}</span>
+									<span className="text-sm font-medium text-slate-700">{city.name}</span>
 								</button>
 							)
 						})}
 					</div>
 				</div>
 
-				<div className="p-4">
+				<div className="p-3">
 					{/* Дни недели */}
 					<div className="grid grid-cols-7 mb-2">
 						{dayNames.map((day) => (
@@ -296,7 +302,7 @@ export default function ScheduleCalendar({
 			{/* Слоты для выбранной даты */}
 			{selectedDateInfo && (
 				<div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-					<div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50">
+					<div className="flex items-center justify-between p-3 border-b border-slate-200 bg-slate-50">
 						<div className="flex items-center gap-3">
 							<svg className="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
