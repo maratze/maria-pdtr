@@ -26,8 +26,8 @@ WITH CHECK (true);
 -- Insert cities
 INSERT INTO public.cities (name, slug, display_order) VALUES
     ('Москва', 'moscow', 1),
-    ('Казань', 'kazan', 2),
-    ('Санкт-Петербург', 'saint-petersburg', 3),
+    ('Санкт-Петербург', 'saint-petersburg', 2),
+    ('Казань', 'kazan', 3),
     ('Новосибирск', 'novosibirsk', 4)
 ON CONFLICT (name) DO NOTHING;
 

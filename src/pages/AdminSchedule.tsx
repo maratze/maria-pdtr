@@ -66,12 +66,6 @@ export default function AdminSchedule() {
 			])
 			setPeriods(periodsData)
 			setCities(citiesData)
-
-			// Установить Москву по умолчанию
-			const moscowCity = citiesData.find(city => city.slug === 'moscow')
-			if (moscowCity) {
-				setSelectedCityFilter(moscowCity.id)
-			}
 		} catch (error) {
 			console.error('Error loading data:', error)
 			setToast({ message: 'Ошибка загрузки данных', type: 'error' })

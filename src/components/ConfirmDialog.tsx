@@ -45,7 +45,7 @@ export default function ConfirmDialog({
 						</svg>
 					</div>
 					<div className="flex-1 min-w-0">
-						<h3 className="text-sm sm:text-md font-medium text-slate-900">{title}</h3>
+						<h3 className="text-sm sm:text-base font-medium text-slate-900">{title}</h3>
 						{itemName && (
 							<p className="text-xs sm:text-sm text-slate-500 mt-0.5 truncate">"{itemName}"</p>
 						)}

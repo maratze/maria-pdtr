@@ -8,7 +8,7 @@ export async function getCities(): Promise<City[]> {
 	const { data, error } = await supabase
 		.from('cities')
 		.select('*')
-		.order('name');
+		.order('display_order', { ascending: true });
 
 	if (error) {
 		console.error('Error fetching cities:', error);
