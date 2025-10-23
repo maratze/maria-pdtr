@@ -61,9 +61,9 @@ export async function getAvailableSlotsByCity(
     `)
 		.eq('schedule_period.city_id', cityId)
 		.eq('is_booked', false)
-		.or(`slot_date.gt.${today},and(slot_date.eq.${today},slot_time.gt.${currentTime})`)
+		.or(`slot_date.gt.${today},and(slot_date.eq.${today},start_time.gt.${currentTime})`)
 		.order('slot_date')
-		.order('slot_time');
+		.order('start_time');
 
 	if (error) {
 		console.error('Error fetching available slots:', error);
