@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { getServices, createService, updateService, deleteService } from '../lib/services'
 import AdminPreloader from '../components/AdminPreloader'
 import Toast from '../components/Toast'
+import DurationTypeDropdown from '../components/DurationTypeDropdown'
 import type { Service, ServiceInsert, DurationType } from '../types/service'
 
 // Вспомогательная функция для форматирования длительности
@@ -233,19 +234,11 @@ export default function AdminServices() {
 									rows={3}
 									className="w-full text-sm rounded-lg border border-slate-200 px-3 py-2 focus:border-ocean-400 focus:outline-none focus:ring-2 focus:ring-ocean-100"
 								/>
-								<div>
-									<label className="block text-sm font-medium text-slate-700 mb-1">Тип длительности</label>
-									<select
-										value={formData.duration_type}
-										onChange={(e) => setFormData({ ...formData, duration_type: e.target.value as DurationType })}
-										className="w-full text-sm rounded-lg border border-slate-200 px-3 py-2 h-10 focus:border-ocean-400 focus:outline-none focus:ring-2 focus:ring-ocean-100"
-									>
-										<option value="minutes">Минуты</option>
-										<option value="hours">Часы</option>
-										<option value="sessions">Сеансы</option>
-										<option value="none">Без указания времени</option>
-									</select>
-								</div>
+								<DurationTypeDropdown
+									value={formData.duration_type}
+									onChange={(value) => setFormData({ ...formData, duration_type: value })}
+									label="Тип длительности"
+								/>
 								{formData.duration_type !== 'none' && (
 									<div className="grid grid-cols-2 gap-3">
 										<input
@@ -351,19 +344,11 @@ export default function AdminServices() {
 											rows={3}
 											className="w-full text-sm rounded-lg border border-slate-200 px-3 py-2 focus:border-ocean-400 focus:outline-none focus:ring-2 focus:ring-ocean-100"
 										/>
-										<div>
-											<label className="block text-sm font-medium text-slate-700 mb-1">Тип длительности</label>
-											<select
-												value={editData.duration_type}
-												onChange={(e) => setEditData({ ...editData, duration_type: e.target.value as DurationType })}
-												className="w-full text-sm rounded-lg border border-slate-200 px-3 py-2 h-10 focus:border-ocean-400 focus:outline-none focus:ring-2 focus:ring-ocean-100"
-											>
-												<option value="minutes">Минуты</option>
-												<option value="hours">Часы</option>
-												<option value="sessions">Сеансы</option>
-												<option value="none">Без указания времени</option>
-											</select>
-										</div>
+										<DurationTypeDropdown
+											value={editData.duration_type}
+											onChange={(value) => setEditData({ ...editData, duration_type: value })}
+											label="Тип длительности"
+										/>
 										{editData.duration_type !== 'none' && (
 											<div className="grid grid-cols-2 gap-3">
 												<input
