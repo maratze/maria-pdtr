@@ -1,15 +1,15 @@
 import { useState, useEffect } from 'react'
 import Dropdown from './Dropdown'
+import AdminPreloader from './AdminPreloader'
 import type { City, SchedulePeriodWithCity } from '../types/booking'
 import { generateSlotsForDateAndCity, type OptimizedBooking } from '../lib/slots'
-import { createBookingsForSlots } from '../lib/bookings'
+import { createBookingsForSlots, getBookingsByPeriodAndDate } from '../lib/bookings'
 
 interface EditPeriodDialogProps {
 	isOpen: boolean
 	period: SchedulePeriodWithCity | null
 	cities: City[]
 	periods?: SchedulePeriodWithCity[]
-	bookings?: OptimizedBooking[]
 	onClose: () => void
 	onSubmit: (periodId: string, cityId: string, startTime: string, endTime: string) => Promise<void>
 	isLoading?: boolean
@@ -20,7 +20,6 @@ export default function EditPeriodDialog({
 	period,
 	cities,
 	periods = [],
-	bookings = [],
 	onClose,
 	onSubmit,
 	isLoading = false,
@@ -29,9 +28,11 @@ export default function EditPeriodDialog({
 	const [startTime, setStartTime] = useState('10:00')
 	const [endTime, setEndTime] = useState('18:00')
 	const [daySlots, setDaySlots] = useState<any[]>([])
+	const [loadedBookings, setLoadedBookings] = useState<OptimizedBooking[]>([])
+	const [loadingBookings, setLoadingBookings] = useState(false)
 
 	// Состояние для выбора слотов и бронирования
-	const [mode, setMode] = useState<'edit' | 'booking'>('edit')
+	const [mode, setMode] = useState<'edit' | 'booking' | 'details'>('edit')
 	const [selectedSlots, setSelectedSlots] = useState<string[]>([])
 	const [clientName, setClientName] = useState('')
 	const [clientPhone, setClientPhone] = useState('')
@@ -39,8 +40,18 @@ export default function EditPeriodDialog({
 	const [bookingError, setBookingError] = useState<string | null>(null)
 	const [timeError, setTimeError] = useState<string | null>(null)
 
+	// Состояние для показа деталей бронирования
+	const [selectedBookingDetails, setSelectedBookingDetails] = useState<OptimizedBooking | null>(null)
+
 	// Проверяем наличие броней за день
 	const hasBookings = daySlots.some(slot => slot.isBooked)
+
+	// Проверяем, изменились ли данные периода
+	const hasChanges = period && (
+		selectedCity !== period.city_id ||
+		startTime !== period.work_start_time.slice(0, 5) ||
+		endTime !== period.work_end_time.slice(0, 5)
+	)
 
 	// Инициализируем значения при открытии диалога
 	useEffect(() => {
@@ -49,11 +60,50 @@ export default function EditPeriodDialog({
 			setStartTime(period.work_start_time.slice(0, 5))
 			setEndTime(period.work_end_time.slice(0, 5))
 
-			// Генерируем слоты для этого дня
-			const slots = generateSlotsForDateAndCity(periods, bookings, period.start_date, period.city_id)
-			setDaySlots(slots)
+			// Загружаем бронирования для этого периода и даты
+			loadBookingsForPeriod()
 		}
-	}, [isOpen, period, periods, bookings])
+	}, [isOpen, period])
+
+	// Загружаем бронирования и генерируем слоты
+	async function loadBookingsForPeriod() {
+		if (!period) return
+
+		try {
+			setLoadingBookings(true)
+
+			// Загружаем бронирования из базы данных
+			const bookingsData = await getBookingsByPeriodAndDate(period.id, period.start_date)
+
+			// Преобразуем в формат OptimizedBooking
+			const optimizedBookings: OptimizedBooking[] = bookingsData.map(b => ({
+				id: b.id,
+				period_id: period.id,
+				booking_date: period.start_date,
+				start_time: b.start_time.slice(0, 5), // HH:MM:SS -> HH:MM
+				end_time: b.end_time.slice(0, 5),
+				service_id: null,
+				client_name: b.client_name,
+				client_phone: b.client_phone,
+				client_email: b.client_email,
+				status: b.status as 'pending' | 'confirmed' | 'cancelled' | 'completed',
+				notes: null,
+			}))
+
+			setLoadedBookings(optimizedBookings)
+
+			// Генерируем слоты для этого дня с учетом загруженных бронирований
+			const slots = generateSlotsForDateAndCity(periods, optimizedBookings, period.start_date, period.city_id)
+			setDaySlots(slots)
+		} catch (error) {
+			console.error('Error loading bookings:', error)
+			// В случае ошибки генерируем слоты без бронирований
+			const slots = generateSlotsForDateAndCity(periods, [], period.start_date, period.city_id)
+			setDaySlots(slots)
+		} finally {
+			setLoadingBookings(false)
+		}
+	}
 
 	// Управляем скроллом body
 	useEffect(() => {
@@ -132,10 +182,9 @@ export default function EditPeriodDialog({
 				return
 			}
 
-			// Успешно забронировано - закрываем диалог
+			// Успешно забронировано - просто закрываем диалог
+			// Данные будут обновлены при следующем открытии через loadBookingsForPeriod
 			onClose()
-
-			// Можно добавить toast notification здесь
 		} catch (error) {
 			console.error('Error booking slots:', error)
 			setBookingError(error instanceof Error ? error.message : 'Неизвестная ошибка')
@@ -188,15 +237,20 @@ export default function EditPeriodDialog({
 				{/* Заголовок */}
 				<div className="flex items-center justify-between p-4 border-b border-slate-200 bg-slate-50 rounded-t-xl flex-shrink-0">
 					<div className="flex items-center gap-2">
-						{mode === 'booking' && (
+						{(mode === 'booking' || mode === 'details') && (
 							<button
 								onClick={() => {
-									setMode('edit')
-									setSelectedSlots([])
-									setClientName('')
-									setClientPhone('')
-									setClientEmail('')
-									setBookingError(null)
+									if (mode === 'booking') {
+										setMode('edit')
+										setSelectedSlots([])
+										setClientName('')
+										setClientPhone('')
+										setClientEmail('')
+										setBookingError(null)
+									} else if (mode === 'details') {
+										setMode('edit')
+										setSelectedBookingDetails(null)
+									}
 								}}
 								className="p-1 rounded-lg text-slate-600 hover:bg-slate-200 transition-colors"
 								title="Назад"
@@ -207,7 +261,7 @@ export default function EditPeriodDialog({
 							</button>
 						)}
 						<h2 className="text-base font-regular text-slate-900">
-							{new Date(period.start_date + 'T00:00:00').toLocaleDateString('ru-RU', {
+							{mode === 'details' ? 'Детали бронирования' : new Date(period.start_date + 'T00:00:00').toLocaleDateString('ru-RU', {
 								day: 'numeric',
 								month: 'long',
 								year: 'numeric',
@@ -253,6 +307,7 @@ export default function EditPeriodDialog({
 									label="Город"
 									placeholder="Выберите город..."
 									required={false}
+									disabled={hasBookings}
 								/>
 							</div>
 
@@ -318,8 +373,13 @@ export default function EditPeriodDialog({
 								</div>
 							)}
 
+							{/* Индикатор загрузки бронирований */}
+							{loadingBookings && (
+								<AdminPreloader message="Загрузка бронирований..." />
+							)}
+
 							{/* Слоты за день */}
-							{daySlots.length > 0 && (
+							{!loadingBookings && daySlots.length > 0 && (
 
 								<div>
 									{/* Разделитель */}
@@ -327,36 +387,47 @@ export default function EditPeriodDialog({
 
 									<p className="text-sm font-medium text-slate-700 mb-3">Слоты за день ({daySlots.length}) - выберите для бронирования</p>
 									<div className="grid grid-cols-2 gap-2">
-										{daySlots.map((slot, idx) => (
-											<button
-												key={idx}
-												type="button"
-												onClick={() => {
-													if (!slot.isBooked) {
-														if (selectedSlots.includes(idx.toString())) {
-															setSelectedSlots(selectedSlots.filter(s => s !== idx.toString()))
-														} else {
-															setSelectedSlots([...selectedSlots, idx.toString()])
+										{daySlots.map((slot, idx) => {
+											// Найдем информацию о бронировании для этого слота
+											const booking = slot.isBooked
+												? loadedBookings.find(b => b.start_time === slot.startTime && b.end_time === slot.endTime)
+												: null
+
+											return (
+												<button
+													key={idx}
+													type="button"
+													onClick={() => {
+														if (slot.isBooked && booking) {
+															// Переключаемся в режим показа деталей
+															setSelectedBookingDetails(booking)
+															setMode('details')
+														} else if (!slot.isBooked) {
+															// Выбираем/отменяем выбор слота
+															if (selectedSlots.includes(idx.toString())) {
+																setSelectedSlots(selectedSlots.filter(s => s !== idx.toString()))
+															} else {
+																setSelectedSlots([...selectedSlots, idx.toString()])
+															}
 														}
-													}
-												}}
-												disabled={slot.isBooked}
-												className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${selectedSlots.includes(idx.toString())
-													? 'bg-ocean-500 text-white border border-ocean-600'
-													: slot.isBooked
-														? 'bg-red-50 text-red-700 border border-red-200 cursor-not-allowed opacity-50'
-														: 'bg-green-50 text-green-700 border border-green-200 hover:bg-green-100'
-													}`}
-											>
-												{slot.startTime} - {slot.endTime}
-											</button>
-										))}
+													}}
+													className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${selectedSlots.includes(idx.toString())
+														? 'bg-ocean-500 text-white border border-ocean-600'
+														: slot.isBooked
+															? 'bg-red-50 text-red-700 border border-red-200 cursor-pointer hover:bg-red-100'
+															: 'bg-green-50 text-green-700 border border-green-200 hover:bg-green-100'
+														}`}
+												>
+													{slot.startTime} - {slot.endTime}
+												</button>
+											)
+										})}
 									</div>
 								</div>
 							)}
 						</div>
 					</form>
-				) : (
+				) : mode === 'booking' ? (
 					<form className="flex-1 overflow-y-auto p-6 space-y-4 scrollbar-thin scrollbar-thumb-ocean-300 scrollbar-track-slate-100">
 						{/* Выбранные слоты */}
 						<div className="p-4 bg-ocean-50 rounded-lg border border-ocean-200">
@@ -437,11 +508,85 @@ export default function EditPeriodDialog({
 							</div>
 						</div>
 					</form>
-				)}
+				) : mode === 'details' && selectedBookingDetails ? (
+					<div className="flex-1 overflow-y-auto p-6 space-y-4 scrollbar-thin scrollbar-thumb-ocean-300 scrollbar-track-slate-100">
+						{/* Время слота */}
+						<div className="p-4 bg-ocean-50 rounded-lg border border-ocean-200">
+							<p className="text-xs text-slate-600 font-medium mb-1 uppercase tracking-wide">Время</p>
+							<p className="text-lg font-medium text-ocean-700">
+								{selectedBookingDetails.start_time} - {selectedBookingDetails.end_time}
+							</p>
+							<p className="text-sm text-slate-600 mt-1">
+								{new Date(selectedBookingDetails.booking_date + 'T00:00:00').toLocaleDateString('ru-RU', {
+									day: 'numeric',
+									month: 'long',
+									year: 'numeric',
+								})}
+							</p>
+						</div>
+
+						{/* Информация о клиенте */}
+						<div className="space-y-3">
+							<div>
+								<p className="text-xs text-slate-500 font-medium mb-1 uppercase tracking-wide">ФИО</p>
+								<p className="text-sm text-slate-900 font-medium">{selectedBookingDetails.client_name}</p>
+							</div>
+
+							<div>
+								<p className="text-xs text-slate-500 font-medium mb-1 uppercase tracking-wide">Телефон</p>
+								<a
+									href={`tel:${selectedBookingDetails.client_phone}`}
+									className="text-sm text-ocean-600 hover:text-ocean-700 font-medium"
+								>
+									{selectedBookingDetails.client_phone}
+								</a>
+							</div>
+
+							<div>
+								<p className="text-xs text-slate-500 font-medium mb-1 uppercase tracking-wide">Email</p>
+								<a
+									href={`mailto:${selectedBookingDetails.client_email}`}
+									className="text-sm text-ocean-600 hover:text-ocean-700 font-medium break-all"
+								>
+									{selectedBookingDetails.client_email}
+								</a>
+							</div>
+
+							{/* Статус */}
+							<div>
+								<p className="text-xs text-slate-500 font-medium mb-1 uppercase tracking-wide">Статус</p>
+								<span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${selectedBookingDetails.status === 'confirmed'
+									? 'bg-green-100 text-green-800'
+									: selectedBookingDetails.status === 'pending'
+										? 'bg-yellow-100 text-yellow-800'
+										: selectedBookingDetails.status === 'cancelled'
+											? 'bg-red-100 text-red-800'
+											: 'bg-slate-100 text-slate-800'
+									}`}>
+									{selectedBookingDetails.status === 'confirmed' && 'Подтверждено'}
+									{selectedBookingDetails.status === 'pending' && 'Ожидает подтверждения'}
+									{selectedBookingDetails.status === 'cancelled' && 'Отменено'}
+									{selectedBookingDetails.status === 'completed' && 'Завершено'}
+								</span>
+							</div>
+						</div>
+					</div>
+				) : null}
 
 				{/* Кнопки */}
 				<div className="flex flex-col sm:flex-row gap-2 sm:gap-3 p-6 border-t border-slate-200 bg-slate-50 rounded-b-xl flex-shrink-0">
-					{mode === 'edit' ? (
+					{mode === 'details' ? (
+						<button
+							type="button"
+							onClick={() => {
+								setMode('edit')
+								setSelectedBookingDetails(null)
+							}}
+							className="flex-1 px-4 py-2.5 h-10 rounded-lg bg-slate-100 text-slate-700 text-sm font-medium hover:bg-slate-200 transition-colors"
+						>
+							Закрыть
+						</button>
+					) : mode === 'edit' ? (
 						<>
 							<button
 								type="button"
@@ -461,7 +606,7 @@ export default function EditPeriodDialog({
 								>
 									Забронировать ({selectedSlots.length})
 								</button>
-							) : (
+							) : hasChanges ? (
 								<button
 									type="button"
 									onClick={handleSubmit}
@@ -470,7 +615,7 @@ export default function EditPeriodDialog({
 								>
 									{isLoading ? 'Сохранение...' : 'Сохранить'}
 								</button>
-							)}
+							) : null}
 						</>
 					) : (
 						<>

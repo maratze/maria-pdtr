@@ -274,7 +274,6 @@ export default function AdminSchedule() {
 				period={editingPeriod}
 				cities={cities}
 				periods={periods}
-				bookings={bookings}
 				onClose={() => {
 					setShowEditPeriodDialog(false)
 					setEditingPeriod(null)

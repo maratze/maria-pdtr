@@ -249,6 +249,64 @@ export async function getBookingsBySlot(
 }
 
 /**
+ * Получить бронирования для конкретного периода и даты
+ */
+export async function getBookingsByPeriodAndDate(
+	periodId: string,
+	date: string
+): Promise<Array<{
+	id: string;
+	slot_id: string;
+	start_time: string;
+	end_time: string;
+	client_name: string;
+	client_phone: string;
+	client_email: string;
+	status: string;
+}>> {
+	if (!supabaseAdmin) {
+		throw new Error('Supabase admin client is not initialized');
+	}
+
+	const { data, error } = await supabaseAdmin
+		.from('bookings')
+		.select(`
+			id,
+			slot_id,
+			client_name,
+			client_phone,
+			client_email,
+			status,
+			time_slot:time_slots!inner(
+				start_time,
+				end_time,
+				period_id,
+				slot_date
+			)
+		`)
+		.eq('time_slot.period_id', periodId)
+		.eq('time_slot.slot_date', date)
+		.in('status', ['pending', 'confirmed']);
+
+	if (error) {
+		console.error('Error fetching bookings by period and date:', error);
+		throw error;
+	}
+
+	// Преобразуем данные в нужный формат
+	return (data || []).map((item: any) => ({
+		id: item.id,
+		slot_id: item.slot_id,
+		start_time: item.time_slot.start_time,
+		end_time: item.time_slot.end_time,
+		client_name: item.client_name,
+		client_phone: item.client_phone,
+		client_email: item.client_email,
+		status: item.status,
+	}));
+}
+
+/**
  * Получить предстоящие бронирования
  */
 export async function getUpcomingBookings(): Promise<BookingFull[]> {

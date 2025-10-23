@@ -18,6 +18,7 @@ interface DropdownProps<T extends DropdownOption> {
 	nullOptionLabel?: string
 	renderValue?: (option: T | null) => ReactNode
 	renderOption?: (option: T) => ReactNode
+	disabled?: boolean
 }
 
 export default function Dropdown<T extends DropdownOption>({
@@ -29,9 +30,10 @@ export default function Dropdown<T extends DropdownOption>({
 	required = false,
 	emptyMessage = 'Нет доступных опций',
 	hasNullOption = false,
-	nullOptionLabel = 'Все',
+	nullOptionLabel = 'Не выбрано',
 	renderValue,
-	renderOption
+	renderOption,
+	disabled = false,
 }: DropdownProps<T>) {
 	const [isOpen, setIsOpen] = useState(false)
 	const [position, setPosition] = useState({ top: 0, left: 0, width: 0 })
@@ -107,8 +109,12 @@ export default function Dropdown<T extends DropdownOption>({
 			<button
 				type="button"
 				ref={buttonRef}
-				onClick={() => setIsOpen(!isOpen)}
-				className="w-full h-10 px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-900 text-sm font-regular flex items-center justify-between hover:border-ocean-300 focus:border-ocean-400 focus:outline-none focus:ring-2 focus:ring-ocean-100 transition-colors"
+				onClick={() => !disabled && setIsOpen(!isOpen)}
+				disabled={disabled}
+				className={`w-full h-10 px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-900 text-sm font-regular flex items-center justify-between transition-colors ${disabled
+						? 'opacity-50 cursor-not-allowed bg-slate-50'
+						: 'hover:border-ocean-300 focus:border-ocean-400 focus:outline-none focus:ring-2 focus:ring-ocean-100'
+					}`}
 			>
 				<span className="text-slate-900 truncate">{displayValue}</span>
 				<svg
