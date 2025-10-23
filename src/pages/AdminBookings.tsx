@@ -147,7 +147,7 @@ export default function AdminBookings() {
 
 			{/* Статистика */}
 			<div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-				<div className="bg-white rounded-xl border border-slate-200 p-4 sm:p-5">
+				<div className="bg-white rounded-xl border border-slate-200 p-4">
 					<div className="flex items-center gap-3 sm:gap-4">
 						<div className="w-10 h-10 sm:w-12 sm:h-12 bg-slate-50 rounded-xl flex items-center justify-center flex-shrink-0">
 							<svg
@@ -171,7 +171,7 @@ export default function AdminBookings() {
 					</div>
 				</div>
 
-				<div className="bg-white rounded-xl border border-slate-200 p-4 sm:p-5">
+				<div className="bg-white rounded-xl border border-slate-200 p-4">
 					<div className="flex items-center gap-3 sm:gap-4">
 						<div className="w-10 h-10 sm:w-12 sm:h-12 bg-amber-50 rounded-xl flex items-center justify-center flex-shrink-0">
 							<svg
@@ -195,7 +195,7 @@ export default function AdminBookings() {
 					</div>
 				</div>
 
-				<div className="bg-white rounded-xl border border-slate-200 p-4 sm:p-5">
+				<div className="bg-white rounded-xl border border-slate-200 p-4">
 					<div className="flex items-center gap-3 sm:gap-4">
 						<div className="w-10 h-10 sm:w-12 sm:h-12 bg-emerald-50 rounded-xl flex items-center justify-center flex-shrink-0">
 							<svg
@@ -219,7 +219,7 @@ export default function AdminBookings() {
 					</div>
 				</div>
 
-				<div className="bg-white rounded-xl border border-slate-200 p-4 sm:p-5">
+				<div className="bg-white rounded-xl border border-slate-200 p-4">
 					<div className="flex items-center gap-3 sm:gap-4">
 						<div className="w-10 h-10 sm:w-12 sm:h-12 bg-red-50 rounded-xl flex items-center justify-center flex-shrink-0">
 							<svg
@@ -243,7 +243,7 @@ export default function AdminBookings() {
 					</div>
 				</div>
 
-				<div className="bg-white rounded-xl border border-slate-200 p-4 sm:p-5">
+				<div className="bg-white rounded-xl border border-slate-200 p-4">
 					<div className="flex items-center gap-3 sm:gap-4">
 						<div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-50 rounded-xl flex items-center justify-center flex-shrink-0">
 							<svg
@@ -269,7 +269,7 @@ export default function AdminBookings() {
 			</div>
 
 			{/* Фильтры */}
-			<div className="bg-white rounded-xl border border-slate-200 p-4 sm:p-5">
+			<div className="bg-white rounded-xl border border-slate-200 p-4">
 				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
 					<div>
 						<label className="block text-sm font-medium text-slate-700 mb-1.5">Город</label>
@@ -397,7 +397,7 @@ export default function AdminBookings() {
 					</div>
 				) : (
 					bookings.map((booking) => (
-						<div key={booking.id} className="bg-white rounded-xl border border-slate-200 p-4 sm:p-5">
+						<div key={booking.id} className="bg-white rounded-xl border border-slate-200 p-4">
 							<div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
 								{/* Информация о бронировании */}
 								<div className="flex-1 min-w-0">

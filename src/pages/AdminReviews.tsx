@@ -293,7 +293,7 @@ export default function AdminReviews() {
 
       {/* Filters */}
       {reviews.length > 0 && (
-        <div className="bg-white rounded-xl border border-slate-200 p-3">
+        <div className="bg-white rounded-xl border border-slate-200 p-4">
           <div className="flex flex-col gap-3">
             {/* Header row with filters label and results count */}
             <div className="flex items-center justify-between gap-2">
@@ -461,7 +461,7 @@ export default function AdminReviews() {
           </div>
 
           {/* Mobile Pagination */}
-          <div className="lg:hidden bg-white rounded-xl border border-slate-200 p-3 mt-4">
+          <div className="lg:hidden bg-white rounded-xl border border-slate-200 p-4 mt-4">
             <div className="flex flex-col gap-3">
               {/* Items per page and Page info */}
               <div className="flex items-center justify-between gap-3">

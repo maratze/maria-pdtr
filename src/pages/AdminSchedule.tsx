@@ -191,7 +191,7 @@ export default function AdminSchedule() {
 			)}
 
 			{/* Статистика и Форма */}
-			<div className="bg-white rounded-xl border border-slate-200 p-4 sm:p-5">
+			<div className="bg-white rounded-xl border border-slate-200 p-4">
 				<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 					<div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
 						<div className="w-10 h-10 sm:w-12 sm:h-12 bg-ocean-50 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -350,7 +350,7 @@ export default function AdminSchedule() {
 			</div>
 
 			{/* Фильтр города */}
-			<div className="bg-white rounded-xl border border-slate-200 p-3">
+			<div className="bg-white rounded-xl border border-slate-200 p-4">
 				<div className="flex flex-col gap-3">
 					{/* Header row with filters label and results count */}
 					<div className="flex items-center justify-between gap-2">
@@ -437,7 +437,7 @@ export default function AdminSchedule() {
 								key={period.id}
 								className="bg-white rounded-xl border border-slate-200 overflow-hidden"
 							>
-								<div className="p-4 sm:p-5">
+								<div className="p-4">
 									<div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
 										<div className="flex-1 min-w-0">
 											<div className="flex flex-wrap items-center gap-2 mb-2">
@@ -485,7 +485,7 @@ export default function AdminSchedule() {
 
 								{/* Развернутый список слотов */}
 								{isExpanded && (
-									<div className="border-t border-slate-200 p-4 sm:p-5 bg-slate-50">
+									<div className="border-t border-slate-200 p-4 bg-slate-50">
 										{slots.length === 0 ? (
 											<p className="text-sm text-slate-500 text-center py-4">
 												Слоты еще не созданы
