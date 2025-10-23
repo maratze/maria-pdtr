@@ -7,6 +7,7 @@ import {
 	getSchedulePeriods,
 	deleteSchedulePeriod,
 	createSchedulePeriodsForDateRange,
+	updateSchedulePeriod,
 } from '../lib/schedule'
 import { getCities } from '../lib/cities'
 import { type OptimizedBooking } from '../lib/slots'
@@ -15,6 +16,7 @@ import Toast from '../components/Toast'
 import ConfirmDialog from '../components/ConfirmDialog'
 import ScheduleCalendar from '../components/ScheduleCalendar.tsx'
 import CreatePeriodDialog from '../components/CreatePeriodDialog'
+import EditPeriodDialog from '../components/EditPeriodDialog'
 
 export default function AdminSchedule() {
 	const [periods, setPeriods] = useState<SchedulePeriodWithCity[]>([])
@@ -32,6 +34,11 @@ export default function AdminSchedule() {
 	const [showCreatePeriodDialog, setShowCreatePeriodDialog] = useState(false)
 	const [dateRangeForPeriod, setDateRangeForPeriod] = useState<{ start: string; end: string } | null>(null)
 	const [createPeriodLoading, setCreatePeriodLoading] = useState(false)
+
+	// Для редактирования периода
+	const [showEditPeriodDialog, setShowEditPeriodDialog] = useState(false)
+	const [editingPeriod, setEditingPeriod] = useState<SchedulePeriodWithCity | null>(null)
+	const [editPeriodLoading, setEditPeriodLoading] = useState(false)
 
 	useEffect(() => {
 		loadInitialData()
@@ -57,10 +64,10 @@ export default function AdminSchedule() {
 	}
 
 
-
 	function handleEdit(period: SchedulePeriodWithCity) {
 		// Редактирование периода
-		console.log('Edit period:', period)
+		setEditingPeriod(period)
+		setShowEditPeriodDialog(true)
 	}
 
 	async function handleDeletePeriod(id: string) {
@@ -149,6 +156,36 @@ export default function AdminSchedule() {
 		}
 	}
 
+	async function handleEditPeriodSubmit(periodId: string, cityId: string, startTime: string, endTime: string) {
+		try {
+			setEditPeriodLoading(true)
+			await updateSchedulePeriod(periodId, {
+				city_id: cityId,
+				work_start_time: startTime,
+				work_end_time: endTime,
+			})
+
+			// Обновляем список периодов
+			const updatedPeriods = await getSchedulePeriods()
+			setPeriods(updatedPeriods)
+
+			setShowEditPeriodDialog(false)
+			setEditingPeriod(null)
+			setToast({
+				message: 'Период обновлен',
+				type: 'success'
+			})
+		} catch (error) {
+			console.error('Error updating period:', error)
+			setToast({
+				message: error instanceof Error ? error.message : 'Ошибка обновления периода',
+				type: 'error'
+			})
+		} finally {
+			setEditPeriodLoading(false)
+		}
+	}
+
 	const filteredPeriods = selectedCityFilter
 		? periods.filter((p) => p.city_id === selectedCityFilter)
 		: periods
@@ -229,6 +266,21 @@ export default function AdminSchedule() {
 				isLoading={createPeriodLoading}
 				cities={cities}
 				existingPeriods={periods}
+			/>
+
+			{/* Модальное окно редактирования периода */}
+			<EditPeriodDialog
+				isOpen={showEditPeriodDialog}
+				period={editingPeriod}
+				cities={cities}
+				periods={periods}
+				bookings={bookings}
+				onClose={() => {
+					setShowEditPeriodDialog(false)
+					setEditingPeriod(null)
+				}}
+				onSubmit={handleEditPeriodSubmit}
+				isLoading={editPeriodLoading}
 			/>
 		</div>
 	)

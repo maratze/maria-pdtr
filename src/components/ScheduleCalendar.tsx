@@ -46,9 +46,7 @@ export default function ScheduleCalendar({
 	cities,
 	selectedCityFilter,
 	onCityFilterChange,
-	onSlotClick,
 	onPeriodEdit,
-	onPeriodDelete,
 	onDeleteMultiplePeriods,
 	onCreatePeriodForRange,
 }: ScheduleCalendarProps) {
@@ -56,12 +54,23 @@ export default function ScheduleCalendar({
 	const [daysInfo, setDaysInfo] = useState<Record<string, DayInfo>>({})
 	const [dateRangeStart, setDateRangeStart] = useState<string | null>(null)
 	const [dateRangeEnd, setDateRangeEnd] = useState<string | null>(null)
+	const [selectedPeriodsForEdit, setSelectedPeriodsForEdit] = useState<SchedulePeriodWithCity[]>([])
 
 	// Получаем цвет для города
 	const getCityColor = (cityId: string) => {
 		const index = cities.findIndex(c => c.id === cityId)
 		return cityColors[index % cityColors.length]
 	}
+
+	// Очищаем выделение когда периоды обновляются (новые периоды добавлены)
+	useEffect(() => {
+		if (dateRangeStart && dateRangeEnd) {
+			// Проверяем, изменилось ли количество периодов
+			setDateRangeStart(null)
+			setDateRangeEnd(null)
+			setSelectedPeriodsForEdit([])
+		}
+	}, [periods])
 
 	// Генерируем информацию о днях на основе периодов и бронирований
 	useEffect(() => {
@@ -114,22 +123,50 @@ export default function ScheduleCalendar({
 		if (!dateRangeStart) {
 			// Первый клик - устанавливаем начало
 			setDateRangeStart(dateStr)
+
+			// Находим периоды на этот день
+			const dayPeriods = periods.filter((period) => {
+				const periodStart = period.start_date
+				const periodEnd = period.end_date
+				return dateStr >= periodStart && dateStr <= periodEnd
+			})
+			setSelectedPeriodsForEdit(dayPeriods)
 		} else if (dateRangeStart === dateStr) {
 			// Клик на ту же дату - отмена
 			setDateRangeStart(null)
 			setDateRangeEnd(null)
+			setSelectedPeriodsForEdit([])
 		} else if (!dateRangeEnd) {
 			// Второй клик - устанавливаем конец (с сортировкой)
+			let start = dateRangeStart
+			let end = dateStr
 			if (dateStr < dateRangeStart) {
-				setDateRangeEnd(dateRangeStart)
-				setDateRangeStart(dateStr)
-			} else {
-				setDateRangeEnd(dateStr)
+				start = dateStr
+				end = dateRangeStart
 			}
+			setDateRangeStart(start)
+			setDateRangeEnd(end)
+
+			// Находим все периоды, которые пересекаются с выбранным диапазоном
+			const overlappingPeriods = periods.filter((period) => {
+				const periodStart = period.start_date
+				const periodEnd = period.end_date
+				const isOverlapping = !(periodEnd < start || periodStart > end)
+				return isOverlapping
+			})
+			setSelectedPeriodsForEdit(overlappingPeriods)
 		} else {
 			// Уже есть диапазон - новый выбор
 			setDateRangeStart(dateStr)
 			setDateRangeEnd(null)
+
+			// Находим периоды на этот день
+			const dayPeriods = periods.filter((period) => {
+				const periodStart = period.start_date
+				const periodEnd = period.end_date
+				return dateStr >= periodStart && dateStr <= periodEnd
+			})
+			setSelectedPeriodsForEdit(dayPeriods)
 		}
 	}
 
@@ -154,7 +191,6 @@ export default function ScheduleCalendar({
 		const todayStr = `${String(today.getFullYear()).padStart(4, '0')}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
 		const isToday = dateStr === todayStr
 		const rangePosition = isDateInRange(dateStr)
-		const isRangeEnd = rangePosition === 'end'
 
 		return (
 			<div
@@ -163,51 +199,6 @@ export default function ScheduleCalendar({
 					}`}
 				onClick={() => handleDateRangeClick(dateStr)}
 			>
-				{/* Кнопки действий для выбранного диапазона (плавающие в правом верхнем углу) */}
-				{rangePosition && dateRangeStart && (isRangeEnd || !dateRangeEnd) && (
-					<div className="absolute top-1 right-1 flex items-center gap-1 z-10">
-						{onCreatePeriodForRange && (
-							<button
-								onClick={(e) => {
-									e.stopPropagation()
-									onCreatePeriodForRange(dateRangeStart, dateRangeEnd || dateRangeStart)
-								}}
-								className="p-1.5 rounded-lg bg-white text-ocean-600 hover:bg-ocean-50 transition-all shadow-md hover:shadow-lg border border-ocean-200"
-								title="Добавить период"
-							>
-								<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
-									<path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-								</svg>
-							</button>
-						)}
-						<button
-							onClick={(e) => {
-								e.stopPropagation()
-								const rangeEnd = dateRangeEnd || dateRangeStart
-								const periodsToDelete = periods.filter((period: SchedulePeriodWithCity) => {
-									const periodStart = period.start_date
-									const periodEnd = period.end_date
-									const isOverlapping = !(periodEnd < dateRangeStart || periodStart > rangeEnd)
-									return isOverlapping
-								})
-
-								if (periodsToDelete.length > 0 && onDeleteMultiplePeriods) {
-									const idsToDelete = periodsToDelete.map(p => p.id)
-									onDeleteMultiplePeriods(idsToDelete)
-								}
-								setDateRangeStart(null)
-								setDateRangeEnd(null)
-							}}
-							className="p-1.5 rounded-lg bg-white text-red-600 hover:bg-red-50 transition-all shadow-md hover:shadow-lg border border-red-200"
-							title="Удалить периоды"
-						>
-							<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
-								<path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-							</svg>
-						</button>
-					</div>
-				)}
-
 				{/* День месяца */}
 				<div className={`text-xs font-semibold w-6 h-6 rounded-full flex items-center justify-center mb-2 ${rangePosition === 'start' || rangePosition === 'end'
 					? 'text-white bg-ocean-600'
@@ -226,7 +217,13 @@ export default function ScheduleCalendar({
 							return (
 								<div
 									key={period.id}
-									className={`px-1.5 py-1 rounded ${cityColor.bg} ${cityColor.text}`}
+									onClick={(e) => {
+										e.stopPropagation()
+										if (onPeriodEdit) {
+											onPeriodEdit(period)
+										}
+									}}
+									className={`px-1.5 py-1 rounded ${cityColor.bg} ${cityColor.text} cursor-pointer hover:opacity-80 transition-opacity`}
 									title={`${period.city?.name}: ${period.work_start_time.slice(0, 5)} - ${period.work_end_time.slice(0, 5)}`}
 								>
 									<div className="text-[12px] font-medium leading-tight">{period.city?.name}</div>
@@ -287,41 +284,9 @@ export default function ScheduleCalendar({
 		<div className="space-y-6">
 			{/* Календарь */}
 			<div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-				{/* Заголовок с месяцем и навигацией */}
-				<div className="flex items-center justify-between p-4 border-b border-slate-200 bg-slate-50">
-					<div className="flex items-center gap-3 flex-1">
-						<svg className="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-						</svg>
-						<h3 className="text-lg font-medium text-slate-800">
-							{monthNames[month]} {year}
-						</h3>
-					</div>
-
-					{/* Навигация по месяцам */}
-					<div className="flex items-center gap-1">
-						<button
-							onClick={handlePrevMonth}
-							className="p-2 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors"
-							title="Предыдущий месяц"
-						>
-							<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-							</svg>
-						</button>
-						<button
-							onClick={handleNextMonth}
-							className="p-2 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors"
-							title="Следующий месяц"
-						>
-							<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-							</svg>
-						</button>
-					</div>
-				</div>				{/* Легенда городов */}
+				{/* Легенда городов - на самый верх */}
 				<div className="p-3 bg-slate-50 border-b border-slate-200">
-					<div className="flex items-center gap-4 flex-wrap">
+					<div className="flex items-center gap-2 flex-wrap">
 						{cities.map((city, index) => {
 							const cityColor = cityColors[index % cityColors.length]
 							const isSelected = selectedCityFilter === city.id
@@ -346,6 +311,142 @@ export default function ScheduleCalendar({
 				</div>
 
 				<div className="p-3">
+					{/* Панель действий и информации - объединённая с кнопками месяца */}
+					<div className="mb-4 p-3 bg-slate-50 border border-slate-200 rounded-lg h-16 flex items-center justify-between">
+						{/* Левая часть - месяц и навигация */}
+						<div className="flex gap-2">
+							<div className="flex items-center gap-2">
+								<button
+									onClick={handlePrevMonth}
+									className="p-2 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors"
+									title="Предыдущий месяц"
+								>
+									<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+									</svg>
+								</button>
+								<button
+									onClick={handleNextMonth}
+									className="p-2 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors"
+									title="Следующий месяц"
+								>
+									<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+									</svg>
+								</button>
+							</div>
+
+							<h3 className="text-lg font-medium text-slate-800">
+								{monthNames[month]} {year}
+							</h3>
+						</div>
+
+						{/* Правая часть - кнопки действий */}
+						{dateRangeStart && (
+							<>
+								<div className="flex items-center gap-2">
+									<div className="flex justify-center mr-4">
+										{dateRangeStart ? (
+											dateRangeEnd ? (
+												<div className="flex items-center gap-2">
+													<svg className="w-5 h-5 text-ocean-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+														<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+													</svg>
+													<div className="flex flex-col">
+														<span className="text-sm font-medium text-slate-700">
+															{new Date(dateRangeStart + 'T00:00:00').toLocaleDateString('ru-RU')} - {new Date(dateRangeEnd + 'T00:00:00').toLocaleDateString('ru-RU')}
+															{(() => {
+																const start = new Date(dateRangeStart + 'T00:00:00')
+																const end = new Date(dateRangeEnd + 'T00:00:00')
+																const daysCount = Math.floor((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1
+																return ` (${daysCount} д.)`
+															})()}
+														</span>
+													</div>
+												</div>
+											) : (
+												<div className="flex items-center gap-2">
+													<svg className="w-5 h-5 text-ocean-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+														<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+													</svg>
+													<div className="flex flex-col">
+														<span className="text-sm font-medium text-slate-700">
+															{new Date(dateRangeStart + 'T00:00:00').toLocaleDateString('ru-RU')}
+														</span>
+													</div>
+												</div>
+											)
+										) : (
+											<div className="flex items-center gap-2 text-slate-600">
+												<svg className="w-5 h-5 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+													<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+												</svg>
+												<span className="text-sm">Выберите диапазон дат на календаре</span>
+											</div>
+										)}
+									</div>
+
+									{onCreatePeriodForRange && dateRangeEnd && (
+										<button
+											onClick={() => onCreatePeriodForRange(dateRangeStart, dateRangeEnd)}
+											className="p-2 rounded-lg bg-white text-green-600 hover:bg-green-50 transition-all border border-green-200"
+											title="Добавить период на выбранный диапазон"
+										>
+											<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+												<path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+											</svg>
+										</button>
+									)}
+									{selectedPeriodsForEdit.length > 0 && (
+										<button
+											onClick={() => {
+												let idsToDelete: string[] = []
+
+												if (dateRangeEnd) {
+													// Если выбран диапазон - удаляем все периоды в диапазоне
+													const periodsToDelete = periods.filter((period: SchedulePeriodWithCity) => {
+														const periodStart = period.start_date
+														const periodEnd = period.end_date
+														const isOverlapping = !(periodEnd < dateRangeStart || periodStart > dateRangeEnd)
+														return isOverlapping
+													})
+													idsToDelete = periodsToDelete.map(p => p.id)
+												} else {
+													// Если выбрана одна дата - удаляем только периоды на эту дату
+													idsToDelete = selectedPeriodsForEdit.map(p => p.id)
+												}
+
+												if (idsToDelete.length > 0 && onDeleteMultiplePeriods) {
+													onDeleteMultiplePeriods(idsToDelete)
+												}
+												setDateRangeStart(null)
+												setDateRangeEnd(null)
+												setSelectedPeriodsForEdit([])
+											}}
+											className="p-2 rounded-lg bg-white text-red-600 hover:bg-red-50 transition-all border border-red-200"
+											title="Удалить периоды"
+										>
+											<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+												<path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+											</svg>
+										</button>
+									)}
+									<button
+										onClick={() => {
+											setDateRangeStart(null)
+											setDateRangeEnd(null)
+											setSelectedPeriodsForEdit([])
+										}}
+										className="px-3 py-2 rounded-lg bg-slate-200 text-slate-700 hover:bg-slate-300 transition-all text-sm font-medium"
+										title="Отменить выбор"
+									>
+										Отмена
+									</button>
+								</div>
+							</>
+						)}
+					</div>
+
 					{/* Дни недели */}
 					<div className="grid grid-cols-7 mb-2">
 						{dayNames.map((day) => (
