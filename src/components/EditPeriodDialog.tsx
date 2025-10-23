@@ -420,12 +420,12 @@ export default function EditPeriodDialog({
 													}}
 													disabled={!!isPastDate && !slot.isBooked}
 													className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${isPastDate && !slot.isBooked
-															? 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed opacity-50'
-															: selectedSlots.includes(idx.toString())
-																? 'bg-ocean-500 text-white border border-ocean-600'
-																: slot.isBooked
-																	? 'bg-red-50 text-red-700 border border-red-200 cursor-pointer hover:bg-red-100'
-																	: 'bg-green-50 text-green-700 border border-green-200 hover:bg-green-100'
+														? 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed opacity-50'
+														: selectedSlots.includes(idx.toString())
+															? 'bg-ocean-500 text-white border border-ocean-600'
+															: slot.isBooked
+																? 'bg-red-50 text-red-700 border border-red-200 cursor-pointer hover:bg-red-100'
+																: 'bg-green-50 text-green-700 border border-green-200 hover:bg-green-100'
 														}`}
 												>
 													{slot.startTime} - {slot.endTime}

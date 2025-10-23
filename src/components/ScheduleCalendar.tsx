@@ -190,14 +190,20 @@ export default function ScheduleCalendar({
 		const today = new Date()
 		const todayStr = `${String(today.getFullYear()).padStart(4, '0')}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
 		const isToday = dateStr === todayStr
+		// Проверяем, является ли день прошедшим
+		const isPastDate = new Date(dateStr + 'T00:00:00') < new Date(todayStr + 'T00:00:00')
 		const rangePosition = isDateInRange(dateStr)
 
 		return (
 			<div
 				key={dateStr}
-				className={`min-h-[100px] p-2 transition-all cursor-pointer relative ${rangePosition ? 'bg-ocean-100' : 'bg-white hover:bg-slate-50'
+				className={`min-h-[100px] p-2 transition-all relative ${isPastDate
+					? 'bg-slate-50 cursor-not-allowed opacity-60'
+					: rangePosition
+						? 'bg-ocean-100 cursor-pointer'
+						: 'bg-white hover:bg-slate-50 cursor-pointer'
 					}`}
-				onClick={() => handleDateRangeClick(dateStr)}
+				onClick={() => !isPastDate && handleDateRangeClick(dateStr)}
 			>
 				{/* День месяца */}
 				<div className={`text-xs font-semibold w-6 h-6 rounded-full flex items-center justify-center mb-2 ${rangePosition === 'start' || rangePosition === 'end'
