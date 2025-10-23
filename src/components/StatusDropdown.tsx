@@ -1,5 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
-import { createPortal } from 'react-dom'
+import Dropdown from './Dropdown'
 
 interface StatusDropdownProps {
 	value: 'all' | 'pending' | 'approved'
@@ -7,124 +6,21 @@ interface StatusDropdownProps {
 }
 
 const STATUS_OPTIONS = [
-	{ value: 'all', label: 'Все статусы' },
-	{ value: 'pending', label: 'На модерации' },
-	{ value: 'approved', label: 'Одобренные' }
+	{ id: 'all', label: 'Все статусы' },
+	{ id: 'pending', label: 'На модерации' },
+	{ id: 'approved', label: 'Одобренные' }
 ] as const
 
 export default function StatusDropdown({ value, onChange }: StatusDropdownProps) {
-	const [isOpen, setIsOpen] = useState(false)
-	const [position, setPosition] = useState({ top: 0, left: 0, width: 0 })
-	const containerRef = useRef<HTMLDivElement>(null)
-	const buttonRef = useRef<HTMLButtonElement>(null)
-	const dropdownRef = useRef<HTMLDivElement>(null)
-
-	const selectedOption = STATUS_OPTIONS.find(o => o.value === value)
-
-	// Calculate dropdown position
-	useEffect(() => {
-		if (isOpen && buttonRef.current) {
-			const updatePosition = () => {
-				if (!buttonRef.current) return
-
-				const rect = buttonRef.current.getBoundingClientRect()
-				const viewportHeight = window.innerHeight
-				const dropdownHeight = dropdownRef.current?.offsetHeight || 200
-				const spaceBelow = viewportHeight - rect.bottom
-				const spaceAbove = rect.top
-
-				// Определяем, открывать вверх или вниз
-				const shouldOpenUpwards = spaceBelow < dropdownHeight && spaceAbove > spaceBelow
-
-				setPosition({
-					top: shouldOpenUpwards ? rect.top - dropdownHeight - 8 : rect.bottom + 8,
-					left: rect.left,
-					width: rect.width
-				})
-			}
-
-			// Сначала устанавливаем начальную позицию
-			updatePosition()
-
-			// Затем пересчитываем после рендера dropdown (двойной RAF для гарантии)
-			requestAnimationFrame(() => {
-				requestAnimationFrame(() => {
-					updatePosition()
-				})
-			})
-		}
-	}, [isOpen])	// Close dropdown when clicking outside
-	useEffect(() => {
-		function handleClickOutside(event: MouseEvent) {
-			if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-				const portal = document.querySelector('[data-dropdown-portal]')
-				if (portal && portal.contains(event.target as Node)) {
-					return
-				}
-				setIsOpen(false)
-			}
-		}
-
-		if (isOpen) {
-			document.addEventListener('mousedown', handleClickOutside)
-			return () => document.removeEventListener('mousedown', handleClickOutside)
-		}
-	}, [isOpen])
+	const options = [...STATUS_OPTIONS] as Array<{ id: string; label: string }>
 
 	return (
-		<div className="relative" ref={containerRef}>
-			{/* Button */}
-			<button
-				ref={buttonRef}
-				onClick={() => setIsOpen(!isOpen)}
-				className="w-full h-10 px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-900 text-sm font-regular flex items-center justify-between hover:border-ocean-300 focus:border-ocean-400 focus:outline-none focus:ring-2 focus:ring-ocean-100 transition-colors"
-			>
-				<span className="text-slate-900 truncate">{selectedOption?.label}</span>
-				<svg
-					className={`w-4 h-4 text-slate-400 transition-transform flex-shrink-0 ml-2 ${isOpen ? 'rotate-180' : ''}`}
-					fill="none"
-					stroke="currentColor"
-					viewBox="0 0 24 24"
-				>
-					<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-				</svg>
-			</button>
-
-			{/* Dropdown Menu via Portal */}
-			{isOpen && createPortal(
-				<div
-					ref={dropdownRef}
-					data-dropdown-portal
-					className="fixed bg-white border border-slate-200 rounded-lg shadow-lg z-50 overflow-hidden"
-					style={{
-						top: `${position.top}px`,
-						left: `${position.left}px`,
-						width: `${position.width}px`
-					}}
-				>
-					{STATUS_OPTIONS.map((option, index) => (
-						<button
-							key={option.value}
-							onClick={() => {
-								onChange(option.value)
-								setIsOpen(false)
-							}}
-							className={`w-full text-left px-4 py-3 text-sm font-regular transition-colors flex items-center gap-2 ${value === option.value
-								? 'bg-ocean-50 text-ocean-700'
-								: 'text-slate-700 hover:bg-slate-50'
-								} ${index === STATUS_OPTIONS.length - 1 ? 'rounded-b-lg' : ''}`}
-						>
-							{value === option.value && (
-								<svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-									<path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-								</svg>
-							)}
-							<span className="flex-1">{option.label}</span>
-						</button>
-					))}
-				</div>,
-				document.body
-			)}
-		</div>
+		<Dropdown
+			options={options}
+			value={value}
+			onChange={(v) => onChange(v as 'all' | 'pending' | 'approved')}
+			placeholder="Все статусы"
+			emptyMessage="Нет доступных статусов"
+		/>
 	)
 }

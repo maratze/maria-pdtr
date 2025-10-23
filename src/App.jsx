@@ -15,6 +15,8 @@ import AdminReviews from './pages/AdminReviews'
 import AdminLogin from './pages/AdminLogin'
 import AdminCategories from './pages/AdminCategories'
 import AdminServices from './pages/AdminServices'
+import AdminSchedule from './pages/AdminSchedule'
+import AdminBookings from './pages/AdminBookings'
 import NotFound from './pages/NotFound'
 import './App.css'
 
@@ -83,6 +85,26 @@ function App() {
 					<PrivateRoute>
 						<AdminLayout>
 							<AdminServices />
+						</AdminLayout>
+					</PrivateRoute>
+				}
+			/>
+			<Route
+				path="/admin/schedule"
+				element={
+					<PrivateRoute>
+						<AdminLayout>
+							<AdminSchedule />
+						</AdminLayout>
+					</PrivateRoute>
+				}
+			/>
+			<Route
+				path="/admin/bookings"
+				element={
+					<PrivateRoute>
+						<AdminLayout>
+							<AdminBookings />
 						</AdminLayout>
 					</PrivateRoute>
 				}

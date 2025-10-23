@@ -142,7 +142,7 @@ export default function AdminCategories() {
 			<div className="space-y-4">
 				{/* Stats Card */}
 				<div className="bg-white rounded-xl border border-slate-200 p-4 sm:p-5">
-					<div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+					<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4 sm:mb-0">
 						<div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
 							<div className="w-10 h-10 sm:w-12 sm:h-12 bg-ocean-50 rounded-xl flex items-center justify-center flex-shrink-0">
 								<svg className="w-5 h-5 sm:w-6 sm:h-6 text-ocean-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -182,13 +182,26 @@ export default function AdminCategories() {
 									className="w-full text-sm rounded-lg border border-slate-200 px-3 py-2 h-10 focus:border-ocean-400 focus:outline-none focus:ring-2 focus:ring-ocean-100"
 									autoFocus
 								/>
-								<button
-									type="submit"
-									disabled={formLoading}
-									className="w-full px-3 py-2 h-10 rounded-lg bg-emerald-600 text-white text-sm font-regular hover:bg-emerald-700 disabled:opacity-50 transition-colors"
-								>
-									{formLoading ? 'Добавление...' : 'Создать'}
-								</button>
+								<div className="flex flex-col-reverse sm:flex-row gap-3 pt-2">
+									<button
+										type="button"
+										onClick={() => {
+											setShowForm(false)
+											setNewCategoryName('')
+										}}
+										disabled={formLoading}
+										className="flex-1 sm:flex-none px-3 py-2 h-10 rounded-lg bg-slate-100 text-slate-700 text-sm font-regular hover:bg-slate-200 transition-colors disabled:opacity-50"
+									>
+										Отмена
+									</button>
+									<button
+										type="submit"
+										disabled={formLoading}
+										className="flex-1 sm:flex-none px-3 py-2 h-10 rounded-lg bg-emerald-600 text-white text-sm font-regular hover:bg-emerald-700 disabled:opacity-50 transition-colors"
+									>
+										{formLoading ? 'Добавление...' : 'Создать'}
+									</button>
+								</div>
 							</div>
 						</form>
 					)}
@@ -245,8 +258,8 @@ export default function AdminCategories() {
 												<span className="text-ocean-700 text-sm sm:text-md font-regular">{index + 1}</span>
 											</div>
 											<div className="flex-1 min-w-0">
-												<h3 className="text-sm sm:text-md font-normal text-slate-900 truncate">{category.name}</h3>
-												<p className="text-xs text-slate-500 truncate">ID: {category.id}</p>
+												<h3 className="text-base font-normal text-slate-900">{category.name}</h3>
+												<p className="text-xs text-slate-600">ID: {category.id}</p>
 											</div>
 										</div>
 										<div className="flex items-center gap-1">
