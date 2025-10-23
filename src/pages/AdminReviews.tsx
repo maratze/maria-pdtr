@@ -462,7 +462,7 @@ export default function AdminReviews() {
           </div>
 
           {/* Mobile Pagination */}
-          <div className="lg:hidden bg-white rounded-xl border border-slate-200 p-4 mt-4">
+          <div className="lg:hidden bg-white rounded-xl border border-slate-200 p-4 mt-3">
             <div className="flex flex-col gap-3">
               {/* Items per page and Page info */}
               <div className="flex items-center justify-between gap-3">
@@ -858,7 +858,7 @@ function ReviewTableRow({ review, categories, onApprove, onReject, onDelete, onU
               <textarea
                 value={editedMessage}
                 onChange={(e) => setEditedMessage(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-ocean-400 focus:outline-none focus:ring-2 focus:ring-ocean-100 text-sm text-slate-700 resize-none"
+                className="w-full p-3 rounded-lg border border-slate-200 focus:border-ocean-400 focus:outline-none focus:ring-2 focus:ring-ocean-100 text-sm text-slate-700 resize-none"
                 rows={8}
                 autoFocus
               />

@@ -351,7 +351,7 @@ export default function ReviewMobileCard({
 						<textarea
 							value={editedMessage}
 							onChange={(e) => setEditedMessage(e.target.value)}
-							className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-ocean-400 focus:outline-none focus:ring-2 focus:ring-ocean-100 text-sm text-slate-700 resize-none"
+							className="w-full p-3 rounded-lg border border-slate-200 focus:border-ocean-400 focus:outline-none focus:ring-2 focus:ring-ocean-100 text-sm text-slate-700 resize-none"
 							rows={8}
 							autoFocus
 						/>
