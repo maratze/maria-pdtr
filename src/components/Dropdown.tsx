@@ -131,6 +131,7 @@ export default function Dropdown<T extends DropdownOption>({
 						left: `${position.left}px`,
 						width: `${position.width}px`
 					}}
+					onClick={(e) => e.stopPropagation()}
 				>
 					{options.length === 0 && !hasNullOption ? (
 						<div className="px-4 py-3 text-sm text-slate-500 text-center">
