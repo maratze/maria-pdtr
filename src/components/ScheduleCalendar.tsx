@@ -10,6 +10,7 @@ interface ScheduleCalendarProps {
 	onSlotClick: (slot: TimeSlot) => void
 	onPeriodEdit: (period: SchedulePeriodWithCity) => void
 	onPeriodDelete: (id: string) => void
+	onDeleteMultiplePeriods?: (ids: string[]) => void | Promise<void>
 	onCreatePeriodForRange?: (startDate: string, endDate: string) => void
 }
 
@@ -43,12 +44,14 @@ const cityColors = [
 
 export default function ScheduleCalendar({
 	slots,
+	periods,
 	cities,
 	selectedCityFilter,
 	onCityFilterChange,
 	onSlotClick,
 	onPeriodEdit,
 	onPeriodDelete,
+	onDeleteMultiplePeriods,
 	onCreatePeriodForRange,
 }: ScheduleCalendarProps) {
 	const [currentMonth, setCurrentMonth] = useState<Date>(new Date())
@@ -169,14 +172,60 @@ export default function ScheduleCalendar({
 		const todayStr = `${String(today.getFullYear()).padStart(4, '0')}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
 		const isToday = dateStr === todayStr
 		const rangePosition = isDateInRange(dateStr)
+		const isRangeEnd = rangePosition === 'end'
 
 		return (
 			<div
 				key={dateStr}
-				className={`min-h-[100px] p-2 transition-all cursor-pointer ${rangePosition ? 'bg-ocean-100' : 'bg-white hover:bg-slate-50'
+				className={`min-h-[100px] p-2 transition-all cursor-pointer relative ${rangePosition ? 'bg-ocean-100' : 'bg-white hover:bg-slate-50'
 					}`}
 				onClick={() => handleDateRangeClick(dateStr)}
 			>
+				{/* Кнопки действий для выбранного диапазона (плавающие в правом верхнем углу) */}
+				{rangePosition && dateRangeStart && (isRangeEnd || !dateRangeEnd) && (
+					<div className="absolute top-1 right-1 flex items-center gap-1 z-10">
+						{onCreatePeriodForRange && (
+							<button
+								onClick={(e) => {
+									e.stopPropagation()
+									onCreatePeriodForRange(dateRangeStart, dateRangeEnd || dateRangeStart)
+								}}
+								className="p-1.5 rounded-lg bg-white text-ocean-600 hover:bg-ocean-50 transition-all shadow-md hover:shadow-lg border border-ocean-200"
+								title="Добавить период"
+							>
+								<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+									<path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+								</svg>
+							</button>
+						)}
+						<button
+							onClick={(e) => {
+								e.stopPropagation()
+								const rangeEnd = dateRangeEnd || dateRangeStart
+								const periodsToDelete = periods.filter((period: SchedulePeriodWithCity) => {
+									const periodStart = period.start_date
+									const periodEnd = period.end_date
+									const isOverlapping = !(periodEnd < dateRangeStart || periodStart > rangeEnd)
+									return isOverlapping
+								})
+
+								if (periodsToDelete.length > 0 && onDeleteMultiplePeriods) {
+									const idsToDelete = periodsToDelete.map(p => p.id)
+									onDeleteMultiplePeriods(idsToDelete)
+								}
+								setDateRangeStart(null)
+								setDateRangeEnd(null)
+							}}
+							className="p-1.5 rounded-lg bg-white text-red-600 hover:bg-red-50 transition-all shadow-md hover:shadow-lg border border-red-200"
+							title="Удалить периоды"
+						>
+							<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+								<path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+							</svg>
+						</button>
+					</div>
+				)}
+
 				{/* День месяца */}
 				<div className={`text-xs font-semibold w-6 h-6 rounded-full flex items-center justify-center mb-2 ${rangePosition === 'start' || rangePosition === 'end'
 					? 'text-white bg-ocean-600'
@@ -262,56 +311,13 @@ export default function ScheduleCalendar({
 						<svg className="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
 						</svg>
-						{dateRangeStart && dateRangeEnd ? (
-							<div className="text-sm">
-								<span className="font-medium text-slate-700">Выбрано: </span>
-								<span className="font-semibold text-ocean-700">
-									{new Date(dateRangeStart + 'T00:00:00').toLocaleDateString('ru-RU', {
-										day: 'numeric',
-										month: 'short',
-									})} - {new Date(dateRangeEnd + 'T00:00:00').toLocaleDateString('ru-RU', {
-										day: 'numeric',
-										month: 'short',
-									})}
-									{' '}({Math.floor((new Date(dateRangeEnd).getTime() - new Date(dateRangeStart).getTime()) / (1000 * 60 * 60 * 24)) + 1} дней)
-								</span>
-							</div>
-						) : (
-							<h3 className="text-lg font-medium text-slate-800">
-								{monthNames[month]} {year}
-							</h3>
-						)}
+						<h3 className="text-lg font-medium text-slate-800">
+							{monthNames[month]} {year}
+						</h3>
 					</div>
 
-					{/* Кнопки действий при выборе диапазона */}
-					{dateRangeStart && dateRangeEnd && (
-						<div className="flex items-center gap-2 ml-4">
-							{onCreatePeriodForRange && (
-								<button
-									onClick={() => onCreatePeriodForRange(dateRangeStart, dateRangeEnd)}
-									className="px-3 py-1.5 bg-ocean-600 text-white rounded-lg hover:bg-ocean-700 transition-colors text-sm font-regular whitespace-nowrap"
-									title="Добавить период расписания"
-								>
-									+ Период
-								</button>
-							)}
-							<button
-								onClick={() => {
-									setDateRangeStart(null)
-									setDateRangeEnd(null)
-								}}
-								className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-200 transition-colors"
-								title="Отмена"
-							>
-								<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-								</svg>
-							</button>
-						</div>
-					)}
-
 					{/* Навигация по месяцам */}
-					<div className="flex items-center gap-1 ml-4">
+					<div className="flex items-center gap-1">
 						<button
 							onClick={handlePrevMonth}
 							className="p-2 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors"

@@ -25,6 +25,8 @@ export default function AdminSchedule() {
 	const [selectedCityFilter, setSelectedCityFilter] = useState<string>('')
 	const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
 	const [deleteLoading, setDeleteLoading] = useState(false)
+	const [deleteMultipleIds, setDeleteMultipleIds] = useState<string[]>([])
+	const [deleteMultipleLoading, setDeleteMultipleLoading] = useState(false)
 	const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'warning' | 'info' } | null>(null)
 
 	// Для отображения календаря
@@ -113,6 +115,31 @@ export default function AdminSchedule() {
 		}
 	}
 
+	async function handleDeleteMultiplePeriods(periodIds: string[]) {
+		if (periodIds.length === 0) return
+		setDeleteMultipleIds(periodIds)
+	}
+
+	async function confirmDeleteMultiple() {
+		if (deleteMultipleIds.length === 0) return
+
+		try {
+			setDeleteMultipleLoading(true)
+			// Удаляем все периоды
+			await Promise.all(deleteMultipleIds.map(id => deleteSchedulePeriod(id)))
+			// Обновляем список
+			const idsToDelete = [...deleteMultipleIds]
+			setPeriods(periods.filter(p => !idsToDelete.includes(p.id)))
+			setToast({ message: `Удалено ${idsToDelete.length} периодов`, type: 'success' })
+			setDeleteMultipleIds([])
+		} catch (error) {
+			console.error('Error deleting periods:', error)
+			setToast({ message: 'Ошибка удаления периодов', type: 'error' })
+		} finally {
+			setDeleteMultipleLoading(false)
+		}
+	}
+
 	async function handleCreatePeriodForRange(startDate: string, endDate: string) {
 		setDateRangeForPeriod({ start: startDate, end: endDate })
 		setShowCreatePeriodDialog(true)
@@ -195,6 +222,7 @@ export default function AdminSchedule() {
 				}}
 				onPeriodEdit={handleEdit}
 				onPeriodDelete={handleDeletePeriod}
+				onDeleteMultiplePeriods={handleDeleteMultiplePeriods}
 				onCreatePeriodForRange={handleCreatePeriodForRange}
 			/>
 
@@ -232,6 +260,18 @@ export default function AdminSchedule() {
 				description="Вы уверены, что хотите удалить этот период расписания? Это действие нельзя отменить."
 				confirmText="Удалить"
 				confirmLoading={deleteLoading}
+			/>
+
+			{/* Модальное окно подтверждения удаления нескольких периодов */}
+			<ConfirmDialog
+				isOpen={deleteMultipleIds.length > 0}
+				onClose={() => setDeleteMultipleIds([])}
+				onConfirm={confirmDeleteMultiple}
+				title="Подтверждение удаления"
+				description={`Вы уверены, что хотите удалить ${deleteMultipleIds.length} период${deleteMultipleIds.length === 1 ? '' : deleteMultipleIds.length < 5 ? 'а' : 'ов'}? Это действие нельзя отменить.`}
+				confirmText="Удалить"
+				confirmLoading={deleteMultipleLoading}
+				variant="danger"
 			/>
 		</div>
 	)

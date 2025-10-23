@@ -28,14 +28,17 @@ export default function CreatePeriodDialog({
 	const [endTime, setEndTime] = useState('18:00')
 	const [error, setError] = useState<string | null>(null)
 
-	if (!isOpen || !startDate || !endDate) return null
+	if (!isOpen || !startDate) return null
+
+	// Используем startDate если endDate не установлена (для однодневного периода)
+	const endDateValue = endDate || startDate
 
 	// Проверяем пересечение дат
 	const hasDateConflict = existingPeriods.some(period => {
 		const periodStart = new Date(period.start_date).getTime()
 		const periodEnd = new Date(period.end_date).getTime()
 		const rangeStart = new Date(startDate).getTime()
-		const rangeEnd = new Date(endDate).getTime()
+		const rangeEnd = new Date(endDateValue).getTime()
 
 		// Проверяем пересечение
 		return !(rangeEnd < periodStart || rangeStart > periodEnd)
@@ -61,22 +64,28 @@ export default function CreatePeriodDialog({
 		}
 
 		try {
-			await onSubmit(selectedCity, startTime + ':00', endTime + ':00')
-			// Очищаем форму
+			// Закрываем диалог сразу же
 			setSelectedCity('')
 			setStartTime('10:00')
 			setEndTime('18:00')
 			setError(null)
 			onClose()
+
+			// Затем выполняем submit в фоне
+			await onSubmit(selectedCity, startTime + ':00', endTime + ':00')
 		} catch (err) {
-			setError(err instanceof Error ? err.message : 'Ошибка при создании периода')
+			// Ошибка будет обработана в parent компоненте
+			console.error('Error creating period:', err)
 		}
 	}
 
-	const daysCount = Math.floor((new Date(endDate).getTime() - new Date(startDate).getTime()) / (1000 * 60 * 60 * 24)) + 1
+	const daysCount = Math.floor((new Date(endDateValue).getTime() - new Date(startDate).getTime()) / (1000 * 60 * 60 * 24)) + 1
 
 	return (
-		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 !m-0">
+		<div
+			className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 !m-0"
+			onClick={onClose}
+		>
 			<div
 				className="bg-white rounded-xl border border-slate-200 shadow-lg max-w-md w-full"
 				onClick={(e) => e.stopPropagation()}
@@ -104,7 +113,7 @@ export default function CreatePeriodDialog({
 								day: 'numeric',
 								month: 'long',
 								year: 'numeric',
-							})} - {new Date(endDate + 'T00:00:00').toLocaleDateString('ru-RU', {
+							})} - {new Date(endDateValue + 'T00:00:00').toLocaleDateString('ru-RU', {
 								day: 'numeric',
 								month: 'long',
 								year: 'numeric',
@@ -131,8 +140,16 @@ export default function CreatePeriodDialog({
 						<div>
 							<Dropdown
 								options={cities.map(city => ({ id: city.id, label: city.name }))}
-								value={selectedCity || null}
-								onChange={(value) => setSelectedCity(value as string)}
+								value={selectedCity ? selectedCity : null}
+								onChange={(value) => {
+									if (value !== null && value !== undefined) {
+										setSelectedCity(String(value))
+										// Очищаем ошибку только когда город выбран (dropdown закрывается)
+										setError(null)
+									} else {
+										setSelectedCity('')
+									}
+								}}
 								label="Город"
 								placeholder="Выберите город..."
 								required={false}
@@ -168,26 +185,19 @@ export default function CreatePeriodDialog({
 						</div>
 					</div>
 
-					{/* Сообщение об ошибке */}
-					{error && (
-						<div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-							<p className="text-sm text-red-700">{error}</p>
-						</div>
-					)}
-
 					{/* Кнопки */}
 					<div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-2">
 						<button
 							type="button"
 							onClick={onClose}
-							disabled={isLoading || hasDateConflict}
+							disabled={isLoading}
 							className="flex-1 px-4 py-2.5 h-10 rounded-lg border border-slate-200 text-slate-600 text-sm font-regular hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed order-2 sm:order-1"
 						>
 							Отмена
 						</button>
 						<button
 							type="submit"
-							disabled={isLoading || hasDateConflict}
+							disabled={isLoading || hasDateConflict || !selectedCity || !startTime || !endTime || startTime >= endTime}
 							className="flex-1 px-4 py-2.5 h-10 rounded-lg bg-green-600 text-white text-sm font-regular hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed order-1 sm:order-2"
 						>
 							{isLoading ? 'Создание...' : 'Создать'}

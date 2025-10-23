@@ -269,7 +269,11 @@ export async function createSchedulePeriodsForDateRange(
 	const end = new Date(endDate + 'T00:00:00');
 
 	while (current <= end) {
-		const dateStr = current.toISOString().split('T')[0];
+		// Используем локальную дату без конвертации в UTC
+		const year = String(current.getFullYear()).padStart(4, '0');
+		const month = String(current.getMonth() + 1).padStart(2, '0');
+		const day = String(current.getDate()).padStart(2, '0');
+		const dateStr = `${year}-${month}-${day}`;
 
 		const { data, error } = await supabaseAdmin
 			.from('schedule_periods')
