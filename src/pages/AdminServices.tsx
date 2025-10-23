@@ -184,7 +184,7 @@ export default function AdminServices() {
 
 	return (
 		<>
-			<div className="space-y-4">
+			<div className="space-y-3">
 				{/* Stats Card */}
 				<div className="bg-white rounded-xl border border-slate-200 p-4 sm:p-5">
 					<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4 sm:mb-0">

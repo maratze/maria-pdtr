@@ -29,7 +29,7 @@ export default function ReviewsList() {
   if (!reviews.length) return <div>Пока нет отзывов.</div>
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {reviews.map((r) => (
         <div key={r.id} className="rounded border p-4 shadow-sm">
           <div className="flex items-center justify-between">

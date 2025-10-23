@@ -142,7 +142,7 @@ export default function ReviewsForm({ onSubmitted }: ReviewsFormProps) {
 
           {/* Modal Body - Scrollable */}
           <div className="flex-1 overflow-auto p-4 sm:p-6">
-            <form id="review-form" onSubmit={handleSubmit} className="space-y-4">
+            <form id="review-form" onSubmit={handleSubmit} className="space-y-3">
               {/* Name Field - на отдельной строке */}
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5 text-left">

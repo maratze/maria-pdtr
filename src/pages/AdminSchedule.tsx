@@ -181,7 +181,7 @@ export default function AdminSchedule() {
 	const totalPeriods = periods.length
 
 	return (
-		<div className="space-y-4 sm:space-y-5">
+		<div className="space-y-3">
 			{toast && (
 				<Toast
 					message={toast.message}
@@ -242,7 +242,7 @@ export default function AdminSchedule() {
 				{/* Форма создания/редактирования */}
 				{showForm && (
 					<form onSubmit={handleSubmit} className="mt-4 pt-4 border-t border-slate-200">
-						<div className="space-y-4">
+						<div className="space-y-3">
 							<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 								<div>
 									<CityDropdown
@@ -350,26 +350,55 @@ export default function AdminSchedule() {
 			</div>
 
 			{/* Фильтр города */}
-			<div className="bg-white rounded-xl border border-slate-200 p-4 sm:p-5">
-				<div className="flex items-center gap-3 mb-4">
-					<svg className="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-					</svg>
-					<h3 className="text-sm font-medium text-slate-700">Фильтр по городу</h3>
-				</div>
-				<div className="w-full sm:w-48">
-					<CityDropdown
-						cities={cities}
-						value={selectedCityFilter}
-						onChange={setSelectedCityFilter}
-						label={undefined}
-						required={false}
-					/>
+			<div className="bg-white rounded-xl border border-slate-200 p-3">
+				<div className="flex flex-col gap-3">
+					{/* Header row with filters label and results count */}
+					<div className="flex items-center justify-between gap-2">
+						<div className="flex items-center gap-2">
+							<svg className="w-5 h-5 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+							</svg>
+							<span className="text-sm font-medium text-slate-700">Фильтры:</span>
+						</div>
+
+						{/* Results count - always visible */}
+						<div className="text-xs sm:text-sm text-slate-500 flex-shrink-0">
+							<span className="font-medium text-slate-700">{filteredPeriods.length}</span> из <span className="font-medium text-slate-700">{periods.length}</span>
+						</div>
+					</div>
+
+					<div className="flex flex-col sm:flex-row gap-2 lg:gap-2">
+						{/* Filter by City */}
+						<div className="w-full sm:w-[200px]">
+							<CityDropdown
+								cities={cities}
+								value={selectedCityFilter}
+								onChange={setSelectedCityFilter}
+								label={undefined}
+								required={false}
+							/>
+						</div>
+
+						{/* Reset Filters */}
+						{selectedCityFilter && (
+							<button
+								onClick={() => {
+									setSelectedCityFilter('')
+								}}
+								className="px-3 py-2 text-sm rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors flex items-center justify-center gap-1.5"
+							>
+								<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+								</svg>
+								Сбросить
+							</button>
+						)}
+					</div>
 				</div>
 			</div>
-
+			
 			{/* Список периодов */}
-			<div className="space-y-3 sm:space-y-4">
+			<div className="space-y-3">
 				{filteredPeriods.length === 0 ? (
 					<div className="bg-white rounded-xl border border-slate-200 p-8 sm:p-12 text-center">
 						<div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">

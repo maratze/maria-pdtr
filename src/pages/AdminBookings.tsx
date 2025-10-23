@@ -136,7 +136,7 @@ export default function AdminBookings() {
 	if (loading) return <AdminPreloader />
 
 	return (
-		<div className="space-y-4 sm:space-y-5">
+		<div className="space-y-3">
 			{toast && (
 				<Toast
 					message={toast.message}
@@ -146,7 +146,7 @@ export default function AdminBookings() {
 			)}
 
 			{/* Статистика */}
-			<div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+			<div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
 				<div className="bg-white rounded-xl border border-slate-200 p-4 sm:p-5">
 					<div className="flex items-center gap-3 sm:gap-4">
 						<div className="w-10 h-10 sm:w-12 sm:h-12 bg-slate-50 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -375,7 +375,7 @@ export default function AdminBookings() {
 			</div>
 
 			{/* Список бронирований */}
-			<div className="space-y-3 sm:space-y-4">
+			<div className="space-y-3">
 				{bookings.length === 0 ? (
 					<div className="bg-white rounded-xl border border-slate-200 p-8 sm:p-12 text-center">
 						<div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -503,7 +503,7 @@ export default function AdminBookings() {
 								</button>
 							</div>
 
-							<div className="space-y-4">
+							<div className="space-y-3">
 								<div>
 									<label className="block text-sm font-medium text-slate-700 mb-1.5">
 										Клиент
