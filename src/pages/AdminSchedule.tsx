@@ -197,7 +197,7 @@ export default function AdminSchedule() {
 							</svg>
 						</div>
 						<div>
-							<p className="text-xl sm:text-2xl font-semibold text-slate-900">
+							<p className="text-xl sm:text-2xl font-regular text-slate-900">
 								{totalPeriods}
 							</p>
 							<p className="text-xs sm:text-sm text-slate-500">

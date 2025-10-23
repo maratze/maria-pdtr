@@ -199,7 +199,7 @@ export default function AdminCategories() {
 										disabled={formLoading}
 										className="flex-1 sm:flex-none px-3 py-2 h-10 rounded-lg bg-emerald-600 text-white text-sm font-regular hover:bg-emerald-700 disabled:opacity-50 transition-colors"
 									>
-										{formLoading ? 'Добавление...' : 'Создать'}
+										{formLoading ? 'Добавление...' : 'Создать категорию'}
 									</button>
 								</div>
 							</div>
