@@ -267,7 +267,7 @@ export default function AdminReviews() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">На модерации</p>
-              <p className="text-2xl font-semibold text-slate-900 mt-1">{allPendingReviews.length}</p>
+              <p className="text-2xl font-semibold text-slate-900">{allPendingReviews.length}</p>
             </div>
             <div className="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center">
               <svg className="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -280,7 +280,7 @@ export default function AdminReviews() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Одобренные</p>
-              <p className="text-2xl font-semibold text-slate-900 mt-1">{allApprovedReviews.length}</p>
+              <p className="text-2xl font-semibold text-slate-900">{allApprovedReviews.length}</p>
             </div>
             <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center">
               <svg className="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -165,7 +165,7 @@ export default function AdminSchedule() {
 
 	if (loading) return <AdminPreloader />
 
-	const totalPeriods = filteredPeriods.length
+	const totalPeriods = periods.length
 
 	return (
 		<div className="space-y-4 sm:space-y-5">
@@ -197,15 +197,15 @@ export default function AdminSchedule() {
 							</svg>
 						</div>
 						<div>
-							<p className="text-xl sm:text-2xl font-regular text-slate-900">
-								{totalPeriods}
-							</p>
-							<p className="text-xs sm:text-sm text-slate-500">
+							<p className="text-xs font-medium text-slate-500 uppercase tracking-wide">
 								{totalPeriods === 1
 									? 'период расписания'
 									: totalPeriods > 1 && totalPeriods < 5
 										? 'периода расписания'
 										: 'периодов расписания'}
+							</p>
+							<p className="text-xl sm:text-2xl font-regular text-slate-900">
+								{totalPeriods}
 							</p>
 						</div>
 					</div>
