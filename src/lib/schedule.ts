@@ -104,7 +104,7 @@ export async function generateSlotsForPeriod(periodId: string): Promise<void> {
 
 /**
  * Создать новый период расписания
- * Автоматически создаст слоты времени через триггер
+ * Теперь НЕ создает слоты - они генерируются динамически на фронте
  */
 export async function createSchedulePeriod(
 	period: SchedulePeriodInsert
@@ -124,22 +124,12 @@ export async function createSchedulePeriod(
 		throw error;
 	}
 
-	// Ждем немного, чтобы триггер срабатал, затем генерируем слоты явно
-	if ((data as any)?.id) {
-		await new Promise(resolve => setTimeout(resolve, 500));
-		try {
-			await generateSlotsForPeriod((data as any).id);
-		} catch (slotError) {
-			console.warn('Slots may already be generating via trigger:', slotError);
-		}
-	}
-
 	return data;
 }
 
 /**
  * Обновить период расписания
- * При изменении дат/времени автоматически пересоздаст слоты через триггер
+ * Слоты теперь генерируются динамически, поэтому пересоздание не требуется
  */
 export async function updateSchedulePeriod(
 	id: string,
@@ -159,14 +149,6 @@ export async function updateSchedulePeriod(
 	if (error) {
 		console.error('Error updating schedule period:', error);
 		throw error;
-	}
-
-	// Ждем и регенерируем слоты
-	await new Promise(resolve => setTimeout(resolve, 500));
-	try {
-		await generateSlotsForPeriod(id);
-	} catch (slotError) {
-		console.warn('Slots may already be regenerating via trigger:', slotError);
 	}
 
 	return data;
@@ -255,7 +237,7 @@ export async function getActiveSchedulePeriodsByCity(
 
 /**
  * Создать периоды расписания на каждый день в диапазоне
- * Оптимизировано: создает все периоды за раз, триггер генерирует слоты автоматически
+ * Оптимизировано: создает только периоды, слоты генерируются динамически на фронте
  */
 export async function createSchedulePeriodsForDateRange(
 	startDate: string,
@@ -292,8 +274,7 @@ export async function createSchedulePeriodsForDateRange(
 	}
 
 	// Вставляем все периоды за один раз
-	// Триггер auto_generate_slots_on_period_insert будет вызван для каждого периода БД
-	// но это сработает в БД параллельно, не в JS
+	// БЕЗ генерации слотов - они будут создаваться динамически!
 	const { data, error } = await supabaseAdmin
 		.from('schedule_periods')
 		.insert(periodsToCreate as never)
@@ -304,10 +285,5 @@ export async function createSchedulePeriodsForDateRange(
 		throw error;
 	}
 
-	const createdPeriods = data || [];
-
-	// Ждем, чтобы триггеры в БД сработали
-	await new Promise(resolve => setTimeout(resolve, 800));
-
-	return createdPeriods;
+	return data || [];
 }

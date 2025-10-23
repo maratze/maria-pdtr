@@ -1,15 +1,16 @@
 import { useState, useEffect } from 'react'
-import type { TimeSlot, SchedulePeriodWithCity, City } from '../types/booking'
+import type { SchedulePeriodWithCity, City } from '../types/booking'
+import { generateSlotsForDateAndCity, type GeneratedSlot, type OptimizedBooking } from '../lib/slots'
 
 interface ScheduleCalendarProps {
-	slots: (TimeSlot & { period: SchedulePeriodWithCity })[]
 	periods: SchedulePeriodWithCity[]
+	bookings: OptimizedBooking[]
 	cities: City[]
 	selectedCityFilter: string
 	onCityFilterChange: (cityId: string) => void
-	onSlotClick: (slot: TimeSlot) => void
-	onPeriodEdit: (period: SchedulePeriodWithCity) => void
-	onPeriodDelete: (id: string) => void
+	onSlotClick?: (slot: GeneratedSlot) => void
+	onPeriodEdit?: (period: SchedulePeriodWithCity) => void
+	onPeriodDelete?: (id: string) => void
 	onDeleteMultiplePeriods?: (ids: string[]) => void | Promise<void>
 	onCreatePeriodForRange?: (startDate: string, endDate: string) => void
 }
@@ -17,13 +18,10 @@ interface ScheduleCalendarProps {
 interface DayInfo {
 	date: string
 	dayOfMonth: number
-	periods: {
-		period: SchedulePeriodWithCity
-		slotCount: number
-		bookedCount: number
-		freeCount: number
-		slots: TimeSlot[]
-	}[]
+	periods: SchedulePeriodWithCity[]
+	totalSlots: number
+	bookedSlots: number
+	freeSlots: number
 }
 
 // Палитра пастельных цветов для городов
@@ -43,8 +41,8 @@ const cityColors = [
 ]
 
 export default function ScheduleCalendar({
-	slots,
 	periods,
+	bookings,
 	cities,
 	selectedCityFilter,
 	onCityFilterChange,
@@ -65,7 +63,7 @@ export default function ScheduleCalendar({
 		return cityColors[index % cityColors.length]
 	}
 
-	// Группируем слоты по датам и периодам
+	// Генерируем информацию о днях на основе периодов и бронирований
 	useEffect(() => {
 		const dayMap: Record<string, DayInfo> = {}
 
@@ -75,50 +73,34 @@ export default function ScheduleCalendar({
 		const daysInMonth = new Date(year, month + 1, 0).getDate()
 
 		for (let i = 1; i <= daysInMonth; i++) {
-			// Используем локальную дату без конвертации в UTC
 			const year_str = String(year).padStart(4, '0')
 			const month_str = String(month + 1).padStart(2, '0')
 			const day_str = String(i).padStart(2, '0')
 			const dateStr = `${year_str}-${month_str}-${day_str}`
+
+			// Находим периоды для этой даты
+			const dayPeriods = periods.filter(period => {
+				const periodStart = period.start_date
+				const periodEnd = period.end_date
+				return dateStr >= periodStart && dateStr <= periodEnd
+			})
+
+			// Генерируем слоты для этой даты и считаем статистику
+			const daySlots = generateSlotsForDateAndCity(periods, bookings, dateStr, selectedCityFilter)
+			const bookedSlots = daySlots.filter(slot => slot.isBooked).length
+
 			dayMap[dateStr] = {
 				date: dateStr,
 				dayOfMonth: i,
-				periods: [],
+				periods: dayPeriods,
+				totalSlots: daySlots.length,
+				bookedSlots: bookedSlots,
+				freeSlots: daySlots.length - bookedSlots,
 			}
 		}
 
-		// Заполняем данные из слотов
-		slots.forEach((slotWithPeriod) => {
-			const dateStr = slotWithPeriod.slot_date
-			if (dayMap[dateStr]) {
-				// Находим или создаем запись для периода в этом дне
-				let periodEntry = dayMap[dateStr].periods.find(
-					p => p.period.id === slotWithPeriod.period.id
-				)
-
-				if (!periodEntry) {
-					periodEntry = {
-						period: slotWithPeriod.period,
-						slotCount: 0,
-						bookedCount: 0,
-						freeCount: 0,
-						slots: [],
-					}
-					dayMap[dateStr].periods.push(periodEntry)
-				}
-
-				periodEntry.slots.push(slotWithPeriod)
-				periodEntry.slotCount++
-				if (slotWithPeriod.is_booked) {
-					periodEntry.bookedCount++
-				} else {
-					periodEntry.freeCount++
-				}
-			}
-		})
-
 		setDaysInfo(dayMap)
-	}, [slots, currentMonth])
+	}, [periods, bookings, currentMonth, selectedCityFilter])
 
 	const handlePrevMonth = () => {
 		setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))
@@ -239,16 +221,16 @@ export default function ScheduleCalendar({
 				{/* Периоды на этот день */}
 				{hasPeriods && (
 					<div className="space-y-1">
-						{dayInfo.periods.map((periodEntry) => {
-							const cityColor = getCityColor(periodEntry.period.city_id)
+						{dayInfo.periods.map((period) => {
+							const cityColor = getCityColor(period.city_id)
 							return (
 								<div
-									key={periodEntry.period.id}
+									key={period.id}
 									className={`px-1.5 py-1 rounded ${cityColor.bg} ${cityColor.text}`}
-									title={`${periodEntry.period.city?.name}: ${periodEntry.period.work_start_time.slice(0, 5)} - ${periodEntry.period.work_end_time.slice(0, 5)}`}
+									title={`${period.city?.name}: ${period.work_start_time.slice(0, 5)} - ${period.work_end_time.slice(0, 5)}`}
 								>
-									<div className="text-[12px] font-medium leading-tight">{periodEntry.period.city?.name}</div>
-									<div className="text-[12px] leading-tight">{`${periodEntry.period.work_start_time.slice(0, 5)} - ${periodEntry.period.work_end_time.slice(0, 5)}`}</div>
+									<div className="text-[12px] font-medium leading-tight">{period.city?.name}</div>
+									<div className="text-[12px] leading-tight">{`${period.work_start_time.slice(0, 5)} - ${period.work_end_time.slice(0, 5)}`}</div>
 								</div>
 							)
 						})}

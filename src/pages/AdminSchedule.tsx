@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import type {
 	SchedulePeriodWithCity,
 	City,
-	TimeSlot,
 } from '../types/booking'
 import {
 	getSchedulePeriods,
@@ -10,17 +9,17 @@ import {
 	createSchedulePeriodsForDateRange,
 } from '../lib/schedule'
 import { getCities } from '../lib/cities'
-import { getTimeSlotsByPeriod } from '../lib/timeSlots'
+import { type OptimizedBooking } from '../lib/slots'
 import AdminPreloader from '../components/AdminPreloader'
 import Toast from '../components/Toast'
 import ConfirmDialog from '../components/ConfirmDialog'
-import ScheduleCalendar from '../components/ScheduleCalendar'
-import SlotDetailsDialog from '../components/SlotDetailsDialog'
+import ScheduleCalendar from '../components/ScheduleCalendar.tsx'
 import CreatePeriodDialog from '../components/CreatePeriodDialog'
 
 export default function AdminSchedule() {
 	const [periods, setPeriods] = useState<SchedulePeriodWithCity[]>([])
 	const [cities, setCities] = useState<City[]>([])
+	const [bookings] = useState<OptimizedBooking[]>([]) // Новое состояние для бронирований
 	const [loading, setLoading] = useState(true)
 	const [selectedCityFilter, setSelectedCityFilter] = useState<string>('')
 	const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
@@ -28,11 +27,6 @@ export default function AdminSchedule() {
 	const [deleteMultipleIds, setDeleteMultipleIds] = useState<string[]>([])
 	const [deleteMultipleLoading, setDeleteMultipleLoading] = useState(false)
 	const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'warning' | 'info' } | null>(null)
-
-	// Для отображения календаря
-	const [periodSlots, setPeriodSlots] = useState<Record<string, TimeSlot[]>>({})
-	const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null)
-	const [showSlotDetails, setShowSlotDetails] = useState(false)
 
 	// Для создания периода на диапазон дат
 	const [showCreatePeriodDialog, setShowCreatePeriodDialog] = useState(false)
@@ -49,15 +43,11 @@ export default function AdminSchedule() {
 			const [periodsData, citiesData] = await Promise.all([
 				getSchedulePeriods(),
 				getCities(),
+				// TODO: загрузить бронирования когда создадим API
 			])
 			setPeriods(periodsData)
 			setCities(citiesData)
-			// Загружаем слоты для всех периодов
-			if (periodsData.length > 0) {
-				await Promise.all(
-					periodsData.map(period => loadPeriodSlots(period.id))
-				)
-			}
+			// setBookings(bookingsData) // Пока пустой массив
 		} catch (error) {
 			console.error('Error loading data:', error)
 			setToast({ message: 'Ошибка загрузки данных', type: 'error' })
@@ -66,30 +56,10 @@ export default function AdminSchedule() {
 		}
 	}
 
-	async function loadPeriodSlots(periodId: string) {
-		if (periodSlots[periodId]) {
-			return // Уже загружены
-		}
-		try {
-			// Добавляем небольшую задержку для гарантии генерации слотов
-			await new Promise(resolve => setTimeout(resolve, 500))
-			const slots = await getTimeSlotsByPeriod(periodId)
-			setPeriodSlots((prev) => ({ ...prev, [periodId]: slots }))
 
-			if (slots.length === 0) {
-				setToast({
-					message: 'Слоты еще генерируются. Попробуйте еще раз через несколько секунд.',
-					type: 'info'
-				})
-			}
-		} catch (error) {
-			console.error('Error loading slots:', error)
-			setToast({ message: 'Ошибка загрузки слотов', type: 'error' })
-		}
-	}
 
 	function handleEdit(period: SchedulePeriodWithCity) {
-		// Редактирование - будет обработано в модальном окне календаря
+		// Редактирование периода
 		console.log('Edit period:', period)
 	}
 
@@ -162,11 +132,6 @@ export default function AdminSchedule() {
 			const updatedPeriods = await getSchedulePeriods()
 			setPeriods(updatedPeriods)
 
-			// Загружаем слоты для новых периодов
-			await Promise.all(
-				newPeriods.map(period => loadPeriodSlots(period.id))
-			)
-
 			setShowCreatePeriodDialog(false)
 			setDateRangeForPeriod(null)
 			setToast({
@@ -188,15 +153,6 @@ export default function AdminSchedule() {
 		? periods.filter((p) => p.city_id === selectedCityFilter)
 		: periods
 
-	// Собираем все слоты из отфильтрованных периодов
-	const allSlots: (TimeSlot & { period: SchedulePeriodWithCity })[] = []
-	filteredPeriods.forEach(period => {
-		const slots = periodSlots[period.id] || []
-		slots.forEach(slot => {
-			allSlots.push({ ...slot, period })
-		})
-	})
-
 	if (loading) return <AdminPreloader />
 
 	return (
@@ -211,29 +167,15 @@ export default function AdminSchedule() {
 
 			{/* Календарь со всеми периодами */}
 			<ScheduleCalendar
-				slots={allSlots}
 				periods={filteredPeriods}
+				bookings={bookings}
 				cities={cities}
 				selectedCityFilter={selectedCityFilter}
 				onCityFilterChange={setSelectedCityFilter}
-				onSlotClick={(slot: TimeSlot) => {
-					setSelectedSlot(slot)
-					setShowSlotDetails(true)
-				}}
 				onPeriodEdit={handleEdit}
 				onPeriodDelete={handleDeletePeriod}
 				onDeleteMultiplePeriods={handleDeleteMultiplePeriods}
 				onCreatePeriodForRange={handleCreatePeriodForRange}
-			/>
-
-			{/* Модальное окно с информацией о слоте */}
-			<SlotDetailsDialog
-				isOpen={showSlotDetails}
-				slot={selectedSlot}
-				onClose={() => {
-					setShowSlotDetails(false)
-					setSelectedSlot(null)
-				}}
 			/>
 
 			{/* Диалог создания периода на диапазон дат */}
@@ -272,6 +214,21 @@ export default function AdminSchedule() {
 				confirmText="Удалить"
 				confirmLoading={deleteMultipleLoading}
 				variant="danger"
+			/>
+
+			{/* Модальное окно создания периода */}
+			<CreatePeriodDialog
+				isOpen={showCreatePeriodDialog}
+				onClose={() => {
+					setShowCreatePeriodDialog(false)
+					setDateRangeForPeriod(null)
+				}}
+				onSubmit={handleCreatePeriodSubmit}
+				startDate={dateRangeForPeriod?.start || null}
+				endDate={dateRangeForPeriod?.end || null}
+				isLoading={createPeriodLoading}
+				cities={cities}
+				existingPeriods={periods}
 			/>
 		</div>
 	)
