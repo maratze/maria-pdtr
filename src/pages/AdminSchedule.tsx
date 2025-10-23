@@ -40,10 +40,17 @@ export default function AdminSchedule() {
 	})
 
 	useEffect(() => {
-		loadData()
-	}, [selectedCityFilter]) // Автофильтрация при изменении города
+		loadInitialData()
+	}, [])
 
-	async function loadData() {
+	useEffect(() => {
+		if (selectedCityFilter) {
+			// Только обновляем данные при смене фильтра города
+			// без полной перезагрузки страницы
+		}
+	}, [selectedCityFilter])
+
+	async function loadInitialData() {
 		try {
 			setLoading(true)
 			const [periodsData, citiesData] = await Promise.all([
@@ -52,6 +59,12 @@ export default function AdminSchedule() {
 			])
 			setPeriods(periodsData)
 			setCities(citiesData)
+
+			// Установить Москву по умолчанию
+			const moscowCity = citiesData.find(city => city.slug === 'moscow')
+			if (moscowCity) {
+				setSelectedCityFilter(moscowCity.id)
+			}
 		} catch (error) {
 			console.error('Error loading data:', error)
 			setToast({ message: 'Ошибка загрузки данных', type: 'error' })
@@ -177,10 +190,10 @@ export default function AdminSchedule() {
 				/>
 			)}
 
-			{/* Статистика */}
+			{/* Статистика и Форма */}
 			<div className="bg-white rounded-xl border border-slate-200 p-4 sm:p-5">
-				<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-					<div className="flex items-center gap-3 sm:gap-4">
+				<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4 sm:mb-0">
+					<div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
 						<div className="w-10 h-10 sm:w-12 sm:h-12 bg-ocean-50 rounded-xl flex items-center justify-center flex-shrink-0">
 							<svg
 								className="w-5 h-5 sm:w-6 sm:h-6 text-ocean-600"
@@ -196,7 +209,7 @@ export default function AdminSchedule() {
 								/>
 							</svg>
 						</div>
-						<div>
+						<div className="flex-1">
 							<p className="text-xs font-medium text-slate-500 uppercase tracking-wide">
 								{totalPeriods === 1
 									? 'период расписания'
@@ -210,144 +223,148 @@ export default function AdminSchedule() {
 						</div>
 					</div>
 
-					<div className="flex flex-col sm:flex-row gap-3 sm:items-center w-full sm:w-auto">
-						<div className="flex-1 sm:flex-none sm:w-48">
-							<CityDropdown
-								cities={cities}
-								value={selectedCityFilter}
-								onChange={setSelectedCityFilter}
-								label={undefined}
-								required={false}
-							/>
-						</div>
-
-						<button
-							onClick={() => setShowForm(!showForm)}
-							className="flex items-center justify-center gap-2 bg-ocean-600 text-white text-sm font-normal px-4 py-2 h-10 rounded-lg hover:bg-ocean-700 transition-colors whitespace-nowrap"
-						>
-							<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-							</svg>
-							{showForm ? 'Отмена' : 'Добавить период'}
-						</button>
-					</div>
+					<button
+						onClick={() => {
+							setShowForm(!showForm)
+							setEditingPeriod(null)
+						}}
+						className="w-full sm:w-auto flex items-center justify-center gap-2 px-3 py-2.5 sm:py-3 h-10 rounded-lg bg-ocean-600 text-white text-sm font-normal hover:bg-ocean-700 transition-colors flex-shrink-0"
+					>
+						<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+						</svg>
+						{showForm ? 'Отмена' : 'Добавить период'}
+					</button>
 				</div>
-			</div>
 
-			{/* Форма создания/редактирования */}
-			{showForm && (
-				<div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-					<div className="border-b border-slate-200 bg-slate-50 px-4 sm:px-5 py-3">
-						<h3 className="text-base sm:text-lg font-semibold text-slate-900">
-							{editingPeriod ? 'Редактирование периода' : 'Новый период расписания'}
-						</h3>
-					</div>
+				{/* Форма создания/редактирования */}
+				{showForm && (
+					<form onSubmit={handleSubmit} className="mt-4 pt-4 border-t border-slate-200">
+						<div className="space-y-4">
+							<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+								<div>
+									<CityDropdown
+										cities={cities}
+										value={formData.city_id}
+										onChange={(value) =>
+											setFormData({ ...formData, city_id: value })
+										}
+										label="Город"
+										required={true}
+									/>
+								</div>
 
-					<form onSubmit={handleSubmit} className="p-4 sm:p-5 space-y-4">
-						<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-							<div>
-								<CityDropdown
-									cities={cities}
-									value={formData.city_id}
-									onChange={(value) =>
-										setFormData({ ...formData, city_id: value })
-									}
-									label="Город"
-									required={true}
-								/>
+								<div>
+									<label className="block text-sm font-medium text-slate-700 mb-1.5">
+										Период работы <span className="text-red-500">*</span>
+									</label>
+									<div className="grid grid-cols-2 gap-2">
+										<input
+											type="date"
+											value={formData.start_date}
+											onChange={(e) =>
+												setFormData({ ...formData, start_date: e.target.value })
+											}
+											className="text-sm rounded-lg border border-slate-200 px-3 py-2 h-10 focus:border-ocean-400 focus:outline-none focus:ring-2 focus:ring-ocean-100"
+											required
+											disabled={formLoading}
+										/>
+										<input
+											type="date"
+											value={formData.end_date}
+											onChange={(e) =>
+												setFormData({ ...formData, end_date: e.target.value })
+											}
+											className="text-sm rounded-lg border border-slate-200 px-3 py-2 h-10 focus:border-ocean-400 focus:outline-none focus:ring-2 focus:ring-ocean-100"
+											required
+											disabled={formLoading}
+										/>
+									</div>
+								</div>
 							</div>
 
-							<div>
-								<label className="block text-sm font-medium text-slate-700 mb-1.5">
-									Период работы <span className="text-red-500">*</span>
-								</label>
-								<div className="grid grid-cols-2 gap-2">
+							<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+								<div>
+									<label className="block text-sm font-medium text-slate-700 mb-1.5">
+										Время начала работы
+									</label>
 									<input
-										type="date"
-										value={formData.start_date}
+										type="time"
+										value={formData.work_start_time.slice(0, 5)}
 										onChange={(e) =>
-											setFormData({ ...formData, start_date: e.target.value })
+											setFormData({
+												...formData,
+												work_start_time: e.target.value + ':00',
+											})
 										}
-										className="text-sm rounded-lg border border-slate-200 px-3 py-2 h-10 focus:border-ocean-400 focus:outline-none focus:ring-2 focus:ring-ocean-100"
-										required
+										className="w-full text-sm rounded-lg border border-slate-200 px-3 py-2 h-10 focus:border-ocean-400 focus:outline-none focus:ring-2 focus:ring-ocean-100"
 										disabled={formLoading}
 									/>
+								</div>
+
+								<div>
+									<label className="block text-sm font-medium text-slate-700 mb-1.5">
+										Время окончания работы
+									</label>
 									<input
-										type="date"
-										value={formData.end_date}
+										type="time"
+										value={formData.work_end_time.slice(0, 5)}
 										onChange={(e) =>
-											setFormData({ ...formData, end_date: e.target.value })
+											setFormData({
+												...formData,
+												work_end_time: e.target.value + ':00',
+											})
 										}
-										className="text-sm rounded-lg border border-slate-200 px-3 py-2 h-10 focus:border-ocean-400 focus:outline-none focus:ring-2 focus:ring-ocean-100"
-										required
+										className="w-full text-sm rounded-lg border border-slate-200 px-3 py-2 h-10 focus:border-ocean-400 focus:outline-none focus:ring-2 focus:ring-ocean-100"
 										disabled={formLoading}
 									/>
 								</div>
 							</div>
-						</div>
 
-						<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-							<div>
-								<label className="block text-sm font-medium text-slate-700 mb-1.5">
-									Время начала работы
-								</label>
-								<input
-									type="time"
-									value={formData.work_start_time.slice(0, 5)}
-									onChange={(e) =>
-										setFormData({
-											...formData,
-											work_start_time: e.target.value + ':00',
-										})
-									}
-									className="w-full text-sm rounded-lg border border-slate-200 px-3 py-2 h-10 focus:border-ocean-400 focus:outline-none focus:ring-2 focus:ring-ocean-100"
+							<div className="flex flex-col-reverse sm:flex-row gap-3 pt-2">
+								<button
+									type="button"
+									onClick={resetForm}
 									disabled={formLoading}
-								/>
-							</div>
-
-							<div>
-								<label className="block text-sm font-medium text-slate-700 mb-1.5">
-									Время окончания работы
-								</label>
-								<input
-									type="time"
-									value={formData.work_end_time.slice(0, 5)}
-									onChange={(e) =>
-										setFormData({
-											...formData,
-											work_end_time: e.target.value + ':00',
-										})
-									}
-									className="w-full text-sm rounded-lg border border-slate-200 px-3 py-2 h-10 focus:border-ocean-400 focus:outline-none focus:ring-2 focus:ring-ocean-100"
+									className="flex-1 sm:flex-none bg-slate-100 text-slate-700 text-sm font-regular px-4 py-2 h-10 rounded-lg hover:bg-slate-200 transition-colors disabled:opacity-50"
+								>
+									Отмена
+								</button>
+								<button
+									type="submit"
 									disabled={formLoading}
-								/>
+									className="flex-1 sm:flex-none bg-emerald-600 text-white text-sm font-regular px-4 py-2 h-10 rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+								>
+									{formLoading
+										? 'Сохранение...'
+										: editingPeriod
+											? 'Сохранить'
+											: 'Создать период'}
+								</button>
 							</div>
-						</div>
-
-						<div className="flex flex-col-reverse sm:flex-row gap-3 pt-2">
-							<button
-								type="button"
-								onClick={resetForm}
-								disabled={formLoading}
-								className="flex-1 sm:flex-none bg-slate-100 text-slate-700 text-sm font-regular px-4 py-2 h-10 rounded-lg hover:bg-slate-200 transition-colors disabled:opacity-50"
-							>
-								Отмена
-							</button>
-							<button
-								type="submit"
-								disabled={formLoading}
-								className="flex-1 sm:flex-none bg-emerald-600 text-white text-sm font-regular px-4 py-2 h-10 rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-							>
-								{formLoading
-									? 'Сохранение...'
-									: editingPeriod
-										? 'Сохранить'
-										: 'Создать период'}
-							</button>
 						</div>
 					</form>
+				)}
+			</div>
+
+			{/* Фильтр города */}
+			<div className="bg-white rounded-xl border border-slate-200 p-4 sm:p-5">
+				<div className="flex items-center gap-3 mb-4">
+					<svg className="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+					</svg>
+					<h3 className="text-sm font-medium text-slate-700">Фильтр по городу</h3>
 				</div>
-			)}
+				<div className="w-full sm:w-48">
+					<CityDropdown
+						cities={cities}
+						value={selectedCityFilter}
+						onChange={setSelectedCityFilter}
+						label={undefined}
+						required={false}
+					/>
+				</div>
+			</div>
 
 			{/* Список периодов */}
 			<div className="space-y-3 sm:space-y-4">
@@ -368,12 +385,12 @@ export default function AdminSchedule() {
 								/>
 							</svg>
 						</div>
-						<p className="text-slate-500 text-sm mb-3">
+						<p className="text-slate-500 text-md mb-3">
 							Нет периодов расписания
 						</p>
 						<button
 							onClick={() => setShowForm(true)}
-							className="text-ocean-600 hover:text-ocean-700 text-sm font-medium"
+							className="text-ocean-600 hover:text-ocean-700 text-md font-medium"
 						>
 							+ Создать первый период
 						</button>
