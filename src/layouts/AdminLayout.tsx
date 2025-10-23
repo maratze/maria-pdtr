@@ -47,6 +47,22 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 				{/* Navigation */}
 				<nav className="flex-1 px-3 py-3 space-y-1 overflow-y-auto">
 					<Link
+						to="/admin/services"
+						onClick={() => setIsMobileMenuOpen(false)}
+						className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-normal transition-all duration-200 ${isActive('/admin/services')
+							? 'bg-ocean-50 text-ocean-700 shadow-sm'
+							: 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+							}`}
+					>
+						<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+						</svg>
+						<span>Услуги</span>
+						{isActive('/admin/services') && (
+							<div className="ml-auto w-1.5 h-1.5 rounded-full bg-ocean-600"></div>
+						)}
+					</Link>
+					<Link
 						to="/admin/categories"
 						onClick={() => setIsMobileMenuOpen(false)}
 						className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-normal transition-all duration-200 ${isActive('/admin/categories')
@@ -115,6 +131,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 					<h1 className="text-md font-normal text-slate-800 hidden lg:block">
 						{isActive('/admin/reviews') && 'Модерация отзывов'}
 						{isActive('/admin/categories') && 'Управление категориями'}
+						{isActive('/admin/services') && 'Управление услугами'}
 					</h1>
 					<div className="hidden lg:flex items-center gap-2 text-sm text-slate-500">
 						<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

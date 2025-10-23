@@ -1,52 +1,47 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import SectionHeader from './SectionHeader';
 import SectionDescription from './SectionDescription';
+import { getServices } from '../lib/services';
+
+// Вспомогательная функция для форматирования длительности
+function formatDuration(from, to, type) {
+	if (type === 'none') return ''
+
+	const value = from === to ? `${from}` : `${from} - ${to}`
+
+	switch (type) {
+		case 'minutes':
+			return `${value} мин`
+		case 'hours':
+			return `${value} ${from === 1 ? 'час' : from < 5 ? 'часа' : 'часов'}`
+		case 'sessions':
+			return `${value} ${from === 1 ? 'сеанс' : from < 5 ? 'сеанса' : 'сеансов'}`
+		default:
+			return ''
+	}
+}
+
+// Вспомогательная функция для форматирования цены
+function formatPrice(price, priceFrom) {
+	const formatted = price.toLocaleString('ru-RU')
+	return priceFrom ? `от ${formatted} ₽` : `${formatted} ₽`
+}
 
 const Services = () => {
-	const services = [
-		{
-			id: 1,
-			title: "Базовый",
-			price: "10 000 ₽",
-			duration: "45 - 60 мин",
-			description: "Индивидуальный сеанс"
-		},
-		{
-			id: 2,
-			title: "Денежные вопросы, проявленность",
-			price: "15 000 ₽",
-			duration: "60 - 90 мин",
-			description: "Индивидуальный сеанс"
-		},
-		{
-			id: 3,
-			title: "Работа с установками и убеждениями",
-			price: "15 000 ₽",
-			duration: "60 - 90 мин",
-			description: "Индивидуальный сеанс"
-		},
-		{
-			id: 4,
-			title: "Комплекс",
-			price: "25 000 ₽",
-			duration: "3 сеанса",
-			description: "Более глубокое погружение в метод P-DTR. Включает 3 сеанса."
-		},
-		{
-			id: 5,
-			title: "Индивидуальное сопровождение",
-			price: "от 30 000 ₽",
-			duration: "",
-			description: "Мое персональное сопровождение Вас до достижения желаемой цели/состояния, консультирование и коррекция. Входит 1-2 сеанса офлайн и безлимитные консультации онлайн."
-		},
-		{
-			id: 6,
-			title: "Обучение методу психоэмоциональной коррекции",
-			price: "40 000 ₽",
-			duration: "16 часов",
-			description: "Групповое обучение до 4х человек. Длительность 16 часов (4ч. теория, 10ч. практика)"
+	const [services, setServices] = useState([])
+	const [loading, setLoading] = useState(true)
+
+	useEffect(() => {
+		async function loadServices() {
+			setLoading(true)
+			const { data, error } = await getServices()
+			if (!error && data) {
+				setServices(data)
+			}
+			setLoading(false)
 		}
-	]
+		loadServices()
+	}, [])
 
 	return (
 		<section id="services" className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-ocean-900 py-12 sm:py-16 lg:py-24 overflow-hidden">
@@ -77,38 +72,51 @@ const Services = () => {
 
 				{/* Компактный список услуг */}
 				<div className="max-w-4xl mx-auto mb-8 sm:mb-12">
-					<div className="bg-white/5 backdrop-blur-sm rounded-xl sm:rounded-2xl overflow-hidden border border-white/10">
-						{services.map((service, index) => (
-							<div
-								key={service.id}
-								className={`
-									p-4 sm:p-6 transition-all duration-300 hover:bg-white/10
-									${index !== services.length - 1 ? 'border-b border-white/10' : ''}
-								`}
-							>
-								<div className="flex flex-col gap-2">
-									<div className="flex items-start justify-between gap-3">
-										<h3 className="text-base sm:text-lg md:text-xl font-light text-white leading-tight flex-1">
-											{service.title}
-										</h3>
-										<div className="text-lg sm:text-xl md:text-2xl font-light text-ocean-300 whitespace-nowrap">
-											{service.price}
+					{loading ? (
+						<div className="bg-white/5 backdrop-blur-sm rounded-xl sm:rounded-2xl overflow-hidden border border-white/10 p-8 text-center">
+							<div className="inline-block w-8 h-8 border-4 border-ocean-300 border-t-transparent rounded-full animate-spin"></div>
+							<p className="text-slate-300 mt-4">Загрузка услуг...</p>
+						</div>
+					) : services.length === 0 ? (
+						<div className="bg-white/5 backdrop-blur-sm rounded-xl sm:rounded-2xl overflow-hidden border border-white/10 p-8 text-center">
+							<p className="text-slate-300">Услуги временно недоступны</p>
+						</div>
+					) : (
+						<div className="bg-white/5 backdrop-blur-sm rounded-xl sm:rounded-2xl overflow-hidden border border-white/10">
+							{services.map((service, index) => (
+								<div
+									key={service.id}
+									className={`
+										p-4 sm:p-6 transition-all duration-300 hover:bg-white/10
+										${index !== services.length - 1 ? 'border-b border-white/10' : ''}
+									`}
+								>
+									<div className="flex flex-col gap-2">
+										<div className="flex items-start justify-between gap-3">
+											<h3 className="text-base sm:text-lg md:text-xl font-light text-white leading-tight flex-1">
+												{service.title}
+											</h3>
+											<div className="text-lg sm:text-xl md:text-2xl font-light text-ocean-300 whitespace-nowrap">
+												{formatPrice(service.price, service.price_from)}
+											</div>
 										</div>
+
+										{service.duration_type !== 'none' && (
+											<p className="text-sm sm:text-base text-ocean-200">
+												{formatDuration(service.duration_from, service.duration_to, service.duration_type)}
+											</p>
+										)}
+
+										{service.description && (
+											<p className="text-sm sm:text-base text-slate-300 leading-relaxed">
+												{service.description}
+											</p>
+										)}
 									</div>
-
-									{service.duration && (
-										<p className="text-sm sm:text-base text-ocean-200">
-											{service.duration}
-										</p>
-									)}
-
-									<p className="text-sm sm:text-base text-slate-300 leading-relaxed">
-										{service.description}
-									</p>
 								</div>
-							</div>
-						))}
-					</div>
+							))}
+						</div>
+					)}
 				</div>
 
 				{/* Онлайн запись */}

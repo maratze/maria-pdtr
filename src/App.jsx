@@ -14,6 +14,7 @@ import Contacts from './components/Contacts'
 import AdminReviews from './pages/AdminReviews'
 import AdminLogin from './pages/AdminLogin'
 import AdminCategories from './pages/AdminCategories'
+import AdminServices from './pages/AdminServices'
 import NotFound from './pages/NotFound'
 import './App.css'
 
@@ -72,6 +73,16 @@ function App() {
 					<PrivateRoute>
 						<AdminLayout>
 							<AdminCategories />
+						</AdminLayout>
+					</PrivateRoute>
+				}
+			/>
+			<Route
+				path="/admin/services"
+				element={
+					<PrivateRoute>
+						<AdminLayout>
+							<AdminServices />
 						</AdminLayout>
 					</PrivateRoute>
 				}
