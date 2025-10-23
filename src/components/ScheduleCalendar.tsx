@@ -388,7 +388,7 @@ export default function ScheduleCalendar({
 
 									{onCreatePeriodForRange && (
 										<button
-											onClick={() => onCreatePeriodForRange(dateRangeStart, dateRangeEnd)}
+											onClick={() => onCreatePeriodForRange(dateRangeStart, dateRangeEnd || dateRangeStart)}
 											className="p-2 rounded-lg bg-white text-green-600 hover:bg-green-50 transition-all border border-green-200"
 											title="Добавить период на выбранный диапазон"
 										>

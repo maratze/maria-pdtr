@@ -255,7 +255,8 @@ export async function createSchedulePeriodsForDateRange(
 	const current = new Date(startDate + 'T00:00:00');
 	const end = new Date(endDate + 'T00:00:00');
 
-	while (current <= end) {
+	// Используем <= для включения последнего дня (поддержка 1 дня)
+	while (current.getTime() <= end.getTime()) {
 		// Используем локальную дату без конвертации в UTC
 		const year = String(current.getFullYear()).padStart(4, '0');
 		const month = String(current.getMonth() + 1).padStart(2, '0');
