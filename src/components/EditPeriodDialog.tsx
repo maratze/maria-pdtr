@@ -208,6 +208,9 @@ export default function EditPeriodDialog({
 									onChange={(value) => {
 										if (value !== null && value !== undefined) {
 											setSelectedCity(String(value))
+											// Обновляем слоты для нового города
+											const slots = generateSlotsForDateAndCity(periods, bookings, period.start_date, String(value))
+											setDaySlots(slots)
 										} else {
 											setSelectedCity('')
 										}

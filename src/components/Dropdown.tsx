@@ -105,6 +105,7 @@ export default function Dropdown<T extends DropdownOption>({
 
 			{/* Button */}
 			<button
+				type="button"
 				ref={buttonRef}
 				onClick={() => setIsOpen(!isOpen)}
 				className="w-full h-10 px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-900 text-sm font-regular flex items-center justify-between hover:border-ocean-300 focus:border-ocean-400 focus:outline-none focus:ring-2 focus:ring-ocean-100 transition-colors"
@@ -143,7 +144,8 @@ export default function Dropdown<T extends DropdownOption>({
 							{hasNullOption && (
 								<>
 									<button
-										onClick={() => {
+										onClick={(e) => {
+											e.stopPropagation()
 											onChange(null)
 											setIsOpen(false)
 										}}
@@ -169,7 +171,8 @@ export default function Dropdown<T extends DropdownOption>({
 							{options.map((option) => (
 								<button
 									key={option.id}
-									onClick={() => {
+									onClick={(e) => {
+										e.stopPropagation()
 										onChange(option.id)
 										setIsOpen(false)
 									}}
