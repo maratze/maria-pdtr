@@ -113,11 +113,11 @@ export default function CreatePeriodDialog({
 								day: 'numeric',
 								month: 'long',
 								year: 'numeric',
-							})} - {new Date(endDateValue + 'T00:00:00').toLocaleDateString('ru-RU', {
+							})} {endDateValue && startDate !== endDateValue ? `— ${new Date(endDateValue + 'T00:00:00').toLocaleDateString('ru-RU', {
 								day: 'numeric',
 								month: 'long',
 								year: 'numeric',
-							})}
+							})}` : ''}
 						</p>
 						<p className="text-sm text-slate-500 mt-1 font-regular">{daysCount} {daysCount === 1 ? 'день' : 'дней'}</p>
 					</div>

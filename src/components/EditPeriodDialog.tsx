@@ -46,6 +46,9 @@ export default function EditPeriodDialog({
 	// Проверяем наличие броней за день
 	const hasBookings = daySlots.some(slot => slot.isBooked)
 
+	// Проверяем, является ли период прошедшим (до текущей даты)
+	const isPastDate = period && new Date(period.start_date + 'T00:00:00') < new Date(new Date().setHours(0, 0, 0, 0))
+
 	// Проверяем, изменились ли данные периода
 	const hasChanges = period && (
 		selectedCity !== period.city_id ||
@@ -398,6 +401,10 @@ export default function EditPeriodDialog({
 													key={idx}
 													type="button"
 													onClick={() => {
+														if (isPastDate && !slot.isBooked) {
+															// Не позволяем бронировать слоты в прошедшие дни
+															return
+														}
 														if (slot.isBooked && booking) {
 															// Переключаемся в режим показа деталей
 															setSelectedBookingDetails(booking)
@@ -411,11 +418,14 @@ export default function EditPeriodDialog({
 															}
 														}
 													}}
-													className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${selectedSlots.includes(idx.toString())
-														? 'bg-ocean-500 text-white border border-ocean-600'
-														: slot.isBooked
-															? 'bg-red-50 text-red-700 border border-red-200 cursor-pointer hover:bg-red-100'
-															: 'bg-green-50 text-green-700 border border-green-200 hover:bg-green-100'
+													disabled={!!isPastDate && !slot.isBooked}
+													className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${isPastDate && !slot.isBooked
+															? 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed opacity-50'
+															: selectedSlots.includes(idx.toString())
+																? 'bg-ocean-500 text-white border border-ocean-600'
+																: slot.isBooked
+																	? 'bg-red-50 text-red-700 border border-red-200 cursor-pointer hover:bg-red-100'
+																	: 'bg-green-50 text-green-700 border border-green-200 hover:bg-green-100'
 														}`}
 												>
 													{slot.startTime} - {slot.endTime}
