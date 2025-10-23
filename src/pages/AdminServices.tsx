@@ -60,8 +60,6 @@ export default function AdminServices() {
 	const [deleteConfirmName, setDeleteConfirmName] = useState('')
 	const [deleteLoading, setDeleteLoading] = useState(false)
 	const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'warning' | 'info' } | null>(null)
-	const [formTouched, setFormTouched] = useState(false)
-	const [editTouched, setEditTouched] = useState(false)
 
 	// Функции проверки валидности форм
 	const isAddFormValid = () => {
@@ -88,7 +86,6 @@ export default function AdminServices() {
 
 	async function handleAddService(e: React.FormEvent) {
 		e.preventDefault()
-		setFormTouched(true)
 
 		if (!formData.title.trim() || formData.price <= 0) {
 			return
@@ -120,14 +117,11 @@ export default function AdminServices() {
 			price: 0,
 			price_from: false
 		})
-		setFormTouched(false)
 		setShowForm(false)
 		setToast({ message: 'Услуга создана', type: 'success' })
 	}
 
 	async function handleUpdateService(serviceId: string) {
-		setEditTouched(true)
-
 		if (!editData.title.trim() || editData.price <= 0) {
 			return
 		}
@@ -148,7 +142,6 @@ export default function AdminServices() {
 			))
 		}
 		setEditingId(null)
-		setEditTouched(false)
 		setToast({ message: 'Услуга обновлена', type: 'success' })
 	}
 
@@ -214,7 +207,6 @@ export default function AdminServices() {
 								onClick={() => {
 									setShowForm(true)
 									setEditingId(null)
-									setFormTouched(false)
 								}}
 								className="w-full sm:w-auto flex items-center justify-center gap-2 px-3 py-2.5 sm:py-3 h-10 rounded-lg bg-ocean-600 text-white text-sm font-normal hover:bg-ocean-700 transition-colors flex-shrink-0"
 							>
@@ -229,17 +221,6 @@ export default function AdminServices() {
 					{/* Add Form */}
 					{showForm && (
 						<form onSubmit={handleAddService} noValidate className="mt-4 pt-4 border-t border-slate-200">
-							{/* Фиксированное место для сообщения об ошибке */}
-							{formTouched && !isAddFormValid() && (
-								<div className="h-6 mb-2">
-									<p className="text-sm text-amber-600 flex items-center gap-1">
-										<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-											<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-										</svg>
-										{!formData.title.trim() ? 'Введите название услуги' : 'Введите корректную стоимость услуги'}
-									</p>
-								</div>
-							)}
 							<div className="space-y-3">
 								<input
 									type="text"
@@ -312,7 +293,6 @@ export default function AdminServices() {
 										type="button"
 										onClick={() => {
 											setShowForm(false)
-											setFormTouched(false)
 											setFormData({
 												title: '',
 												description: '',
@@ -352,17 +332,6 @@ export default function AdminServices() {
 								} ${index === services.length - 1 ? 'rounded-b-[10px]' : ''}`}>
 								{editingId === service.id ? (
 									<div className="space-y-3">
-										{/* Фиксированное место для сообщения об ошибке */}
-										{editTouched && !isEditFormValid() && (
-											<div className="h-6">
-												<p className="text-sm text-amber-600 flex items-center gap-1">
-													<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-														<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-													</svg>
-													{!editData.title.trim() ? 'Введите название услуги' : 'Введите корректную стоимость услуги'}
-												</p>
-											</div>
-										)}
 										<input
 											type="text"
 											value={editData.title}
@@ -433,7 +402,6 @@ export default function AdminServices() {
 											<button
 												onClick={() => {
 													setEditingId(null)
-													setEditTouched(false)
 												}}
 												className="sm:flex-none px-3 py-2 h-10 rounded-lg border border-slate-200 text-slate-600 text-sm font-regular hover:bg-slate-50 transition-colors"
 											>
@@ -470,7 +438,6 @@ export default function AdminServices() {
 											<button
 												onClick={() => {
 													setEditingId(service.id)
-													setEditTouched(false)
 													setEditData({
 														title: service.title,
 														description: service.description || '',

@@ -30,7 +30,6 @@ export default function AdminSchedule() {
 	const [deleteLoading, setDeleteLoading] = useState(false)
 	const [formLoading, setFormLoading] = useState(false)
 	const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'warning' | 'info' } | null>(null)
-	const [formTouched, setFormTouched] = useState(false)
 
 	// Форма
 	const [formData, setFormData] = useState<SchedulePeriodInsert>({
@@ -105,7 +104,6 @@ export default function AdminSchedule() {
 		})
 		setEditingPeriod(null)
 		setShowForm(false)
-		setFormTouched(false)
 	}
 
 	function handleEdit(period: SchedulePeriodWithCity) {
@@ -117,13 +115,11 @@ export default function AdminSchedule() {
 			work_start_time: period.work_start_time,
 			work_end_time: period.work_end_time,
 		})
-		setFormTouched(false)
 		setShowForm(true)
 	}
 
 	async function handleSubmit(e: React.FormEvent) {
 		e.preventDefault()
-		setFormTouched(true)
 
 		if (!formData.city_id || !formData.start_date || !formData.end_date) {
 			return
@@ -231,7 +227,6 @@ export default function AdminSchedule() {
 							onClick={() => {
 								setShowForm(true)
 								setEditingPeriod(null)
-								setFormTouched(false)
 							}}
 							className="w-full sm:w-auto flex items-center justify-center gap-2 px-3 py-2.5 sm:py-3 h-10 rounded-lg bg-ocean-600 text-white text-sm font-normal hover:bg-ocean-700 transition-colors flex-shrink-0"
 						>
@@ -246,17 +241,6 @@ export default function AdminSchedule() {
 				{/* Форма создания/редактирования */}
 				{showForm && (
 					<form onSubmit={handleSubmit} noValidate className="mt-4 pt-4 border-t border-slate-200">
-						{/* Фиксированное место для сообщения об ошибке */}
-						{formTouched && !isFormValid() && (
-							<div className="h-6 mb-2">
-								<p className="text-sm text-amber-600 flex items-center gap-1">
-									<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-									</svg>
-									Заполните все обязательные поля
-								</p>
-							</div>
-						)}
 						<div className="space-y-3">
 							<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 								<div>
