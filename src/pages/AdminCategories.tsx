@@ -193,16 +193,16 @@ export default function AdminCategories() {
 					{showForm && (
 						<form onSubmit={handleAddCategory} noValidate className="mt-4 pt-4 border-t border-slate-200">
 							{/* Фиксированное место для сообщения об ошибке */}
-							<div className="h-6 mb-2">
-								{formTouched && !isAddFormValid() && (
+							{formTouched && !isAddFormValid() && (
+								<div className="h-6 mb-2">
 									<p className="text-sm text-amber-600 flex items-center gap-1">
 										<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 											<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
 										</svg>
 										Введите название категории
 									</p>
-								)}
-							</div>
+								</div>
+							)}
 							<div className="space-y-3">
 								<input
 									type="text"
@@ -257,16 +257,16 @@ export default function AdminCategories() {
 								{editingId === category.id ? (
 									<div className="space-y-2">
 										{/* Фиксированное место для сообщения об ошибке */}
-										<div className="h-6">
-											{editTouched && !isEditFormValid() && (
+										{editTouched && !isEditFormValid() && (
+											<div className="h-6">
 												<p className="text-sm text-amber-600 flex items-center gap-1">
 													<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 														<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
 													</svg>
 													Введите название категории
 												</p>
-											)}
-										</div>
+											</div>
+										)}
 										<div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
 											<input
 												type="text"
