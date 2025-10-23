@@ -38,6 +38,9 @@ export default function EditPeriodDialog({
 	const [bookingError, setBookingError] = useState<string | null>(null)
 	const [timeError, setTimeError] = useState<string | null>(null)
 
+	// Проверяем наличие броней за день
+	const hasBookings = daySlots.some(slot => slot.isBooked)
+
 	// Инициализируем значения при открытии диалога
 	useEffect(() => {
 		if (isOpen && period) {

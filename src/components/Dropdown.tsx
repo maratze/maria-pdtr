@@ -144,6 +144,7 @@ export default function Dropdown<T extends DropdownOption>({
 							{hasNullOption && (
 								<>
 									<button
+										type="button"
 										onClick={(e) => {
 											e.stopPropagation()
 											onChange(null)
@@ -170,6 +171,7 @@ export default function Dropdown<T extends DropdownOption>({
 							{/* Options */}
 							{options.map((option) => (
 								<button
+									type="button"
 									key={option.id}
 									onClick={(e) => {
 										e.stopPropagation()

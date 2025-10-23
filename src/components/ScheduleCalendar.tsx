@@ -386,7 +386,7 @@ export default function ScheduleCalendar({
 										)}
 									</div>
 
-									{onCreatePeriodForRange && dateRangeEnd && (
+									{onCreatePeriodForRange && (
 										<button
 											onClick={() => onCreatePeriodForRange(dateRangeStart, dateRangeEnd)}
 											className="p-2 rounded-lg bg-white text-green-600 hover:bg-green-50 transition-all border border-green-200"
