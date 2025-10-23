@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import Dropdown from './Dropdown'
 import type { City, SchedulePeriodWithCity } from '../types/booking'
 import { generateSlotsForDateAndCity, type OptimizedBooking } from '../lib/slots'
+import { createBookingsForSlots } from '../lib/bookings'
 
 interface EditPeriodDialogProps {
 	isOpen: boolean
@@ -96,6 +97,49 @@ export default function EditPeriodDialog({
 
 		// Не генерируем слоты автоматически - они будут пустыми после изменения
 		// Слоты нужно будет пересоздать через submit
+	}
+
+	// Обработчик бронирования слотов
+	const handleBookingSubmit = async () => {
+		if (!period || selectedSlots.length === 0 || !clientName || !clientEmail || !clientPhone) {
+			return
+		}
+
+		setBookingError(null)
+
+		try {
+			// Подготавливаем выбранные слоты
+			const slotsToBook = selectedSlots.map(idx => {
+				const slot = daySlots[parseInt(idx)]
+				return {
+					startTime: slot.startTime,
+					endTime: slot.endTime
+				}
+			})
+
+			// Создаем бронирования
+			const result = await createBookingsForSlots(
+				period.id,
+				period.start_date,
+				slotsToBook,
+				clientName,
+				clientPhone,
+				clientEmail
+			)
+
+			if (!result.success) {
+				setBookingError(result.error || 'Ошибка создания бронирования')
+				return
+			}
+
+			// Успешно забронировано - закрываем диалог
+			onClose()
+
+			// Можно добавить toast notification здесь
+		} catch (error) {
+			console.error('Error booking slots:', error)
+			setBookingError(error instanceof Error ? error.message : 'Неизвестная ошибка')
+		}
 	}
 
 	if (!isOpen || !period) return null
@@ -440,6 +484,7 @@ export default function EditPeriodDialog({
 							</button>
 							<button
 								type="button"
+								onClick={handleBookingSubmit}
 								disabled={isLoading || selectedSlots.length === 0 || !clientName || !clientEmail || !clientPhone}
 								className="flex-1 px-4 py-2.5 h-10 rounded-lg bg-ocean-600 text-white text-sm font-regular hover:bg-ocean-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed order-1 sm:order-2"
 							>

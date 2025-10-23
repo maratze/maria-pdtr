@@ -345,3 +345,109 @@ export async function getBookingStats(): Promise<{
 
 	return stats;
 }
+
+/**
+ * Создать бронирования для слотов администратором
+ * Создает слоты в базе данных если их нет, затем создает бронирования
+ */
+export async function createBookingsForSlots(
+	periodId: string,
+	date: string,
+	slots: Array<{ startTime: string; endTime: string }>,
+	clientName: string,
+	clientPhone: string,
+	clientEmail: string
+): Promise<{ success: boolean; bookings: string[]; error?: string }> {
+	if (!supabaseAdmin) {
+		throw new Error('Supabase admin client is not initialized');
+	}
+
+	try {
+		const bookingIds: string[] = [];
+
+		// Создаем слоты и бронирования для каждого выбранного слота
+		for (const slot of slots) {
+			// Проверяем, существует ли слот в базе данных
+			const { data: existingSlot, error: slotCheckError } = await supabaseAdmin
+				.from('time_slots')
+				.select('id, is_booked')
+				.eq('period_id', periodId)
+				.eq('slot_date', date)
+				.eq('start_time', slot.startTime + ':00')
+				.eq('end_time', slot.endTime + ':00')
+				.maybeSingle() as { data: { id: string; is_booked: boolean } | null; error: any };
+
+			if (slotCheckError) {
+				console.error('Error checking slot:', slotCheckError);
+				return { success: false, bookings: bookingIds, error: slotCheckError.message };
+			}
+
+			let slotId: string;
+
+			if (existingSlot) {
+				// Слот существует - проверяем, не забронирован ли он
+				if (existingSlot.is_booked) {
+					return {
+						success: false,
+						bookings: bookingIds,
+						error: `Слот ${slot.startTime}-${slot.endTime} уже забронирован`
+					};
+				}
+				slotId = existingSlot.id;
+			} else {
+				// Слот не существует - создаем его
+				const { data: newSlot, error: slotCreateError } = await supabaseAdmin
+					.from('time_slots')
+					.insert({
+						period_id: periodId,
+						slot_date: date,
+						start_time: slot.startTime + ':00',
+						end_time: slot.endTime + ':00',
+						is_booked: false,
+					} as any)
+					.select('id')
+					.single() as { data: { id: string } | null; error: any };
+
+				if (slotCreateError || !newSlot) {
+					console.error('Error creating slot:', slotCreateError);
+					return { success: false, bookings: bookingIds, error: slotCreateError?.message || 'Failed to create slot' };
+				}
+
+				slotId = newSlot.id;
+			}
+
+			// Создаем бронирование
+			const { data: booking, error: bookingError } = await supabaseAdmin
+				.from('bookings')
+				.insert({
+					slot_id: slotId,
+					service_id: null, // Админ может бронировать без услуги
+					client_name: clientName,
+					client_phone: clientPhone,
+					client_email: clientEmail,
+					status: 'confirmed',
+				} as any)
+				.select('id')
+				.single() as { data: { id: string } | null; error: any };
+
+			if (bookingError || !booking) {
+				console.error('Error creating booking:', bookingError);
+				return { success: false, bookings: bookingIds, error: bookingError?.message || 'Failed to create booking' };
+			}
+
+			// Слот автоматически помечается как забронированный через базовую логику
+			// при наличии связанного бронирования
+
+			bookingIds.push(booking.id);
+		}
+
+		return { success: true, bookings: bookingIds };
+	} catch (error) {
+		console.error('Error in createBookingsForSlots:', error);
+		return {
+			success: false,
+			bookings: [],
+			error: error instanceof Error ? error.message : 'Unknown error'
+		};
+	}
+}
