@@ -85,6 +85,24 @@ export async function getSchedulePeriodById(
 }
 
 /**
+ * Явно генерировать слоты для периода
+ */
+export async function generateSlotsForPeriod(periodId: string): Promise<void> {
+	if (!supabaseAdmin) {
+		throw new Error('Supabase admin client is not initialized');
+	}
+
+	const { error } = await supabaseAdmin.rpc('generate_time_slots_for_period', {
+		p_period_id: periodId,
+	} as any);
+
+	if (error) {
+		console.error('Error generating slots:', error);
+		throw error;
+	}
+}
+
+/**
  * Создать новый период расписания
  * Автоматически создаст слоты времени через триггер
  */
@@ -104,6 +122,16 @@ export async function createSchedulePeriod(
 	if (error) {
 		console.error('Error creating schedule period:', error);
 		throw error;
+	}
+
+	// Ждем немного, чтобы триггер срабатал, затем генерируем слоты явно
+	if ((data as any)?.id) {
+		await new Promise(resolve => setTimeout(resolve, 500));
+		try {
+			await generateSlotsForPeriod((data as any).id);
+		} catch (slotError) {
+			console.warn('Slots may already be generating via trigger:', slotError);
+		}
 	}
 
 	return data;
@@ -131,6 +159,14 @@ export async function updateSchedulePeriod(
 	if (error) {
 		console.error('Error updating schedule period:', error);
 		throw error;
+	}
+
+	// Ждем и регенерируем слоты
+	await new Promise(resolve => setTimeout(resolve, 500));
+	try {
+		await generateSlotsForPeriod(id);
+	} catch (slotError) {
+		console.warn('Slots may already be regenerating via trigger:', slotError);
 	}
 
 	return data;

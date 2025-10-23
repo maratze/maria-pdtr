@@ -27,7 +27,7 @@ export async function getTimeSlotsByPeriod(
     `)
 		.eq('period_id', periodId)
 		.order('slot_date')
-		.order('slot_time');
+		.order('start_time');
 
 	if (error) {
 		console.error('Error fetching time slots by period:', error);

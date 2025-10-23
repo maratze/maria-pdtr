@@ -78,10 +78,20 @@ export default function AdminSchedule() {
 			return // Уже загружены
 		}
 		try {
+			// Добавляем небольшую задержку для гарантии генерации слотов
+			await new Promise(resolve => setTimeout(resolve, 500))
 			const slots = await getTimeSlotsByPeriod(periodId)
 			setPeriodSlots((prev) => ({ ...prev, [periodId]: slots }))
+
+			if (slots.length === 0) {
+				setToast({
+					message: 'Слоты еще генерируются. Попробуйте еще раз через несколько секунд.',
+					type: 'info'
+				})
+			}
 		} catch (error) {
 			console.error('Error loading slots:', error)
+			setToast({ message: 'Ошибка загрузки слотов', type: 'error' })
 		}
 	}
 
@@ -484,9 +494,15 @@ export default function AdminSchedule() {
 								{isExpanded && (
 									<div className="border-t border-slate-200 p-4 bg-slate-50">
 										{slots.length === 0 ? (
-											<p className="text-sm text-slate-500 text-center py-4">
-												Слоты еще не созданы
-											</p>
+											<div className="text-center py-6">
+												<div className="mb-2">
+													<svg className="w-8 h-8 text-slate-400 mx-auto animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+														<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z" />
+													</svg>
+												</div>
+												<p className="text-sm text-slate-600 mb-1">Слоты генерируются...</p>
+												<p className="text-xs text-slate-500">Это может занять несколько секунд</p>
+											</div>
 										) : (
 											<div className="max-h-80 overflow-y-auto">
 												<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
