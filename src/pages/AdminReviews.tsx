@@ -7,6 +7,7 @@ import CategoryFilterDropdown from '../components/CategoryFilterDropdown'
 import ItemsPerPageDropdown from '../components/ItemsPerPageDropdown'
 import Toast from '../components/Toast'
 import ReviewMobileCard from '../components/ReviewMobileCard'
+import ConfirmDialog from '../components/ConfirmDialog'
 import type { Review, Category } from '../types/review'
 
 export default function AdminReviews() {
@@ -632,87 +633,34 @@ export default function AdminReviews() {
       )}
 
       {/* Delete Confirmation Modal */}
-      {deleteConfirmId && deleteConfirmType === 'review' && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 !m-0" onClick={() => {
+      <ConfirmDialog
+        isOpen={deleteConfirmId !== null && deleteConfirmType === 'review'}
+        onClose={() => {
           setDeleteConfirmId(null)
           setDeleteConfirmType(null)
-        }}>
-          <div className="bg-white rounded-xl border border-slate-200 shadow-lg p-5 sm:p-6 max-w-sm w-full" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-red-50 rounded-lg flex items-center justify-center flex-shrink-0">
-                <svg className="w-5 h-5 sm:w-6 sm:h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="text-sm sm:text-md font-medium text-slate-900">Удалить отзыв?</h3>
-                <p className="text-xs sm:text-sm text-slate-500 mt-0.5 truncate">от {reviews.find(r => r.id === deleteConfirmId)?.name || 'Аноним'}</p>
-              </div>
-            </div>
-            <p className="text-xs sm:text-sm text-slate-600 mb-4">Это действие невозможно будет отменить</p>
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
-              <button
-                onClick={() => {
-                  setDeleteConfirmId(null)
-                  setDeleteConfirmType(null)
-                }}
-                className="flex-1 px-4 py-2 h-10 rounded-lg border border-slate-200 text-slate-600 text-sm font-regular hover:bg-slate-50 transition-colors order-2 sm:order-1"
-              >
-                Отмена
-              </button>
-              <button
-                onClick={() => deleteConfirmId && confirmDeleteReview(deleteConfirmId)}
-                disabled={processingId === deleteConfirmId}
-                className="flex-1 px-4 py-2 h-10 rounded-lg bg-red-600 text-white text-sm font-regular hover:bg-red-700 disabled:opacity-50 transition-colors order-1 sm:order-2"
-              >
-                {processingId === deleteConfirmId ? '...' : 'Удалить'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+        }}
+        onConfirm={() => deleteConfirmId && confirmDeleteReview(deleteConfirmId)}
+        title="Удалить отзыв?"
+        itemName={`от ${reviews.find(r => r.id === deleteConfirmId)?.name || 'Аноним'}`}
+        description="Это действие невозможно будет отменить"
+        confirmText="Удалить"
+        confirmLoading={processingId === deleteConfirmId}
+      />
 
       {/* Delete Photo Confirmation Modal */}
-      {deleteConfirmId && deleteConfirmType === 'photo' && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 !m-0" onClick={() => {
+      <ConfirmDialog
+        isOpen={deleteConfirmId !== null && deleteConfirmType === 'photo'}
+        onClose={() => {
           setDeleteConfirmId(null)
           setDeleteConfirmType(null)
           setDeleteConfirmPhotoUrl(null)
-        }}>
-          <div className="bg-white rounded-xl border border-slate-200 shadow-lg p-5 sm:p-6 max-w-sm w-full" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-red-50 rounded-lg flex items-center justify-center flex-shrink-0">
-                <svg className="w-5 h-5 sm:w-6 sm:h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <div className="flex-1">
-                <h3 className="text-sm sm:text-md font-medium text-slate-900">Удалить фото?</h3>
-              </div>
-            </div>
-            <p className="text-xs sm:text-sm text-slate-600 mb-4">Это действие невозможно будет отменить</p>
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
-              <button
-                onClick={() => {
-                  setDeleteConfirmId(null)
-                  setDeleteConfirmType(null)
-                  setDeleteConfirmPhotoUrl(null)
-                }}
-                className="flex-1 px-4 py-2 h-10 rounded-lg border border-slate-200 text-slate-600 text-sm font-regular hover:bg-slate-50 transition-colors order-2 sm:order-1"
-              >
-                Отмена
-              </button>
-              <button
-                onClick={() => deleteConfirmId && deleteConfirmPhotoUrl && confirmRemovePhoto(deleteConfirmId, deleteConfirmPhotoUrl)}
-                disabled={processingId === deleteConfirmId}
-                className="flex-1 px-4 py-2 h-10 rounded-lg bg-red-600 text-white text-sm font-regular hover:bg-red-700 disabled:opacity-50 transition-colors order-1 sm:order-2"
-              >
-                {processingId === deleteConfirmId ? '...' : 'Удалить'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+        }}
+        onConfirm={() => deleteConfirmId && deleteConfirmPhotoUrl && confirmRemovePhoto(deleteConfirmId, deleteConfirmPhotoUrl)}
+        title="Удалить фото?"
+        description="Это действие невозможно будет отменить"
+        confirmText="Удалить"
+        confirmLoading={processingId === deleteConfirmId}
+      />
 
       {/* Toast Notification */}
       {toast && (

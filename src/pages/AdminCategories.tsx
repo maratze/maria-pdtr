@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { getCategories } from '../lib/reviews'
 import AdminPreloader from '../components/AdminPreloader'
 import Toast from '../components/Toast'
+import ConfirmDialog from '../components/ConfirmDialog'
 import { supabaseAdmin } from '../lib/supabaseClient'
 import type { Category } from '../types/review'
 
@@ -19,6 +20,17 @@ export default function AdminCategories() {
 	const [deleteConfirmName, setDeleteConfirmName] = useState('')
 	const [deleteLoading, setDeleteLoading] = useState(false)
 	const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'warning' | 'info' } | null>(null)
+	const [formTouched, setFormTouched] = useState(false)
+	const [editTouched, setEditTouched] = useState(false)
+
+	// Функции проверки валидности форм
+	const isAddFormValid = () => {
+		return newCategoryName.trim().length > 0
+	}
+
+	const isEditFormValid = () => {
+		return editingName.trim().length > 0
+	}
 
 	async function load() {
 		setLoading(true)
@@ -36,8 +48,9 @@ export default function AdminCategories() {
 
 	async function handleAddCategory(e: React.FormEvent) {
 		e.preventDefault()
+		setFormTouched(true)
+
 		if (!newCategoryName.trim()) {
-			setToast({ message: 'Введите название категории', type: 'warning' })
 			return
 		}
 
@@ -63,13 +76,15 @@ export default function AdminCategories() {
 		}
 
 		setNewCategoryName('')
+		setFormTouched(false)
 		setShowForm(false)
 		setToast({ message: 'Категория создана', type: 'success' })
 	}
 
 	async function handleUpdateCategory(categoryId: string) {
+		setEditTouched(true)
+
 		if (!editingName.trim()) {
-			setToast({ message: 'Введите название категории', type: 'warning' })
 			return
 		}
 
@@ -92,6 +107,7 @@ export default function AdminCategories() {
 		))
 		setEditingId(null)
 		setEditingName('')
+		setEditTouched(false)
 		setToast({ message: 'Категория обновлена', type: 'success' })
 	}
 
@@ -161,6 +177,7 @@ export default function AdminCategories() {
 								onClick={() => {
 									setShowForm(true)
 									setEditingId(null)
+									setFormTouched(false)
 								}}
 								className="w-full sm:w-auto flex items-center justify-center gap-2 px-3 py-2.5 sm:py-3 h-10 rounded-lg bg-ocean-600 text-white text-sm font-normal hover:bg-ocean-700 transition-colors flex-shrink-0"
 							>
@@ -175,6 +192,17 @@ export default function AdminCategories() {
 					{/* Add Form */}
 					{showForm && (
 						<form onSubmit={handleAddCategory} noValidate className="mt-4 pt-4 border-t border-slate-200">
+							{/* Фиксированное место для сообщения об ошибке */}
+							<div className="h-6 mb-2">
+								{formTouched && !isAddFormValid() && (
+									<p className="text-sm text-amber-600 flex items-center gap-1">
+										<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+										</svg>
+										Введите название категории
+									</p>
+								)}
+							</div>
 							<div className="space-y-3">
 								<input
 									type="text"
@@ -187,8 +215,8 @@ export default function AdminCategories() {
 								<div className="flex flex-col-reverse sm:flex-row gap-3 pt-2">
 									<button
 										type="submit"
-										disabled={formLoading}
-										className="sm:flex-none px-3 py-2 h-10 rounded-lg bg-emerald-600 text-white text-sm font-regular hover:bg-emerald-700 disabled:opacity-50 transition-colors"
+										disabled={formLoading || !isAddFormValid()}
+										className="sm:flex-none px-3 py-2 h-10 rounded-lg bg-emerald-600 text-white text-sm font-regular hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 									>
 										{formLoading ? 'Добавление...' : 'Создать категорию'}
 									</button>
@@ -197,6 +225,7 @@ export default function AdminCategories() {
 										onClick={() => {
 											setShowForm(false)
 											setNewCategoryName('')
+											setFormTouched(false)
 										}}
 										disabled={formLoading}
 										className="sm:flex-none px-3 py-2 h-10 rounded-lg bg-slate-100 text-slate-700 text-sm font-regular hover:bg-slate-200 transition-colors disabled:opacity-50"
@@ -226,31 +255,45 @@ export default function AdminCategories() {
 							<div key={category.id} className={`p-3 sm:p-4 hover:bg-slate-50 transition-colors ${index === 0 ? 'rounded-t-[10px]' : ''
 								} ${index === categories.length - 1 ? 'rounded-b-[10px]' : ''}`}>
 								{editingId === category.id ? (
-									<div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
-										<input
-											type="text"
-											value={editingName}
-											onChange={(e) => setEditingName(e.target.value)}
-											className="flex-1 text-sm rounded-lg border border-slate-200 px-3 py-2 h-10 focus:border-ocean-400 focus:outline-none focus:ring-2 focus:ring-ocean-100"
-											autoFocus
-										/>
-										<div className="flex items-center gap-2">
-											<button
-												onClick={() => handleUpdateCategory(category.id)}
-												disabled={editLoading}
-												className="sm:flex-none px-3 py-2 h-10 sm:w-24 rounded-lg bg-emerald-600 text-white text-sm font-regular hover:bg-emerald-700 disabled:opacity-50 transition-colors flex items-center justify-center"
-											>
-												{editLoading ? '...' : 'Сохранить'}
-											</button>
-											<button
-												onClick={() => {
-													setEditingId(null)
-													setEditingName('')
-												}}
-												className="sm:flex-none px-3 py-2 h-10 rounded-lg border border-slate-200 text-slate-600 text-sm font-regular hover:bg-slate-50 transition-colors"
-											>
-												Отмена
-											</button>
+									<div className="space-y-2">
+										{/* Фиксированное место для сообщения об ошибке */}
+										<div className="h-6">
+											{editTouched && !isEditFormValid() && (
+												<p className="text-sm text-amber-600 flex items-center gap-1">
+													<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+														<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+													</svg>
+													Введите название категории
+												</p>
+											)}
+										</div>
+										<div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+											<input
+												type="text"
+												value={editingName}
+												onChange={(e) => setEditingName(e.target.value)}
+												className="flex-1 text-sm rounded-lg border border-slate-200 px-3 py-2 h-10 focus:border-ocean-400 focus:outline-none focus:ring-2 focus:ring-ocean-100"
+												autoFocus
+											/>
+											<div className="flex items-center gap-2">
+												<button
+													onClick={() => handleUpdateCategory(category.id)}
+													disabled={editLoading || !isEditFormValid()}
+													className="sm:flex-none px-3 py-2 h-10 sm:w-24 rounded-lg bg-emerald-600 text-white text-sm font-regular hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
+												>
+													{editLoading ? '...' : 'Сохранить'}
+												</button>
+												<button
+													onClick={() => {
+														setEditingId(null)
+														setEditingName('')
+														setEditTouched(false)
+													}}
+													className="sm:flex-none px-3 py-2 h-10 rounded-lg border border-slate-200 text-slate-600 text-sm font-regular hover:bg-slate-50 transition-colors"
+												>
+													Отмена
+												</button>
+											</div>
 										</div>
 									</div>
 								) : (
@@ -269,6 +312,7 @@ export default function AdminCategories() {
 												onClick={() => {
 													setEditingId(category.id)
 													setEditingName(category.name)
+													setEditTouched(false)
 												}}
 												className="p-2 rounded-lg text-slate-400 hover:text-ocean-600 hover:bg-ocean-50 transition-colors"
 												title="Редактировать"
@@ -296,46 +340,22 @@ export default function AdminCategories() {
 						))}
 					</div>
 				)}
-			</div>			{/* Delete Confirmation Modal */}
-			{deleteConfirmId && (
-				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 !m-0" onClick={() => {
+			</div>
+
+			{/* Delete Confirmation Modal */}
+			<ConfirmDialog
+				isOpen={!!deleteConfirmId}
+				onClose={() => {
 					setDeleteConfirmId(null)
 					setDeleteConfirmName('')
-				}}>
-					<div className="bg-white rounded-xl border border-slate-200 shadow-lg p-5 sm:p-6 max-w-sm w-full" onClick={(e) => e.stopPropagation()}>
-						<div className="flex items-center gap-3 mb-4">
-							<div className="w-10 h-10 bg-red-50 rounded-lg flex items-center justify-center flex-shrink-0">
-								<svg className="w-5 h-5 sm:w-6 sm:h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-								</svg>
-							</div>
-							<div className="flex-1 min-w-0">
-								<h3 className="text-sm sm:text-md font-medium text-slate-900">Удалить категорию?</h3>
-								<p className="text-xs sm:text-sm text-slate-500 mt-0.5 truncate">"{deleteConfirmName}"</p>
-							</div>
-						</div>
-						<p className="text-xs sm:text-sm text-slate-600 mb-4">Это действие невозможно будет отменить</p>
-						<div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
-							<button
-								onClick={() => {
-									setDeleteConfirmId(null)
-									setDeleteConfirmName('')
-								}}
-								className="flex-1 px-4 py-2 h-10 rounded-lg border border-slate-200 text-slate-600 text-sm font-regular hover:bg-slate-50 transition-colors order-2 sm:order-1"
-							>
-								Отмена
-							</button>
-							<button
-								onClick={() => deleteConfirmId && handleDeleteCategory(deleteConfirmId)}
-								disabled={deleteLoading}
-								className="flex-1 px-4 py-2 h-10 rounded-lg bg-red-600 text-white text-sm font-regular hover:bg-red-700 disabled:opacity-50 transition-colors order-1 sm:order-2"
-							>
-								{deleteLoading ? '...' : 'Удалить'}
-							</button>
-						</div>
-					</div>
-				</div>
-			)}
+				}}
+				onConfirm={() => deleteConfirmId && handleDeleteCategory(deleteConfirmId)}
+				title="Удалить категорию?"
+				itemName={deleteConfirmName}
+				description="Это действие невозможно будет отменить"
+				confirmText="Удалить"
+				confirmLoading={deleteLoading}
+			/>
 
 			{/* Toast Notification */}
 			{toast && (

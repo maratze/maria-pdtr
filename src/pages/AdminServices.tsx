@@ -3,6 +3,7 @@ import { getServices, createService, updateService, deleteService } from '../lib
 import AdminPreloader from '../components/AdminPreloader'
 import Toast from '../components/Toast'
 import DurationTypeDropdown from '../components/DurationTypeDropdown'
+import ConfirmDialog from '../components/ConfirmDialog'
 import type { Service, ServiceInsert, DurationType } from '../types/service'
 
 // Вспомогательная функция для форматирования длительности
@@ -59,6 +60,17 @@ export default function AdminServices() {
 	const [deleteConfirmName, setDeleteConfirmName] = useState('')
 	const [deleteLoading, setDeleteLoading] = useState(false)
 	const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'warning' | 'info' } | null>(null)
+	const [formTouched, setFormTouched] = useState(false)
+	const [editTouched, setEditTouched] = useState(false)
+
+	// Функции проверки валидности форм
+	const isAddFormValid = () => {
+		return formData.title.trim() && formData.price > 0
+	}
+
+	const isEditFormValid = () => {
+		return editData.title.trim() && editData.price > 0
+	}
 
 	async function load() {
 		setLoading(true)
@@ -76,12 +88,9 @@ export default function AdminServices() {
 
 	async function handleAddService(e: React.FormEvent) {
 		e.preventDefault()
-		if (!formData.title.trim()) {
-			setToast({ message: 'Введите название услуги', type: 'warning' })
-			return
-		}
-		if (formData.price <= 0) {
-			setToast({ message: 'Введите корректную стоимость услуги', type: 'warning' })
+		setFormTouched(true)
+
+		if (!formData.title.trim() || formData.price <= 0) {
 			return
 		}
 
@@ -111,17 +120,15 @@ export default function AdminServices() {
 			price: 0,
 			price_from: false
 		})
+		setFormTouched(false)
 		setShowForm(false)
 		setToast({ message: 'Услуга создана', type: 'success' })
 	}
 
 	async function handleUpdateService(serviceId: string) {
-		if (!editData.title.trim()) {
-			setToast({ message: 'Введите название услуги', type: 'warning' })
-			return
-		}
-		if (editData.price <= 0) {
-			setToast({ message: 'Введите корректную стоимость услуги', type: 'warning' })
+		setEditTouched(true)
+
+		if (!editData.title.trim() || editData.price <= 0) {
 			return
 		}
 
@@ -141,6 +148,7 @@ export default function AdminServices() {
 			))
 		}
 		setEditingId(null)
+		setEditTouched(false)
 		setToast({ message: 'Услуга обновлена', type: 'success' })
 	}
 
@@ -206,6 +214,7 @@ export default function AdminServices() {
 								onClick={() => {
 									setShowForm(true)
 									setEditingId(null)
+									setFormTouched(false)
 								}}
 								className="w-full sm:w-auto flex items-center justify-center gap-2 px-3 py-2.5 sm:py-3 h-10 rounded-lg bg-ocean-600 text-white text-sm font-normal hover:bg-ocean-700 transition-colors flex-shrink-0"
 							>
@@ -220,6 +229,17 @@ export default function AdminServices() {
 					{/* Add Form */}
 					{showForm && (
 						<form onSubmit={handleAddService} noValidate className="mt-4 pt-4 border-t border-slate-200">
+							{/* Фиксированное место для сообщения об ошибке */}
+							<div className="h-6 mb-2">
+								{formTouched && !isAddFormValid() && (
+									<p className="text-sm text-amber-600 flex items-center gap-1">
+										<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+										</svg>
+										{!formData.title.trim() ? 'Введите название услуги' : 'Введите корректную стоимость услуги'}
+									</p>
+								)}
+							</div>
 							<div className="space-y-3">
 								<input
 									type="text"
@@ -283,8 +303,8 @@ export default function AdminServices() {
 								<div className="flex flex-col-reverse sm:flex-row gap-3 pt-2">
 									<button
 										type="submit"
-										disabled={formLoading}
-										className="sm:flex-none px-3 py-2 h-10 rounded-lg bg-emerald-600 text-white text-sm font-regular hover:bg-emerald-700 disabled:opacity-50 transition-colors"
+										disabled={formLoading || !isAddFormValid()}
+										className="sm:flex-none px-3 py-2 h-10 rounded-lg bg-emerald-600 text-white text-sm font-regular hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 									>
 										{formLoading ? 'Добавление...' : 'Создать услугу'}
 									</button>
@@ -292,6 +312,7 @@ export default function AdminServices() {
 										type="button"
 										onClick={() => {
 											setShowForm(false)
+											setFormTouched(false)
 											setFormData({
 												title: '',
 												description: '',
@@ -331,6 +352,17 @@ export default function AdminServices() {
 								} ${index === services.length - 1 ? 'rounded-b-[10px]' : ''}`}>
 								{editingId === service.id ? (
 									<div className="space-y-3">
+										{/* Фиксированное место для сообщения об ошибке */}
+										<div className="h-6">
+											{editTouched && !isEditFormValid() && (
+												<p className="text-sm text-amber-600 flex items-center gap-1">
+													<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+														<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+													</svg>
+													{!editData.title.trim() ? 'Введите название услуги' : 'Введите корректную стоимость услуги'}
+												</p>
+											)}
+										</div>
 										<input
 											type="text"
 											value={editData.title}
@@ -393,14 +425,15 @@ export default function AdminServices() {
 										<div className="flex items-center gap-2">
 											<button
 												onClick={() => handleUpdateService(service.id)}
-												disabled={editLoading}
-												className="sm:flex-none px-3 py-2 h-10 sm:w-24 rounded-lg bg-emerald-600 text-white text-sm font-regular hover:bg-emerald-700 disabled:opacity-50 transition-colors flex items-center justify-center"
+												disabled={editLoading || !isEditFormValid()}
+												className="sm:flex-none px-3 py-2 h-10 sm:w-24 rounded-lg bg-emerald-600 text-white text-sm font-regular hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
 											>
 												{editLoading ? '...' : 'Сохранить'}
 											</button>
 											<button
 												onClick={() => {
 													setEditingId(null)
+													setEditTouched(false)
 												}}
 												className="sm:flex-none px-3 py-2 h-10 rounded-lg border border-slate-200 text-slate-600 text-sm font-regular hover:bg-slate-50 transition-colors"
 											>
@@ -440,6 +473,7 @@ export default function AdminServices() {
 											<button
 												onClick={() => {
 													setEditingId(service.id)
+													setEditTouched(false)
 													setEditData({
 														title: service.title,
 														description: service.description || '',
@@ -479,45 +513,19 @@ export default function AdminServices() {
 			</div>
 
 			{/* Delete Confirmation Modal */}
-			{deleteConfirmId && (
-				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 !m-0" onClick={() => {
+			<ConfirmDialog
+				isOpen={!!deleteConfirmId}
+				onClose={() => {
 					setDeleteConfirmId(null)
 					setDeleteConfirmName('')
-				}}>
-					<div className="bg-white rounded-xl border border-slate-200 shadow-lg p-5 sm:p-6 max-w-sm w-full" onClick={(e) => e.stopPropagation()}>
-						<div className="flex items-center gap-3 mb-4">
-							<div className="w-10 h-10 bg-red-50 rounded-lg flex items-center justify-center flex-shrink-0">
-								<svg className="w-5 h-5 sm:w-6 sm:h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-								</svg>
-							</div>
-							<div className="flex-1 min-w-0">
-								<h3 className="text-sm sm:text-md font-medium text-slate-900">Удалить услугу?</h3>
-								<p className="text-xs sm:text-sm text-slate-500 mt-0.5 truncate">"{deleteConfirmName}"</p>
-							</div>
-						</div>
-						<p className="text-xs sm:text-sm text-slate-600 mb-4">Это действие невозможно будет отменить</p>
-						<div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
-							<button
-								onClick={() => {
-									setDeleteConfirmId(null)
-									setDeleteConfirmName('')
-								}}
-								className="flex-1 px-4 py-2 h-10 rounded-lg border border-slate-200 text-slate-600 text-sm font-regular hover:bg-slate-50 transition-colors order-2 sm:order-1"
-							>
-								Отмена
-							</button>
-							<button
-								onClick={() => deleteConfirmId && handleDeleteService(deleteConfirmId)}
-								disabled={deleteLoading}
-								className="flex-1 px-4 py-2 h-10 rounded-lg bg-red-600 text-white text-sm font-regular hover:bg-red-700 disabled:opacity-50 transition-colors order-1 sm:order-2"
-							>
-								{deleteLoading ? '...' : 'Удалить'}
-							</button>
-						</div>
-					</div>
-				</div>
-			)}
+				}}
+				onConfirm={() => deleteConfirmId && handleDeleteService(deleteConfirmId)}
+				title="Удалить услугу?"
+				itemName={deleteConfirmName}
+				description="Это действие невозможно будет отменить"
+				confirmText="Удалить"
+				confirmLoading={deleteLoading}
+			/>
 
 			{/* Toast Notification */}
 			{toast && (

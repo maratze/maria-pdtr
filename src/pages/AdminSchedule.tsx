@@ -15,6 +15,7 @@ import { getTimeSlotsByPeriod } from '../lib/timeSlots'
 import AdminPreloader from '../components/AdminPreloader'
 import Toast from '../components/Toast'
 import CityDropdown from '../components/CityDropdown'
+import ConfirmDialog from '../components/ConfirmDialog'
 
 export default function AdminSchedule() {
 	const [periods, setPeriods] = useState<SchedulePeriodWithCity[]>([])
@@ -29,6 +30,7 @@ export default function AdminSchedule() {
 	const [deleteLoading, setDeleteLoading] = useState(false)
 	const [formLoading, setFormLoading] = useState(false)
 	const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'warning' | 'info' } | null>(null)
+	const [formTouched, setFormTouched] = useState(false)
 
 	// Форма
 	const [formData, setFormData] = useState<SchedulePeriodInsert>({
@@ -38,6 +40,11 @@ export default function AdminSchedule() {
 		work_start_time: '10:00:00',
 		work_end_time: '18:00:00',
 	})
+
+	// Функция проверки валидности формы
+	const isFormValid = () => {
+		return formData.city_id && formData.start_date && formData.end_date
+	}
 
 	useEffect(() => {
 		loadInitialData()
@@ -104,6 +111,7 @@ export default function AdminSchedule() {
 		})
 		setEditingPeriod(null)
 		setShowForm(false)
+		setFormTouched(false)
 	}
 
 	function handleEdit(period: SchedulePeriodWithCity) {
@@ -115,14 +123,15 @@ export default function AdminSchedule() {
 			work_start_time: period.work_start_time,
 			work_end_time: period.work_end_time,
 		})
+		setFormTouched(false)
 		setShowForm(true)
 	}
 
 	async function handleSubmit(e: React.FormEvent) {
 		e.preventDefault()
+		setFormTouched(true)
 
 		if (!formData.city_id || !formData.start_date || !formData.end_date) {
-			setToast({ message: 'Заполните все обязательные поля', type: 'warning' })
 			return
 		}
 
@@ -228,6 +237,7 @@ export default function AdminSchedule() {
 							onClick={() => {
 								setShowForm(true)
 								setEditingPeriod(null)
+								setFormTouched(false)
 							}}
 							className="w-full sm:w-auto flex items-center justify-center gap-2 px-3 py-2.5 sm:py-3 h-10 rounded-lg bg-ocean-600 text-white text-sm font-normal hover:bg-ocean-700 transition-colors flex-shrink-0"
 						>
@@ -242,6 +252,17 @@ export default function AdminSchedule() {
 				{/* Форма создания/редактирования */}
 				{showForm && (
 					<form onSubmit={handleSubmit} noValidate className="mt-4 pt-4 border-t border-slate-200">
+						{/* Фиксированное место для сообщения об ошибке */}
+						<div className="h-6 mb-2">
+							{formTouched && !isFormValid() && (
+								<p className="text-sm text-amber-600 flex items-center gap-1">
+									<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+									</svg>
+									Заполните все обязательные поля
+								</p>
+							)}
+						</div>
 						<div className="space-y-3">
 							<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 								<div>
@@ -251,7 +272,7 @@ export default function AdminSchedule() {
 										onChange={(value) =>
 											setFormData({ ...formData, city_id: value })
 										}
-										label="Город"
+										label="Город "
 										required={true}
 									/>
 								</div>
@@ -268,7 +289,6 @@ export default function AdminSchedule() {
 												setFormData({ ...formData, start_date: e.target.value })
 											}
 											className="text-sm rounded-lg border border-slate-200 px-3 py-2 h-10 focus:border-ocean-400 focus:outline-none focus:ring-2 focus:ring-ocean-100"
-											required
 											disabled={formLoading}
 										/>
 										<input
@@ -278,7 +298,6 @@ export default function AdminSchedule() {
 												setFormData({ ...formData, end_date: e.target.value })
 											}
 											className="text-sm rounded-lg border border-slate-200 px-3 py-2 h-10 focus:border-ocean-400 focus:outline-none focus:ring-2 focus:ring-ocean-100"
-											required
 											disabled={formLoading}
 										/>
 									</div>
@@ -326,7 +345,7 @@ export default function AdminSchedule() {
 							<div className="flex flex-col-reverse sm:flex-row gap-3 pt-2">
 								<button
 									type="submit"
-									disabled={formLoading}
+									disabled={formLoading || !isFormValid()}
 									className="sm:flex-none bg-emerald-600 text-white text-sm font-regular px-4 py-2 h-10 rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 								>
 									{formLoading
@@ -522,35 +541,15 @@ export default function AdminSchedule() {
 			</div>
 
 			{/* Модальное окно подтверждения удаления */}
-			{deleteConfirmId && (
-				<div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 !m-0">
-					<div className="bg-white rounded-xl max-w-md w-full p-5 sm:p-6">
-						<h3 className="text-lg font-semibold text-slate-900 mb-2">
-							Подтверждение удаления
-						</h3>
-						<p className="text-sm text-slate-600 mb-5">
-							Вы уверены, что хотите удалить этот период расписания? Это действие
-							нельзя отменить.
-						</p>
-						<div className="flex gap-3">
-							<button
-								onClick={confirmDelete}
-								disabled={deleteLoading}
-								className="flex-1 bg-red-600 text-white text-sm font-regular px-4 py-2 h-10 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
-							>
-								{deleteLoading ? 'Удаление...' : 'Удалить'}
-							</button>
-							<button
-								onClick={() => setDeleteConfirmId(null)}
-								disabled={deleteLoading}
-								className="flex-1 bg-slate-100 text-slate-700 text-sm font-regular px-4 py-2 h-10 rounded-lg hover:bg-slate-200 transition-colors disabled:opacity-50"
-							>
-								Отмена
-							</button>
-						</div>
-					</div>
-				</div>
-			)}
+			<ConfirmDialog
+				isOpen={!!deleteConfirmId}
+				onClose={() => setDeleteConfirmId(null)}
+				onConfirm={confirmDelete}
+				title="Подтверждение удаления"
+				description="Вы уверены, что хотите удалить этот период расписания? Это действие нельзя отменить."
+				confirmText="Удалить"
+				confirmLoading={deleteLoading}
+			/>
 		</div>
 	)
 }
