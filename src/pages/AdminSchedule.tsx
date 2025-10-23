@@ -33,22 +33,39 @@ function formatDateRange(startDate: string, endDate: string): string {
 	return `${startDay}.${startMonth}.${startYear} - ${endDay}.${endMonth}.${endYear}`
 }
 
+function formatDate(dateStr: string): string {
+	const date = new Date(dateStr + 'T00:00:00')
+	const day = String(date.getDate()).padStart(2, '0')
+	const month = String(date.getMonth() + 1).padStart(2, '0')
+	return `${day}.${month}`
+}
+
 export default function AdminSchedule() {
 	const [periods, setPeriods] = useState<SchedulePeriodWithCity[]>([])
 	const [cities, setCities] = useState<City[]>([])
 	const [loading, setLoading] = useState(true)
 	const [showForm, setShowForm] = useState(false)
 	const [editingPeriod, setEditingPeriod] = useState<SchedulePeriodWithCity | null>(null)
+	const [editingPeriodId, setEditingPeriodId] = useState<string | null>(null)
 	const [selectedCityFilter, setSelectedCityFilter] = useState<string>('')
 	const [expandedPeriodId, setExpandedPeriodId] = useState<string | null>(null)
 	const [periodSlots, setPeriodSlots] = useState<Record<string, any[]>>({})
 	const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
 	const [deleteLoading, setDeleteLoading] = useState(false)
+	const [editLoading, setEditLoading] = useState(false)
 	const [formLoading, setFormLoading] = useState(false)
 	const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'warning' | 'info' } | null>(null)
 
 	// Форма
 	const [formData, setFormData] = useState<SchedulePeriodInsert>({
+		city_id: '',
+		start_date: '',
+		end_date: '',
+		work_start_time: '10:00:00',
+		work_end_time: '18:00:00',
+	})
+
+	const [editData, setEditData] = useState<SchedulePeriodInsert>({
 		city_id: '',
 		start_date: '',
 		end_date: '',
@@ -133,15 +150,14 @@ export default function AdminSchedule() {
 	}
 
 	function handleEdit(period: SchedulePeriodWithCity) {
-		setEditingPeriod(period)
-		setFormData({
+		setEditingPeriodId(period.id)
+		setEditData({
 			city_id: period.city_id,
 			start_date: period.start_date,
 			end_date: period.end_date,
 			work_start_time: period.work_start_time,
 			work_end_time: period.work_end_time,
 		})
-		setShowForm(true)
 	}
 
 	async function handleSubmit(e: React.FormEvent) {
@@ -153,25 +169,38 @@ export default function AdminSchedule() {
 
 		try {
 			setFormLoading(true)
-			if (editingPeriod) {
-				await updateSchedulePeriod(editingPeriod.id, formData)
-				// Реактивное обновление
-				const updated = await getSchedulePeriods()
-				setPeriods(updated)
-				setToast({ message: 'Период обновлен', type: 'success' })
-			} else {
-				await createSchedulePeriod(formData)
-				// Реактивное обновление
-				const updated = await getSchedulePeriods()
-				setPeriods(updated)
-				setToast({ message: 'Период создан', type: 'success' })
-			}
+			await createSchedulePeriod(formData)
+			// Реактивное обновление
+			const updated = await getSchedulePeriods()
+			setPeriods(updated)
+			setToast({ message: 'Период создан', type: 'success' })
 			resetForm()
 		} catch (error) {
 			console.error('Error saving period:', error)
 			setToast({ message: 'Ошибка сохранения периода', type: 'error' })
 		} finally {
 			setFormLoading(false)
+		}
+	}
+
+	async function handleUpdatePeriod(periodId: string) {
+		if (!editData.city_id || !editData.start_date || !editData.end_date) {
+			return
+		}
+
+		try {
+			setEditLoading(true)
+			await updateSchedulePeriod(periodId, editData)
+			// Реактивное обновление
+			const updated = await getSchedulePeriods()
+			setPeriods(updated)
+			setEditingPeriodId(null)
+			setToast({ message: 'Период обновлен', type: 'success' })
+		} catch (error) {
+			console.error('Error updating period:', error)
+			setToast({ message: 'Ошибка обновления периода', type: 'error' })
+		} finally {
+			setEditLoading(false)
 		}
 	}
 
@@ -479,6 +508,7 @@ export default function AdminSchedule() {
 							<div className="space-y-2">
 								{cityPeriods.map((period) => {
 									const isExpanded = expandedPeriodId === period.id
+									const isEditing = editingPeriodId === period.id
 									const slots = periodSlots[period.id] || []
 									const bookedCount = slots.filter((s) => s.is_booked).length
 
@@ -487,75 +517,178 @@ export default function AdminSchedule() {
 											key={period.id}
 											className="bg-white rounded-xl border border-slate-200 overflow-hidden"
 										>
-											<button
-												onClick={() => handleExpandPeriod(period.id)}
-												className="w-full text-left p-4 hover:bg-slate-50 transition-colors flex items-center justify-between gap-4"
-											>
-												{/* Левая часть - информация о периоде */}
-												<div className="flex-1 min-w-0">
-													{/* Дата */}
-													<p className="text-ьв text-slate-800 mb-1">
-														{formatDateRange(period.start_date, period.end_date)}
-													</p>
+											{isEditing ? (
+												// Форма редактирования на месте
+												<div className="p-4 space-y-3">
+													<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+														<div>
+															<CityDropdown
+																cities={cities}
+																value={editData.city_id}
+																onChange={(value) =>
+																	setEditData({ ...editData, city_id: value })
+																}
+																label="Город"
+																required={true}
+															/>
+														</div>
 
-													{/* Часы работы */}
-													<p className="text-sm text-slate-800 mb-2">
-														Часы работы: {period.work_start_time.slice(0, 5)} -{' '}
-														{period.work_end_time.slice(0, 5)}
-													</p>
+														<div>
+															<label className="block text-sm font-medium text-slate-700 mb-1.5">
+																Период работы <span className="text-red-500">*</span>
+															</label>
+															<div className="grid grid-cols-2 gap-2">
+																<input
+																	type="date"
+																	value={editData.start_date}
+																	onChange={(e) =>
+																		setEditData({ ...editData, start_date: e.target.value })
+																	}
+																	className="text-sm rounded-lg border border-slate-200 px-3 py-2 h-10 focus:border-ocean-400 focus:outline-none focus:ring-2 focus:ring-ocean-100"
+																	disabled={editLoading}
+																/>
+																<input
+																	type="date"
+																	value={editData.end_date}
+																	onChange={(e) =>
+																		setEditData({ ...editData, end_date: e.target.value })
+																	}
+																	className="text-sm rounded-lg border border-slate-200 px-3 py-2 h-10 focus:border-ocean-400 focus:outline-none focus:ring-2 focus:ring-ocean-100"
+																	disabled={editLoading}
+																/>
+															</div>
+														</div>
+													</div>
 
-													{/* Информация о слотах при развёртывании */}
-													{slots.length > 0 && (
-														<p className="text-xs text-slate-500">
-															Слотов: {slots.length} (забронировано: {bookedCount},
-															свободно: {slots.length - bookedCount})
-														</p>
-													)}
-												</div>
+													<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+														<div>
+															<label className="block text-sm font-medium text-slate-700 mb-1.5">
+																Время начала работы
+															</label>
+															<input
+																type="time"
+																value={editData.work_start_time.slice(0, 5)}
+																onChange={(e) =>
+																	setEditData({
+																		...editData,
+																		work_start_time: e.target.value + ':00',
+																	})
+																}
+																className="w-full text-sm rounded-lg border border-slate-200 px-3 py-2 h-10 focus:border-ocean-400 focus:outline-none focus:ring-2 focus:ring-ocean-100"
+																disabled={editLoading}
+															/>
+														</div>
 
-												{/* Кнопки справа - иконки */}
-												<div className="flex items-center gap-1 flex-shrink-0">
-													<button
-														onClick={(e) => {
-															e.stopPropagation()
-															handleEdit(period)
-														}}
-														className="p-2 rounded-lg text-slate-400 hover:text-ocean-600 hover:bg-ocean-50 transition-colors"
-														title="Редактировать"
-													>
-														<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-															<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-														</svg>
-													</button>
-													<button
-														onClick={(e) => {
-															e.stopPropagation()
-															handleDelete(period.id)
-														}}
-														className="p-2 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
-														title="Удалить"
-													>
-														<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-															<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-														</svg>
-													</button>
+														<div>
+															<label className="block text-sm font-medium text-slate-700 mb-1.5">
+																Время окончания работы
+															</label>
+															<input
+																type="time"
+																value={editData.work_end_time.slice(0, 5)}
+																onChange={(e) =>
+																	setEditData({
+																		...editData,
+																		work_end_time: e.target.value + ':00',
+																	})
+																}
+																className="w-full text-sm rounded-lg border border-slate-200 px-3 py-2 h-10 focus:border-ocean-400 focus:outline-none focus:ring-2 focus:ring-ocean-100"
+																disabled={editLoading}
+															/>
+														</div>
+													</div>
 
-													{/* Стрелка для раскрытия слотов */}
-													<div className="w-5 h-5 flex items-center justify-center text-slate-400">
-														<svg
-															className={`w-5 h-5 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
-															fill="none"
-															stroke="currentColor"
-															viewBox="0 0 24 24"
+													<div className="flex items-center gap-2">
+														<button
+															onClick={() => handleUpdatePeriod(period.id)}
+															disabled={editLoading || !editData.city_id || !editData.start_date || !editData.end_date}
+															className="sm:flex-none px-3 py-2 h-10 sm:w-24 rounded-lg bg-emerald-600 text-white text-sm font-regular hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
 														>
-															<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-														</svg>
+															{editLoading ? '...' : 'Сохранить'}
+														</button>
+														<button
+															onClick={() => {
+																setEditingPeriodId(null)
+															}}
+															disabled={editLoading}
+															className="sm:flex-none px-3 py-2 h-10 rounded-lg border border-slate-200 text-slate-600 text-sm font-regular hover:bg-slate-50 transition-colors"
+														>
+															Отмена
+														</button>
 													</div>
 												</div>
-											</button>
+											) : (
+												// Отображение периода
+												<button
+													onClick={() => handleExpandPeriod(period.id)}
+													className="w-full text-left p-4 hover:bg-slate-50 transition-colors flex items-center justify-between gap-4"
+												>
+													{/* Левая часть - информация о периоде */}
+													<div className="flex-1 min-w-0">
+														{/* Дата */}
+														<p className="text-md font-medium text-slate-800 mb-1">
+															{formatDateRange(period.start_date, period.end_date)}
+														</p>
+
+														{/* Часы работы */}
+														<p className="text-sm text-slate-500 mb-2">
+															Часы работы: {period.work_start_time.slice(0, 5)} -{' '}
+															{period.work_end_time.slice(0, 5)}
+														</p>
+
+														{/* Информация о слотах при развёртывании */}
+														{slots.length > 0 && (
+															<p className="text-xs text-slate-500">
+																Слотов: {slots.length} (забронировано: {bookedCount},
+																свободно: {slots.length - bookedCount})
+															</p>
+														)}
+													</div>
+
+													{/* Кнопки справа - иконки */}
+													<div className="flex items-center gap-1 flex-shrink-0">
+														<button
+															onClick={(e) => {
+																e.stopPropagation()
+																handleEdit(period)
+															}}
+															className="p-2 rounded-lg text-slate-400 hover:text-ocean-600 hover:bg-ocean-50 transition-colors"
+															title="Редактировать"
+														>
+															<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+																<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+															</svg>
+														</button>
+														<button
+															onClick={(e) => {
+																e.stopPropagation()
+																handleDelete(period.id)
+															}}
+															className="p-2 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+															title="Удалить"
+														>
+															<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+																<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+															</svg>
+														</button>
+
+														{/* Стрелка для раскрытия слотов */}
+														<div className="w-5 h-5 flex items-center justify-center text-slate-400">
+															<svg
+																className={`w-5 h-5 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+																fill="none"
+																stroke="currentColor"
+																viewBox="0 0 24 24"
+															>
+																<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+															</svg>
+														</div>
+													</div>
+												</button>
+											)}
 
 											{/* Развернутый список слотов */}
-											{isExpanded && (
+											{isExpanded && !isEditing && (
 												<div className="border-t border-slate-200 p-3 bg-slate-50">
 													{slots.length === 0 ? (
 														<div className="text-center py-6">
@@ -568,26 +701,36 @@ export default function AdminSchedule() {
 															<p className="text-xs text-slate-500">Это может занять несколько секунд</p>
 														</div>
 													) : (
-														<div className="max-h-80 overflow-y-auto">
-															<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
-																{slots.map((slot) => (
-																	<div
-																		key={slot.id}
-																		className={`p-2 rounded-lg text-xs text-center ${slot.is_booked
-																			? 'bg-red-100 text-red-800 border border-red-200'
-																			: 'bg-emerald-100 text-emerald-800 border border-emerald-200'
-																			}`}
-																	>
-																		<div className="font-medium mb-0.5">
-																			{slot.slot_date}
-																		</div>
-																		<div className="text-[10px]">
-																			{slot.start_time.slice(0, 5)} -{' '}
-																			{slot.end_time.slice(0, 5)}
-																		</div>
+														<div className="max-h-[480px] overflow-y-auto space-y-3">
+															{Object.entries(
+																slots.reduce((acc, slot) => {
+																	const date = slot.slot_date
+																	if (!acc[date]) acc[date] = []
+																	acc[date].push(slot)
+																	return acc
+																}, {} as any)
+															).map(([date, dateSlots]: any) => (
+																<div key={date}>
+																	<p className="text-sm font-medium text-slate-700 mb-2 px-1">
+																		{formatDate(date)}
+																	</p>
+																	<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+																		{(dateSlots as any[]).map((slot) => (
+																			<div
+																				key={slot.id}
+																				className={`p-2 rounded-lg text-xs text-center ${slot.is_booked
+																					? 'bg-red-100 text-red-800 border border-red-200'
+																					: 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+																					}`}
+																			>
+																				<div className="font-medium">
+																					{slot.start_time.slice(0, 5)}
+																				</div>
+																			</div>
+																		))}
 																	</div>
-																))}
-															</div>
+																</div>
+															))}
 														</div>
 													)}
 												</div>
