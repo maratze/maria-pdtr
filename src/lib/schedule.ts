@@ -250,8 +250,12 @@ export async function getActiveSchedulePeriodsByCity(
 }
 
 /**
+ * Получить активные периоды расписания (которые еще не закончились)
+ */
+
+/**
  * Создать периоды расписания на каждый день в диапазоне
- * Автоматически создаст слоты времени через триггер
+ * Оптимизировано: создает все периоды за раз, триггер генерирует слоты автоматически
  */
 export async function createSchedulePeriodsForDateRange(
 	startDate: string,
@@ -264,7 +268,8 @@ export async function createSchedulePeriodsForDateRange(
 		throw new Error('Supabase admin client is not initialized');
 	}
 
-	const createdPeriods: SchedulePeriod[] = [];
+	// Формируем массив периодов для батч вставки
+	const periodsToCreate: SchedulePeriodInsert[] = [];
 	const current = new Date(startDate + 'T00:00:00');
 	const end = new Date(endDate + 'T00:00:00');
 
@@ -275,39 +280,34 @@ export async function createSchedulePeriodsForDateRange(
 		const day = String(current.getDate()).padStart(2, '0');
 		const dateStr = `${year}-${month}-${day}`;
 
-		const { data, error } = await supabaseAdmin
-			.from('schedule_periods')
-			.insert({
-				city_id: cityId,
-				start_date: dateStr,
-				end_date: dateStr,
-				work_start_time: workStartTime,
-				work_end_time: workEndTime,
-			} as never)
-			.select()
-			.single();
-
-		if (error) {
-			console.error(`Error creating schedule period for ${dateStr}:`, error);
-			throw error;
-		}
-
-		createdPeriods.push(data);
-
-		// Ждем немного, чтобы триггер срабатал
-		await new Promise(resolve => setTimeout(resolve, 300));
-
-		// Генерируем слоты явно
-		if ((data as any)?.id) {
-			try {
-				await generateSlotsForPeriod((data as any).id);
-			} catch (slotError) {
-				console.warn(`Slots may already be generating via trigger for ${dateStr}:`, slotError);
-			}
-		}
+		periodsToCreate.push({
+			city_id: cityId,
+			start_date: dateStr,
+			end_date: dateStr,
+			work_start_time: workStartTime,
+			work_end_time: workEndTime,
+		} as SchedulePeriodInsert);
 
 		current.setDate(current.getDate() + 1);
 	}
+
+	// Вставляем все периоды за один раз
+	// Триггер auto_generate_slots_on_period_insert будет вызван для каждого периода БД
+	// но это сработает в БД параллельно, не в JS
+	const { data, error } = await supabaseAdmin
+		.from('schedule_periods')
+		.insert(periodsToCreate as never)
+		.select();
+
+	if (error) {
+		console.error('Error creating schedule periods:', error);
+		throw error;
+	}
+
+	const createdPeriods = data || [];
+
+	// Ждем, чтобы триггеры в БД сработали
+	await new Promise(resolve => setTimeout(resolve, 800));
 
 	return createdPeriods;
 }
