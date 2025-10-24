@@ -288,6 +288,7 @@ export default function ScheduleCalendar({
 	for (let i = 0; i < adjustedFirstDay; i++) {
 		calendarDays.push(null)
 	}
+	
 	for (let i = 1; i <= daysInMonth; i++) {
 		// Используем локальную дату без конвертации в UTC
 		const year_str = String(year).padStart(4, '0')
