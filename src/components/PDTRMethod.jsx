@@ -198,7 +198,7 @@ const PDTRMethod = () => {
 
 					<div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:gap-8">
 						{/* Решение эмоциональных проблем */}
-						<div className="group relative bg-white/80 backdrop-blur-sm p-4 sm:p-8 rounded-xl border border-gray-100 shadow-md hover:shadow-xl transition-all duration-500 hover:-translate-y-1 overflow-hidden">
+						<div className="group relative bg-white backdrop-blur-sm p-4 sm:p-8 rounded-xl border border-gray-100 shadow-md hover:shadow-xl transition-all duration-500 hover:-translate-y-1 overflow-hidden">
 							<div className="relative">
 								<div className="flex items-start gap-5 mb-6">
 									<div className="flex-shrink-0">
@@ -227,7 +227,7 @@ const PDTRMethod = () => {
 						</div>
 
 						{/* Прокачка функционального состояния */}
-						<div className="group relative bg-white/80 backdrop-blur-sm p-4 sm:p-8 rounded-xl border border-gray-100 shadow-md hover:shadow-xl transition-all duration-500 hover:-translate-y-1 overflow-hidden">
+						<div className="group relative bg-white backdrop-blur-sm p-4 sm:p-8 rounded-xl border border-gray-100 shadow-md hover:shadow-xl transition-all duration-500 hover:-translate-y-1 overflow-hidden">
 							<div className="relative">
 								<div className="flex items-start gap-5 mb-6">
 									<div className="flex-shrink-0">
@@ -256,7 +256,7 @@ const PDTRMethod = () => {
 						</div>
 
 						{/* Облегчение боли */}
-						<div className="group relative bg-white/80 backdrop-blur-sm p-4 sm:p-8 rounded-xl border border-gray-100 shadow-md hover:shadow-xl transition-all duration-500 hover:-translate-y-1 overflow-hidden">
+						<div className="group relative bg-white backdrop-blur-sm p-4 sm:p-8 rounded-xl border border-gray-100 shadow-md hover:shadow-xl transition-all duration-500 hover:-translate-y-1 overflow-hidden">
 							<div className="relative">
 								<div className="flex items-start gap-5 mb-6">
 									<div className="flex-shrink-0">
@@ -285,7 +285,7 @@ const PDTRMethod = () => {
 						</div>
 
 						{/* Повышение уровня энергии */}
-						<div className="group relative bg-white/80 backdrop-blur-sm p-4 sm:p-8 rounded-xl border border-gray-100 shadow-md hover:shadow-xl transition-all duration-500 hover:-translate-y-1 overflow-hidden">
+						<div className="group relative bg-white backdrop-blur-sm p-4 sm:p-8 rounded-xl border border-gray-100 shadow-md hover:shadow-xl transition-all duration-500 hover:-translate-y-1 overflow-hidden">
 							<div className="relative">
 								<div className="flex items-start gap-5 mb-6">
 									<div className="flex-shrink-0">

@@ -121,22 +121,14 @@ const Services = () => {
 				</div>
 
 				{/* Онлайн запись */}
-				<div id="booking" className="max-w-3xl mx-auto">
-					<div className="bg-white/5 backdrop-blur-sm rounded-xl sm:rounded-2xl overflow-hidden border border-white/10 p-4 sm:p-6 md:p-8">
-						<div className="text-center mb-6 sm:mb-8">
-							<div className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-ocean-600 to-ocean-600/20 rounded-full mb-3 sm:mb-4">
-								<svg className="w-6 h-6 sm:w-8 sm:h-8 text-ocean-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-									<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-								</svg>
-							</div>
-							<h3 className="text-xl sm:text-2xl font-light text-white mb-2 px-2">
-								Онлайн-запись
-							</h3>
-							<p className="text-sm sm:text-base text-slate-300 mb-4 sm:mb-6 px-2">
-								Выберите удобные дату и время для консультации
-							</p>
-						</div>
+				<div className="max-w-4xl mx-auto mt-24">
+					{/* Заголовок раздела */}
+					<div id="booking" className="text-center mb-8 sm:mb-12">
+						<SectionHeader title="Онлайн запись" isDarkMode={true} />
+						<SectionDescription text="Выберите удобные дату и время для консультации" isDarkMode={true} />
+					</div>
 
+					<div className="bg-white/5 backdrop-blur-sm rounded-xl sm:rounded-2xl overflow-hidden border border-white/10 p-4 sm:p-6 md:p-8">
 						<BookingWidget />
 					</div>
 				</div>

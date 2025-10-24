@@ -282,7 +282,7 @@ const BookingWidget = () => {
 					<p className="text-lg sm:text-xl text-ocean-300 mb-6">
 						{selectedSlot.startTime} - {selectedSlot.endTime}
 					</p>
-					<p className="text-xs sm:text-sm text-slate-300 mb-8 break-all">
+					<p className="text-sm text-slate-300 mb-8 break-all">
 						Подтверждение отправлено на {clientEmail}
 					</p>
 					<button
@@ -294,8 +294,8 @@ const BookingWidget = () => {
 				</div>
 			) : (
 				<>
-					<div>
-						<label className="block text-xs sm:text-sm font-medium text-slate-300 mb-3">
+					<div className="mb-8">
+						<label className="block text-sm font-medium text-slate-300 mb-3">
 							Выберите город
 						</label>
 						<div className="flex flex-wrap gap-2">
@@ -308,7 +308,7 @@ const BookingWidget = () => {
 										setSelectedSlot(null)
 										setStep(1)
 									}}
-									className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-medium text-xs sm:text-sm transition-all ${selectedCity === city.id
+									className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-medium text-sm transition-all ${selectedCity === city.id
 										? 'bg-ocean-600 text-white'
 										: 'bg-white/5 text-slate-300 hover:bg-white/10'
 										}`}
@@ -320,8 +320,8 @@ const BookingWidget = () => {
 					</div>
 
 					{step === 1 && (
-						<div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-							<div className="lg:col-span-2">
+						<div className="space-y-6">
+							<div className="w-full">
 								<div className="flex items-center justify-between mb-4">
 									<button
 										onClick={() => {
@@ -352,7 +352,7 @@ const BookingWidget = () => {
 									</button>
 								</div>
 
-								<div className="grid grid-cols-7 gap-1 sm:gap-1.5 mb-2 px-1">
+								<div className="grid grid-cols-7 gap-1 sm:gap-1.5 mb-2">
 									{dayNames.map(day => (
 										<div key={day} className="text-center text-xs font-medium text-slate-400 py-1 sm:py-2">
 											{day}
@@ -372,7 +372,7 @@ const BookingWidget = () => {
 												onClick={() => day.isAvailable && handleDateSelect(day.date)}
 												disabled={!day.isAvailable}
 												className={`
-													aspect-square rounded text-xs sm:text-sm font-medium transition-all
+													aspect-square rounded text-sm font-medium transition-all
 													${day.isSelected
 														? 'bg-ocean-600 text-white border-2 border-ocean-500'
 														: day.isToday
@@ -393,9 +393,9 @@ const BookingWidget = () => {
 							</div>
 
 							{selectedDate && (
-								<div className="lg:col-span-1">
-									<h3 className="text-xs sm:text-sm font-medium text-slate-300 mb-3">
-										Время на {new Date(selectedDate + 'T00:00:00').toLocaleDateString('ru-RU', {
+								<div className="w-full">
+									<h3 className="text-base font-regular text-slate-300 mb-4">
+										Выберите время на {new Date(selectedDate + 'T00:00:00').toLocaleDateString('ru-RU', {
 											day: 'numeric',
 											month: 'long'
 										})}
@@ -406,34 +406,41 @@ const BookingWidget = () => {
 											<div className="inline-block w-6 h-6 border-4 border-ocean-300 border-t-transparent rounded-full animate-spin"></div>
 										</div>
 									) : daySlots.length === 0 ? (
-										<p className="text-slate-400 text-center py-4 text-xs sm:text-sm">Нет доступных слотов</p>
+										<p className="text-slate-400 text-center py-4 text-sm">Нет доступных слотов на эту дату</p>
 									) : (
 										<>
-											<div className="space-y-2 mb-4 max-h-96 overflow-y-auto pr-2">
-												{daySlots.map((slot, idx) => (
-													<button
-														key={idx}
-														onClick={() => handleSlotSelect(slot)}
-														disabled={slot.isBooked}
-														className={`
-															w-full px-2.5 sm:px-3 py-2 sm:py-2.5 rounded text-xs sm:text-sm font-medium transition-all
-															${selectedSlot?.id === slot.id
-																? 'bg-ocean-600 text-white border-2 border-ocean-400'
-																: slot.isBooked
-																	? 'bg-slate-700/50 text-slate-500 border border-slate-600 cursor-not-allowed'
-																	: 'bg-green-500/20 text-green-300 border border-green-500/30 hover:bg-green-500/30'
-															}
-														`}
-													>
-														{slot.startTime} - {slot.endTime}
-													</button>
-												))}
+											<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+												{daySlots.map((slot, idx) => {
+													const isSelected = selectedSlot?.id === slot.id
+													const isBooked = slot.isBooked
+
+													return (
+														<button
+															key={idx}
+															type="button"
+															onClick={() => !isBooked && handleSlotSelect(slot)}
+															disabled={isBooked}
+															className={`
+																px-3 py-2 sm:py-2.5 rounded-lg text-sm font-medium transition-all
+																${isSelected
+																	? 'bg-ocean-600 text-white border-2 border-ocean-400'
+																	: isBooked
+																		? 'bg-red-50 text-red-700 border border-red-200 cursor-not-allowed'
+																		: 'bg-green-50 text-green-700 border border-green-200 hover:bg-green-100'
+																}
+															`}
+														>
+															{slot.startTime} - {slot.endTime}
+														</button>
+													)
+												})}
 											</div>
 
 											{selectedSlot && (
 												<button
+													type="button"
 													onClick={handleNextStep}
-													className="w-full px-3 sm:px-4 py-2 sm:py-2.5 rounded bg-ocean-600 text-white font-medium text-xs sm:text-sm hover:bg-ocean-700 transition-colors"
+													className="w-full mt-4 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg bg-ocean-600 text-white font-medium text-sm hover:bg-ocean-700 transition-colors"
 												>
 													Продолжить
 												</button>
@@ -446,10 +453,10 @@ const BookingWidget = () => {
 					)}
 
 					{step === 2 && (
-						<div className="max-w-md mx-auto lg:mx-0">
+						<div className="space-y-4">
 							<button
 								onClick={handleBackStep}
-								className="flex items-center gap-2 text-slate-300 hover:text-white mb-4 transition-colors text-xs sm:text-sm"
+								className="flex items-center gap-2 text-slate-300 hover:text-white mb-4 transition-colors text-sm"
 							>
 								<svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 									<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -458,8 +465,8 @@ const BookingWidget = () => {
 							</button>
 
 							<div className="p-3 sm:p-4 bg-ocean-500/20 rounded border border-ocean-500/30 mb-6">
-								<p className="text-xs sm:text-sm text-slate-400 mb-1">Выбранное время</p>
-								<p className="text-xs sm:text-sm text-white font-medium">
+								<p className="text-sm text-slate-400 mb-1">Выбранное время</p>
+								<p className="text-sm text-white font-medium">
 									{new Date(selectedSlot.date + 'T00:00:00').toLocaleDateString('ru-RU', {
 										day: 'numeric',
 										month: 'long',
@@ -473,7 +480,7 @@ const BookingWidget = () => {
 
 							<form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
 								<div>
-									<label className="block text-xs sm:text-sm font-medium text-slate-300 mb-1.5 sm:mb-2">
+									<label className="block text-sm font-medium text-slate-300 mb-1.5 sm:mb-2">
 										ФИО <span className="text-red-400">*</span>
 									</label>
 									<input
@@ -481,13 +488,13 @@ const BookingWidget = () => {
 										value={clientName}
 										onChange={(e) => setClientName(e.target.value)}
 										required
-										className="w-full px-3 sm:px-4 py-2 sm:py-2.5 bg-white/5 border border-white/10 rounded text-white placeholder-slate-500 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-ocean-500 focus:border-transparent"
+										className="w-full px-3 sm:px-4 py-2 sm:py-2.5 bg-white/5 border border-white/10 rounded text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-ocean-500 focus:border-transparent"
 										placeholder="Ваше имя и фамилия"
 									/>
 								</div>
 
 								<div>
-									<label className="block text-xs sm:text-sm font-medium text-slate-300 mb-1.5 sm:mb-2">
+									<label className="block text-sm font-medium text-slate-300 mb-1.5 sm:mb-2">
 										Телефон <span className="text-red-400">*</span>
 									</label>
 									<input
@@ -495,13 +502,13 @@ const BookingWidget = () => {
 										value={clientPhone}
 										onChange={(e) => setClientPhone(e.target.value)}
 										required
-										className="w-full px-3 sm:px-4 py-2 sm:py-2.5 bg-white/5 border border-white/10 rounded text-white placeholder-slate-500 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-ocean-500 focus:border-transparent"
+										className="w-full px-3 sm:px-4 py-2 sm:py-2.5 bg-white/5 border border-white/10 rounded text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-ocean-500 focus:border-transparent"
 										placeholder="+7 (900) 000-00-00"
 									/>
 								</div>
 
 								<div>
-									<label className="block text-xs sm:text-sm font-medium text-slate-300 mb-1.5 sm:mb-2">
+									<label className="block text-sm font-medium text-slate-300 mb-1.5 sm:mb-2">
 										Email <span className="text-red-400">*</span>
 									</label>
 									<input
@@ -509,7 +516,7 @@ const BookingWidget = () => {
 										value={clientEmail}
 										onChange={(e) => setClientEmail(e.target.value)}
 										required
-										className="w-full px-3 sm:px-4 py-2 sm:py-2.5 bg-white/5 border border-white/10 rounded text-white placeholder-slate-500 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-ocean-500 focus:border-transparent"
+										className="w-full px-3 sm:px-4 py-2 sm:py-2.5 bg-white/5 border border-white/10 rounded text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-ocean-500 focus:border-transparent"
 										placeholder="your@email.com"
 									/>
 								</div>
@@ -517,11 +524,36 @@ const BookingWidget = () => {
 								<button
 									type="submit"
 									disabled={bookingLoading || !clientName || !clientPhone || !clientEmail}
-									className="w-full px-3 sm:px-6 py-2 sm:py-3 rounded bg-ocean-600 text-white font-medium text-xs sm:text-sm hover:bg-ocean-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+									className="w-full px-3 sm:px-6 py-2 sm:py-3 rounded bg-ocean-600 text-white font-medium text-sm hover:bg-ocean-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 								>
 									{bookingLoading ? 'Создание записи...' : 'Записаться'}
 								</button>
 							</form>
+						</div>
+					)}
+
+					{step === 3 && (
+						<div className="text-center space-y-4">
+							<div className="flex justify-center mb-4">
+								<svg className="w-16 h-16 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 13l4 4L19 7" />
+								</svg>
+							</div>
+							<h2 className="text-lg sm:text-xl font-bold text-white">Запись успешно создана!</h2>
+							<p className="text-slate-400 text-sm sm:text-base">Мы отправили подтверждение на {clientEmail}</p>
+							<button
+								onClick={() => {
+									setStep(0)
+									setSelectedDate(null)
+									setSelectedSlot(null)
+									setClientName('')
+									setClientPhone('')
+									setClientEmail('')
+								}}
+								className="mt-6 px-6 py-2.5 rounded bg-ocean-600 text-white font-medium text-sm hover:bg-ocean-700 transition-colors"
+							>
+								Готово
+							</button>
 						</div>
 					)}
 				</>

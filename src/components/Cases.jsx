@@ -300,8 +300,7 @@ const Cases = () => {
 						Хотите получить такие же результаты?
 					</p>
 					<a
-						href="https://t.me/maria_pdtr"
-						target="_blank"
+						href="#booking"
 						className="inline-flex items-center gap-2 bg-gradient-to-r from-ocean-600 to-ocean-600 text-white px-4 py-3 sm:px-8 sm:py-4 rounded-full hover:bg-ocean-500 transition-all duration-300 shadow-lg hover:shadow-ocean-500/25 text-sm sm:text-base font-light"
 					>
 						<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -41,9 +41,7 @@ function Hero() {
 			<div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10 pt-24 sm:pt-32 pb-20">
 				<div className="flex sm:flex-row gap-2 min-[1000px]:hidden mb-4">
 					<a
-						href="https://t.me/maria_pdtr"
-						target="_blank"
-						rel="noopener noreferrer"
+						href="#booking"
 						className="bg-gradient-to-r from-ocean-600 to-ocean-600 text-white px-5 py-3 rounded-full hover:bg-ocean-500 transform transition-all duration-300 text-[14px] flex items-center justify-center gap-2 shadow-md hover:shadow-ocean-500/25 font-light"
 					>
 						<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
