@@ -188,7 +188,6 @@ export default function AdminReviews() {
   async function loadCategories() {
     const { data, error } = await getCategories()
     if (error) {
-      console.error('Ошибка загрузки категорий:', error)
       return
     }
     setCategories(data || [])

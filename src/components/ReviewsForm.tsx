@@ -161,15 +161,14 @@ export default function ReviewsForm({ onSubmitted }: ReviewsFormProps) {
               {/* Email Field - на отдельной строке */}
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5 text-left">
-                  Email <span className="text-ocean-600">*</span>
+                  Email
                 </label>
                 <input
                   type="email"
                   className="w-full px-3 py-2.5 rounded-lg border border-slate-200 focus:border-ocean-600 focus:outline-none focus:ring-2 focus:ring-ocean-600/20 transition-all text-sm h-10"
-                  placeholder="ivan@example.com"
+                  placeholder="ivan@example.com (опционально)"
                   value={email}
                   onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
-                  required
                 />
               </div>
 

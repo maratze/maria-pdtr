@@ -194,7 +194,7 @@ const BookingWidget = () => {
 
 	const handleSubmit = async (e) => {
 		e.preventDefault()
-		if (selectedSlots.length === 0 || !clientName || !clientPhone || !clientEmail) return
+		if (selectedSlots.length === 0 || !clientName || !clientPhone) return
 
 		try {
 			setBookingLoading(true)
@@ -425,11 +425,6 @@ const BookingWidget = () => {
 											month: 'long'
 										})}
 									</h3>
-									{selectedSlots.length > 0 && (
-										<p className="text-xs text-ocean-300">
-											Выбрано: {selectedSlots.length} {selectedSlots.length === 1 ? 'слот' : selectedSlots.length < 5 ? 'слота' : 'слотов'}
-										</p>
-									)}
 								</div>
 
 								{loadingSlots ? (
@@ -535,16 +530,15 @@ const BookingWidget = () => {
 													</div>
 
 													<div>
-														<label className="block text-sm font-medium text-slate-300 mb-1.5 sm:mb-2">
-															Email <span className="text-red-400">*</span>
+														<label htmlFor="email" className="block text-xs sm:text-sm font-medium text-slate-300 mb-1.5">
+															Email
 														</label>
 														<input
 															type="email"
 															value={clientEmail}
 															onChange={(e) => setClientEmail(e.target.value)}
-															required
 															className="w-full px-3 sm:px-4 py-2 sm:py-2.5 bg-white/5 border border-white/10 rounded text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-ocean-500 focus:border-transparent"
-															placeholder="your@email.com"
+															placeholder="your@email.com (опционально)"
 														/>
 													</div>
 
@@ -558,7 +552,7 @@ const BookingWidget = () => {
 														</button>
 														<button
 															type="submit"
-															disabled={bookingLoading || !clientName || !clientPhone || !clientEmail}
+															disabled={bookingLoading || !clientName || !clientPhone}
 															className="flex-1 px-3 sm:px-6 py-2 sm:py-2.5 rounded bg-ocean-600 text-white font-medium text-sm hover:bg-ocean-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 														>
 															{bookingLoading ? 'Создание записи...' : 'Записаться'}

@@ -281,8 +281,6 @@ export async function getOrCreateSlotsForDate(
 	} const allSlots: TimeSlot[] = [];
 
 	for (const period of periods) {
-		console.log('Processing period:', (period as any).id);
-
 		// Проверяем, существуют ли слоты для этого периода и даты
 		const { data: existingSlots, error: slotsError } = await supabase
 			.from('time_slots')
@@ -292,24 +290,14 @@ export async function getOrCreateSlotsForDate(
 			.order('start_time');
 
 		if (slotsError) {
-			console.error('Error fetching existing slots:', slotsError);
 			throw slotsError;
 		}
 
-		console.log('Existing slots:', existingSlots);
-
 		if (existingSlots && existingSlots.length > 0) {
 			// Слоты уже существуют
-			console.log('Using existing slots:', existingSlots.length);
 			allSlots.push(...(existingSlots as TimeSlot[]));
 		} else {
 			// Слотов нет - нужно создать
-			console.log('Creating new slots for period:', {
-				periodId: (period as any).id,
-				date,
-				workStartTime: (period as any).work_start_time,
-				workEndTime: (period as any).work_end_time
-			});
 
 			const slotsToCreate = generateSlotsForPeriodAndDate(
 				(period as any).id,
@@ -319,8 +307,6 @@ export async function getOrCreateSlotsForDate(
 				60 // 1 час по умолчанию
 			);
 
-			console.log('Slots to create:', slotsToCreate);
-
 			// Создаем слоты в БД
 			const { data: createdSlots, error: createError } = await supabase
 				.from('time_slots')
@@ -328,11 +314,8 @@ export async function getOrCreateSlotsForDate(
 				.select();
 
 			if (createError) {
-				console.error('Error creating slots:', createError);
 				throw createError;
 			}
-
-			console.log('Created slots:', createdSlots);
 
 			if (createdSlots) {
 				allSlots.push(...(createdSlots as TimeSlot[]));
@@ -340,7 +323,6 @@ export async function getOrCreateSlotsForDate(
 		}
 	}
 
-	console.log('Total slots returned:', allSlots.length);
 	return allSlots;
 }
 
