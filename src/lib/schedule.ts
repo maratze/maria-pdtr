@@ -260,7 +260,9 @@ export async function getPublicActiveSchedulePeriods(): Promise<SchedulePeriodWi
 export async function getPublicActiveSchedulePeriodsByCity(
 	cityId: string
 ): Promise<SchedulePeriodWithCity[]> {
-	const today = new Date().toISOString().split('T')[0];
+	// Форматируем дату локально без UTC конвертации
+	const today = new Date();
+	const todayStr = `${String(today.getFullYear()).padStart(4, '0')}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
 	const { data, error } = await supabase
 		.from('schedule_periods')
@@ -269,7 +271,7 @@ export async function getPublicActiveSchedulePeriodsByCity(
       city:cities(*)
     `)
 		.eq('city_id', cityId)
-		.gte('end_date', today)
+		.gte('end_date', todayStr)
 		.order('start_date', { ascending: true });
 
 	if (error) {

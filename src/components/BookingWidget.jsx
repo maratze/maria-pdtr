@@ -16,7 +16,7 @@ const BookingWidget = () => {
 	const [availableDates, setAvailableDates] = useState([])
 
 	const [daySlots, setDaySlots] = useState([])
-	const [selectedSlot, setSelectedSlot] = useState(null)
+	const [selectedSlots, setSelectedSlots] = useState([])
 
 	const [step, setStep] = useState(1)
 	const [clientName, setClientName] = useState('')
@@ -37,7 +37,6 @@ const BookingWidget = () => {
 					setSelectedCity(citiesData[0].id)
 				}
 			} catch (error) {
-				console.error('Error loading cities:', error)
 				setToast({ message: 'Ошибка загрузки городов', type: 'error' })
 			} finally {
 				setLoading(false)
@@ -56,17 +55,28 @@ const BookingWidget = () => {
 
 				const dates = new Set()
 				periodsData.forEach(period => {
-					const start = new Date(period.start_date + 'T00:00:00')
-					const end = new Date(period.end_date + 'T00:00:00')
-					const current = new Date(start)
-					while (current <= end) {
-						dates.add(current.toISOString().split('T')[0])
-						current.setDate(current.getDate() + 1)
+					// Используем даты напрямую из БД без создания Date объектов
+					// period.start_date и period.end_date уже в формате YYYY-MM-DD
+					const start = period.start_date
+					const end = period.end_date
+
+					// Если start_date === end_date (период на один день)
+					if (start === end) {
+						dates.add(start)
+					} else {
+						// Если период на несколько дней
+						const currentDate = new Date(start + 'T00:00:00')
+						const endDate = new Date(end + 'T00:00:00')
+
+						while (currentDate <= endDate) {
+							const dateStr = `${String(currentDate.getFullYear()).padStart(4, '0')}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}`
+							dates.add(dateStr)
+							currentDate.setDate(currentDate.getDate() + 1)
+						}
 					}
 				})
 				setAvailableDates(Array.from(dates))
 			} catch (error) {
-				console.error('Error loading data:', error)
 				setToast({ message: 'Ошибка загрузки данных', type: 'error' })
 			} finally {
 				setLoading(false)
@@ -94,7 +104,6 @@ const BookingWidget = () => {
 				}))
 				setDaySlots(formattedSlots)
 			} catch (error) {
-				console.error('Error loading slots:', error)
 				setToast({ message: 'Ошибка загрузки слотов', type: 'error' })
 			} finally {
 				setLoadingSlots(false)
@@ -149,18 +158,27 @@ const BookingWidget = () => {
 
 	const handleDateSelect = (dateStr) => {
 		setSelectedDate(dateStr)
-		setSelectedSlot(null)
+		setSelectedSlots([])
 		setStep(1)
 	}
 
 	const handleSlotSelect = (slot) => {
-		if (!slot.isBooked) {
-			setSelectedSlot(slot)
+		if (slot.isBooked) return
+
+		// Проверяем, выбран ли уже этот слот
+		const isAlreadySelected = selectedSlots.some(s => s.id === slot.id)
+
+		if (isAlreadySelected) {
+			// Убираем из выбранных
+			setSelectedSlots(selectedSlots.filter(s => s.id !== slot.id))
+		} else {
+			// Добавляем к выбранным
+			setSelectedSlots([...selectedSlots, slot])
 		}
 	}
 
 	const handleNextStep = () => {
-		if (step === 1 && selectedSlot) {
+		if (step === 1 && selectedSlots.length > 0) {
 			setStep(2)
 		}
 	}
@@ -176,23 +194,38 @@ const BookingWidget = () => {
 
 	const handleSubmit = async (e) => {
 		e.preventDefault()
-		if (!selectedSlot || !clientName || !clientPhone || !clientEmail) return
+		if (selectedSlots.length === 0 || !clientName || !clientPhone || !clientEmail) return
 
 		try {
 			setBookingLoading(true)
-			const result = await createPublicBooking(
-				selectedSlot.periodId,
-				selectedSlot.date,
-				selectedSlot.startTime,
-				selectedSlot.endTime,
-				clientName,
-				clientPhone,
-				clientEmail
-			)
+			let allSuccess = true
+			let errorMessage = ''
 
-			if (result.success) {
+			// Создаём бронирование для каждого выбранного слота
+			for (const slot of selectedSlots) {
+				const result = await createPublicBooking(
+					slot.periodId,
+					slot.date,
+					slot.startTime,
+					slot.endTime,
+					clientName,
+					clientPhone,
+					clientEmail
+				)
+
+				if (!result.success) {
+					allSuccess = false
+					errorMessage = result.error || 'Ошибка создания бронирования'
+					break
+				}
+			}
+
+			if (allSuccess) {
 				setStep(3)
-				setToast({ message: 'Бронирование успешно создано!', type: 'success' })
+				const message = selectedSlots.length === 1
+					? 'Бронирование успешно создано!'
+					: `Успешно забронировано ${selectedSlots.length} слотов!`
+				setToast({ message, type: 'success' })
 				// Перезагружаем слоты, чтобы показать обновлённые данные
 				const slots = await getOrCreateSlotsForDate(selectedCity, selectedDate)
 				const formattedSlots = slots.map(slot => ({
@@ -205,10 +238,9 @@ const BookingWidget = () => {
 				}))
 				setDaySlots(formattedSlots)
 			} else {
-				setToast({ message: result.error || 'Ошибка создания бронирования', type: 'error' })
+				setToast({ message: errorMessage, type: 'error' })
 			}
 		} catch (error) {
-			console.error('Error creating booking:', error)
 			setToast({ message: 'Ошибка создания бронирования', type: 'error' })
 		} finally {
 			setBookingLoading(false)
@@ -218,7 +250,7 @@ const BookingWidget = () => {
 	const handleReset = () => {
 		setStep(1)
 		setSelectedDate(null)
-		setSelectedSlot(null)
+		setSelectedSlots([])
 		setClientName('')
 		setClientPhone('')
 		setClientEmail('')
@@ -257,17 +289,27 @@ const BookingWidget = () => {
 							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
 						</svg>
 					</div>
-					<h3 className="text-xl sm:text-2xl font-light text-white mb-3">Запись успешно создана!</h3>
+					<h3 className="text-xl sm:text-2xl font-light text-white mb-3">
+						{selectedSlots.length === 1 ? 'Запись успешно создана!' : 'Записи успешно созданы!'}
+					</h3>
 					<p className="text-sm sm:text-base text-slate-300 mb-2">
-						{new Date(selectedSlot.date + 'T00:00:00').toLocaleDateString('ru-RU', {
+						{selectedSlots.length > 0 && new Date(selectedSlots[0].date + 'T00:00:00').toLocaleDateString('ru-RU', {
 							day: 'numeric',
 							month: 'long',
 							year: 'numeric'
 						})}
 					</p>
-					<p className="text-lg sm:text-xl text-ocean-300 mb-6">
-						{selectedSlot.startTime} - {selectedSlot.endTime}
-					</p>
+					<div className="text-lg sm:text-xl text-ocean-300 mb-6">
+						{selectedSlots.length === 1 ? (
+							<p>{selectedSlots[0].startTime} - {selectedSlots[0].endTime}</p>
+						) : (
+							<div className="space-y-1">
+								{selectedSlots.map((slot, idx) => (
+									<p key={idx}>{slot.startTime} - {slot.endTime}</p>
+								))}
+							</div>
+						)}
+					</div>
 					<p className="text-sm text-slate-300 mb-8 break-all">
 						Подтверждение отправлено на {clientEmail}
 					</p>
@@ -291,7 +333,7 @@ const BookingWidget = () => {
 									onClick={() => {
 										setSelectedCity(city.id)
 										setSelectedDate(null)
-										setSelectedSlot(null)
+										setSelectedSlots([])
 										setStep(1)
 									}}
 									className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-medium text-sm transition-all ${selectedCity === city.id
@@ -305,243 +347,235 @@ const BookingWidget = () => {
 						</div>
 					</div>
 
-					{step === 1 && (
-						<div className="space-y-6">
-							<div className="w-full">
-								<div className="flex items-center justify-between mb-4">
-									<button
-										onClick={() => {
-											const newMonth = new Date(currentMonth)
-											newMonth.setMonth(newMonth.getMonth() - 1)
-											setCurrentMonth(newMonth)
-										}}
-										className="p-1.5 sm:p-2 rounded-lg text-slate-300 hover:bg-white/5 transition-colors flex-shrink-0"
-									>
-										<svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-											<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-										</svg>
-									</button>
-									<h3 className="text-sm sm:text-base lg:text-lg font-medium text-white">
-										{monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
-									</h3>
-									<button
-										onClick={() => {
-											const newMonth = new Date(currentMonth)
-											newMonth.setMonth(newMonth.getMonth() + 1)
-											setCurrentMonth(newMonth)
-										}}
-										className="p-1.5 sm:p-2 rounded-lg text-slate-300 hover:bg-white/5 transition-colors flex-shrink-0"
-									>
-										<svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-											<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-										</svg>
-									</button>
-								</div>
-
-								<div className="grid grid-cols-7 gap-1 sm:gap-1.5 mb-2">
-									{dayNames.map(day => (
-										<div key={day} className="text-center text-xs font-medium text-slate-400 py-1 sm:py-2">
-											{day}
-										</div>
-									))}
-								</div>
-
-								<div className="grid grid-cols-7 gap-1 sm:gap-1.5">
-									{generateCalendar().map((day, idx) => {
-										if (!day) {
-											return <div key={`empty-${idx}`} />
-										}
-
-										return (
-											<button
-												key={day.date}
-												onClick={() => day.isAvailable && handleDateSelect(day.date)}
-												disabled={!day.isAvailable}
-												className={`
-													aspect-square rounded text-sm font-medium transition-all
-													${day.isSelected
-														? 'bg-ocean-600 text-white border-2 border-ocean-500'
-														: day.isToday
-															? 'bg-white/5 text-slate-300 border-2 border-white/60'
-															: day.isAvailable
-																? 'bg-green-500/20 text-green-300 hover:bg-green-500/30 border border-green-500/30'
-																: day.isPast
-																	? 'bg-white/5 text-slate-600 cursor-not-allowed border border-white/5'
-																	: 'bg-white/5 text-slate-500 cursor-not-allowed border border-white/5'
-													}
-												`}
-											>
-												{day.day}
-											</button>
-										)
-									})}
-								</div>
+					<div className="space-y-6">
+						<div className="w-full">
+							<div className="flex items-center justify-between mb-4">
+								<button
+									onClick={() => {
+										const newMonth = new Date(currentMonth)
+										newMonth.setMonth(newMonth.getMonth() - 1)
+										setCurrentMonth(newMonth)
+									}}
+									className="p-1.5 sm:p-2 rounded-lg text-slate-300 hover:bg-white/5 transition-colors flex-shrink-0"
+								>
+									<svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+									</svg>
+								</button>
+								<h3 className="text-sm sm:text-base lg:text-lg font-medium text-white">
+									{monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
+								</h3>
+								<button
+									onClick={() => {
+										const newMonth = new Date(currentMonth)
+										newMonth.setMonth(newMonth.getMonth() + 1)
+										setCurrentMonth(newMonth)
+									}}
+									className="p-1.5 sm:p-2 rounded-lg text-slate-300 hover:bg-white/5 transition-colors flex-shrink-0"
+								>
+									<svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+									</svg>
+								</button>
 							</div>
 
-							{selectedDate && (
-								<div className="w-full">
-									<h3 className="text-base font-regular text-slate-300 mb-4">
+							<div className="grid grid-cols-7 gap-1 sm:gap-1.5 mb-2">
+								{dayNames.map(day => (
+									<div key={day} className="text-center text-xs font-medium text-slate-400 py-1 sm:py-2">
+										{day}
+									</div>
+								))}
+							</div>
+
+							<div className="grid grid-cols-7 gap-1 sm:gap-1.5">
+								{generateCalendar().map((day, idx) => {
+									if (!day) {
+										return <div key={`empty-${idx}`} />
+									}
+
+									return (
+										<button
+											key={day.date}
+											onClick={() => day.isAvailable && handleDateSelect(day.date)}
+											disabled={!day.isAvailable}
+											className={`
+													aspect-square rounded text-sm font-medium transition-all
+													${day.isSelected
+													? 'bg-ocean-600 text-white border-2 border-ocean-500'
+													: day.isToday
+														? 'bg-white/5 text-slate-300 border-2 border-white/60'
+														: day.isAvailable
+															? 'bg-green-500/20 text-green-300 hover:bg-green-500/30 border border-green-500/30'
+															: day.isPast
+																? 'bg-white/5 text-slate-600 cursor-not-allowed border border-white/5'
+																: 'bg-white/5 text-slate-500 cursor-not-allowed border border-white/5'
+												}
+												`}
+										>
+											{day.day}
+										</button>
+									)
+								})}
+							</div>
+						</div>
+
+						{selectedDate && (
+							<div className="w-full">
+								<div className="mb-4">
+									<h3 className="text-base font-regular text-slate-300 mb-1">
 										Выберите время на {new Date(selectedDate + 'T00:00:00').toLocaleDateString('ru-RU', {
 											day: 'numeric',
 											month: 'long'
 										})}
 									</h3>
-
-									{loadingSlots ? (
-										<div className="text-center py-4">
-											<div className="inline-block w-6 h-6 border-4 border-ocean-300 border-t-transparent rounded-full animate-spin"></div>
-										</div>
-									) : daySlots.length === 0 ? (
-										<p className="text-slate-400 text-center py-4 text-sm">Нет доступных слотов на эту дату</p>
-									) : (
-										<>
-											<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-												{daySlots.map((slot, idx) => {
-													const isSelected = selectedSlot?.id === slot.id
-													const isBooked = slot.isBooked
-
-													return (
-														<button
-															key={idx}
-															type="button"
-															onClick={() => !isBooked && handleSlotSelect(slot)}
-															disabled={isBooked}
-															className={`
-																px-3 py-2 sm:py-2.5 rounded-lg text-sm font-medium transition-all
-																${isSelected
-																	? 'bg-ocean-600 text-white border-2 border-ocean-400'
-																	: isBooked
-																		? 'bg-red-50 text-red-700 border border-red-200 cursor-not-allowed'
-																		: 'bg-green-50 text-green-700 border border-green-200 hover:bg-green-100'
-																}
-															`}
-														>
-															{slot.startTime} - {slot.endTime}
-														</button>
-													)
-												})}
-											</div>
-
-											{selectedSlot && (
-												<button
-													type="button"
-													onClick={handleNextStep}
-													className="w-full mt-4 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg bg-ocean-600 text-white font-medium text-sm hover:bg-ocean-700 transition-colors"
-												>
-													Продолжить
-												</button>
-											)}
-										</>
+									{selectedSlots.length > 0 && (
+										<p className="text-xs text-ocean-300">
+											Выбрано: {selectedSlots.length} {selectedSlots.length === 1 ? 'слот' : selectedSlots.length < 5 ? 'слота' : 'слотов'}
+										</p>
 									)}
 								</div>
-							)}
-						</div>
-					)}
 
-					{step === 2 && (
-						<div className="space-y-4">
-							<button
-								onClick={handleBackStep}
-								className="flex items-center gap-2 text-slate-300 hover:text-white mb-4 transition-colors text-sm"
-							>
-								<svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-								</svg>
-								Назад
-							</button>
+								{loadingSlots ? (
+									<div className="text-center py-4">
+										<div className="inline-block w-6 h-6 border-4 border-ocean-300 border-t-transparent rounded-full animate-spin"></div>
+									</div>
+								) : daySlots.length === 0 ? (
+									<p className="text-slate-400 text-center py-4 text-sm">Нет доступных слотов на эту дату</p>
+								) : (
+									<>
+										<p className="text-xs text-slate-400 mb-2">Вы можете выбрать несколько слотов подряд</p>
+										<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+											{daySlots.map((slot, idx) => {
+												const isSelected = selectedSlots.some(s => s.id === slot.id)
+												const isBooked = slot.isBooked
 
-							<div className="p-3 sm:p-4 bg-ocean-500/20 rounded border border-ocean-500/30 mb-6">
-								<p className="text-sm text-slate-400 mb-1">Выбранное время</p>
-								<p className="text-sm text-white font-medium">
-									{new Date(selectedSlot.date + 'T00:00:00').toLocaleDateString('ru-RU', {
-										day: 'numeric',
-										month: 'long',
-										year: 'numeric'
-									})}
-								</p>
-								<p className="text-sm sm:text-base text-ocean-300 font-medium">
-									{selectedSlot.startTime} - {selectedSlot.endTime}
-								</p>
+												return (
+													<button
+														key={idx}
+														type="button"
+														onClick={() => !isBooked && handleSlotSelect(slot)}
+														disabled={isBooked}
+														className={`
+															px-3 py-2.5 rounded text-sm font-medium transition-all border relative
+															${isSelected
+																? 'bg-ocean-600 text-white border-ocean-600'
+																: isBooked
+																	? 'bg-white/5 text-slate-500 border-white/10 cursor-not-allowed'
+																	: 'bg-white/5 text-slate-300 border-white/10 hover:bg-white/10 hover:border-white/20'
+															}
+														`}
+													>
+														{slot.startTime} - {slot.endTime}
+														{isSelected && (
+															<span className="absolute -top-1 -right-1 w-5 h-5 bg-ocean-400 rounded-full flex items-center justify-center text-xs text-white">
+																{selectedSlots.findIndex(s => s.id === slot.id) + 1}
+															</span>
+														)}
+													</button>
+												)
+											})}
+										</div>
+
+										{selectedSlots.length > 0 && step === 1 && (
+											<button
+												type="button"
+												onClick={handleNextStep}
+												className="w-full mt-4 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg bg-ocean-600 text-white font-medium text-sm hover:bg-ocean-700 transition-colors"
+											>
+												Продолжить ({selectedSlots.length} {selectedSlots.length === 1 ? 'слот' : selectedSlots.length < 5 ? 'слота' : 'слотов'})
+											</button>
+										)}
+
+										{selectedSlots.length > 0 && step === 2 && (
+											<div className="mt-6 space-y-4">
+												<div className="p-3 sm:p-4 bg-ocean-500/20 rounded border border-ocean-500/30">
+													<p className="text-sm text-slate-400 mb-1">
+														{selectedSlots.length === 1 ? 'Выбранное время' : `Выбрано слотов: ${selectedSlots.length}`}
+													</p>
+													<p className="text-sm text-white font-medium mb-2">
+														{new Date(selectedSlots[0].date + 'T00:00:00').toLocaleDateString('ru-RU', {
+															day: 'numeric',
+															month: 'long',
+															year: 'numeric'
+														})}
+													</p>
+													<div className="space-y-1">
+														{selectedSlots.map((slot, idx) => (
+															<p key={idx} className="text-sm sm:text-base text-ocean-300 font-medium">
+																{slot.startTime} - {slot.endTime}
+															</p>
+														))}
+													</div>
+												</div>
+
+												<form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
+													<div>
+														<label className="block text-sm font-medium text-slate-300 mb-1.5 sm:mb-2">
+															ФИО <span className="text-red-400">*</span>
+														</label>
+														<input
+															type="text"
+															value={clientName}
+															onChange={(e) => setClientName(e.target.value)}
+															required
+															className="w-full px-3 sm:px-4 py-2 sm:py-2.5 bg-white/5 border border-white/10 rounded text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-ocean-500 focus:border-transparent"
+															placeholder="Ваше имя и фамилия"
+														/>
+													</div>
+
+													<div>
+														<label className="block text-sm font-medium text-slate-300 mb-1.5 sm:mb-2">
+															Телефон <span className="text-red-400">*</span>
+														</label>
+														<input
+															type="tel"
+															value={clientPhone}
+															onChange={(e) => setClientPhone(e.target.value)}
+															required
+															className="w-full px-3 sm:px-4 py-2 sm:py-2.5 bg-white/5 border border-white/10 rounded text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-ocean-500 focus:border-transparent"
+															placeholder="+7 (900) 000-00-00"
+														/>
+													</div>
+
+													<div>
+														<label className="block text-sm font-medium text-slate-300 mb-1.5 sm:mb-2">
+															Email <span className="text-red-400">*</span>
+														</label>
+														<input
+															type="email"
+															value={clientEmail}
+															onChange={(e) => setClientEmail(e.target.value)}
+															required
+															className="w-full px-3 sm:px-4 py-2 sm:py-2.5 bg-white/5 border border-white/10 rounded text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-ocean-500 focus:border-transparent"
+															placeholder="your@email.com"
+														/>
+													</div>
+
+													<div className="flex gap-2">
+														<button
+															type="button"
+															onClick={handleBackStep}
+															className="px-4 py-2 sm:py-2.5 rounded bg-white/5 text-slate-300 font-medium text-sm hover:bg-white/10 transition-colors"
+														>
+															Назад
+														</button>
+														<button
+															type="submit"
+															disabled={bookingLoading || !clientName || !clientPhone || !clientEmail}
+															className="flex-1 px-3 sm:px-6 py-2 sm:py-2.5 rounded bg-ocean-600 text-white font-medium text-sm hover:bg-ocean-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+														>
+															{bookingLoading ? 'Создание записи...' : 'Записаться'}
+														</button>
+													</div>
+												</form>
+											</div>
+										)}
+									</>
+								)}
 							</div>
+						)}
+					</div>
 
-							<form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
-								<div>
-									<label className="block text-sm font-medium text-slate-300 mb-1.5 sm:mb-2">
-										ФИО <span className="text-red-400">*</span>
-									</label>
-									<input
-										type="text"
-										value={clientName}
-										onChange={(e) => setClientName(e.target.value)}
-										required
-										className="w-full px-3 sm:px-4 py-2 sm:py-2.5 bg-white/5 border border-white/10 rounded text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-ocean-500 focus:border-transparent"
-										placeholder="Ваше имя и фамилия"
-									/>
-								</div>
-
-								<div>
-									<label className="block text-sm font-medium text-slate-300 mb-1.5 sm:mb-2">
-										Телефон <span className="text-red-400">*</span>
-									</label>
-									<input
-										type="tel"
-										value={clientPhone}
-										onChange={(e) => setClientPhone(e.target.value)}
-										required
-										className="w-full px-3 sm:px-4 py-2 sm:py-2.5 bg-white/5 border border-white/10 rounded text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-ocean-500 focus:border-transparent"
-										placeholder="+7 (900) 000-00-00"
-									/>
-								</div>
-
-								<div>
-									<label className="block text-sm font-medium text-slate-300 mb-1.5 sm:mb-2">
-										Email <span className="text-red-400">*</span>
-									</label>
-									<input
-										type="email"
-										value={clientEmail}
-										onChange={(e) => setClientEmail(e.target.value)}
-										required
-										className="w-full px-3 sm:px-4 py-2 sm:py-2.5 bg-white/5 border border-white/10 rounded text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-ocean-500 focus:border-transparent"
-										placeholder="your@email.com"
-									/>
-								</div>
-
-								<button
-									type="submit"
-									disabled={bookingLoading || !clientName || !clientPhone || !clientEmail}
-									className="w-full px-3 sm:px-6 py-2 sm:py-3 rounded bg-ocean-600 text-white font-medium text-sm hover:bg-ocean-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-								>
-									{bookingLoading ? 'Создание записи...' : 'Записаться'}
-								</button>
-							</form>
-						</div>
-					)}
-
-					{step === 3 && (
-						<div className="text-center space-y-4">
-							<div className="flex justify-center mb-4">
-								<svg className="w-16 h-16 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 13l4 4L19 7" />
-								</svg>
-							</div>
-							<h2 className="text-lg sm:text-xl font-bold text-white">Запись успешно создана!</h2>
-							<p className="text-slate-400 text-sm sm:text-base">Мы отправили подтверждение на {clientEmail}</p>
-							<button
-								onClick={() => {
-									setStep(0)
-									setSelectedDate(null)
-									setSelectedSlot(null)
-									setClientName('')
-									setClientPhone('')
-									setClientEmail('')
-								}}
-								className="mt-6 px-6 py-2.5 rounded bg-ocean-600 text-white font-medium text-sm hover:bg-ocean-700 transition-colors"
-							>
-								Готово
-							</button>
-						</div>
-					)}
 				</>
 			)}
 		</div>
