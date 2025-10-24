@@ -121,9 +121,9 @@ const Services = () => {
 				</div>
 
 				{/* Онлайн запись */}
-				<div className="max-w-4xl mx-auto mt-24">
+				<div className="max-w-4xl mx-auto">
 					{/* Заголовок раздела */}
-					<div id="booking" className="text-center mb-8 sm:mb-12">
+					<div id="booking" className="text-center mb-8 sm:mb-12 pt-24">
 						<SectionHeader title="Онлайн запись" isDarkMode={true} />
 						<SectionDescription text="Выберите удобные дату и время для консультации" isDarkMode={true} />
 					</div>

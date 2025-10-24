@@ -299,15 +299,26 @@ const Cases = () => {
 					<p className="text-sm sm:text-base text-slate-200 mb-4 sm:mb-6">
 						Хотите получить такие же результаты?
 					</p>
-					<a
-						href="#booking"
+					<button
+						onClick={(e) => {
+							e.preventDefault()
+							const targetElement = document.getElementById('booking')
+							if (targetElement) {
+								const elementPosition = targetElement.getBoundingClientRect().top + window.pageYOffset
+								const offsetPosition = elementPosition
+								window.scrollTo({
+									top: offsetPosition,
+									behavior: 'smooth'
+								})
+							}
+						}}
 						className="inline-flex items-center gap-2 bg-gradient-to-r from-ocean-600 to-ocean-600 text-white px-4 py-3 sm:px-8 sm:py-4 rounded-full hover:bg-ocean-500 transition-all duration-300 shadow-lg hover:shadow-ocean-500/25 text-sm sm:text-base font-light"
 					>
 						<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
 						</svg>
 						Записаться на консультацию
-					</a>
+					</button>
 				</div>
 			</div>
 

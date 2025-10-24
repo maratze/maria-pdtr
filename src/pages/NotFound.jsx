@@ -10,9 +10,8 @@ function NotFound() {
 			const element = document.getElementById(sectionId)
 			if (element) {
 				const elementPosition = element.offsetTop
-				const offsetPosition = elementPosition - 80
 				window.scrollTo({
-					top: offsetPosition,
+					top: elementPosition,
 					behavior: 'smooth'
 				})
 			}

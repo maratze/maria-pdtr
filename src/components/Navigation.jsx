@@ -20,8 +20,8 @@ function Navigation() {
 			setTimeout(() => {
 				const targetElement = document.getElementById(targetId)
 				if (targetElement) {
-					const elementPosition = targetElement.offsetTop
-					const offsetPosition = elementPosition - 80
+					const elementPosition = targetElement.getBoundingClientRect().top + window.pageYOffset
+					const offsetPosition = elementPosition
 					window.scrollTo({
 						top: offsetPosition,
 						behavior: 'smooth'
@@ -31,8 +31,8 @@ function Navigation() {
 		} else {
 			const targetElement = document.getElementById(targetId)
 			if (targetElement) {
-				const elementPosition = targetElement.offsetTop
-				const offsetPosition = elementPosition - 80
+				const elementPosition = targetElement.getBoundingClientRect().top + window.pageYOffset
+				const offsetPosition = elementPosition
 				window.scrollTo({
 					top: offsetPosition,
 					behavior: 'smooth'

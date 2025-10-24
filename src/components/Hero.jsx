@@ -40,15 +40,25 @@ function Hero() {
 
 			<div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10 pt-24 sm:pt-32 pb-20">
 				<div className="flex sm:flex-row gap-2 min-[1000px]:hidden mb-4">
-					<a
-						href="#booking"
+					<button
+						onClick={(e) => {
+							e.preventDefault()
+							const targetElement = document.getElementById('booking')
+							if (targetElement) {
+								const elementPosition = targetElement.offsetTop
+								window.scrollTo({
+									top: elementPosition,
+									behavior: 'smooth'
+								})
+							}
+						}}
 						className="bg-gradient-to-r from-ocean-600 to-ocean-600 text-white px-5 py-3 rounded-full hover:bg-ocean-500 transform transition-all duration-300 text-[14px] flex items-center justify-center gap-2 shadow-md hover:shadow-ocean-500/25 font-light"
 					>
 						<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
 							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.4} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
 						</svg>
 						Записаться
-					</a>
+					</button>
 
 					<a
 						href="https://t.me/moscow_pdtr"
