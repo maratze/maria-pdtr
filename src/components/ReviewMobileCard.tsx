@@ -280,7 +280,7 @@ export default function ReviewMobileCard({
 
 			{/* Full Message Modal */}
 			{showFullMessage && (
-				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 !m-0" onClick={() => setShowFullMessage(false)}>
+				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-2 !m-0" onClick={() => setShowFullMessage(false)}>
 					<div className="bg-white rounded-xl border border-slate-200 shadow-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
 						<div className="flex items-start justify-between mb-4">
 							<div>
@@ -326,7 +326,7 @@ export default function ReviewMobileCard({
 
 			{/* Edit Modal */}
 			{showEditModal && (
-				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 !m-0" onClick={() => {
+				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-2 !m-0" onClick={() => {
 					setShowEditModal(false)
 					setEditedMessage(review.message)
 				}}>

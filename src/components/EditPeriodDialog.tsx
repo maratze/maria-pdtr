@@ -234,7 +234,7 @@ export default function EditPeriodDialog({
 
 	return (
 		<div
-			className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 !m-0"
+			className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-2 !m-0"
 			onClick={onClose}
 		>
 			<div
@@ -287,7 +287,7 @@ export default function EditPeriodDialog({
 
 				{/* Содержимое со скроллом */}
 				{mode === 'edit' ? (
-					<form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-4 scrollbar-thin scrollbar-thumb-ocean-300 scrollbar-track-slate-100">
+					<form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 scrollbar-thin scrollbar-thumb-ocean-300 scrollbar-track-slate-100">
 						{/* Выбор города и время */}
 						<div className="space-y-4">
 							{/* Выбор города */}
@@ -442,7 +442,7 @@ export default function EditPeriodDialog({
 						</div>
 					</form>
 				) : mode === 'booking' ? (
-					<form className="flex-1 overflow-y-auto p-6 space-y-4 scrollbar-thin scrollbar-thumb-ocean-300 scrollbar-track-slate-100">
+					<form className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 scrollbar-thin scrollbar-thumb-ocean-300 scrollbar-track-slate-100">
 						{/* Выбранные слоты */}
 						<div className="p-4 bg-ocean-50 rounded-lg border border-ocean-200">
 							<p className="text-xs text-slate-600 font-medium mb-2 uppercase tracking-wide">Выбранные слоты</p>
@@ -588,7 +588,7 @@ export default function EditPeriodDialog({
 				) : null}
 
 				{/* Кнопки */}
-				<div className="flex flex-col sm:flex-row gap-2 sm:gap-3 p-6 border-t border-slate-200 bg-slate-50 rounded-b-xl flex-shrink-0">
+				<div className="flex flex-col sm:flex-row gap-2 sm:gap-3 p-4 md:p-6 border-t border-slate-200 bg-slate-50 rounded-b-xl flex-shrink-0">
 					{mode === 'details' ? (
 						<button
 							type="button"

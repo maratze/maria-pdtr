@@ -55,6 +55,7 @@ export default function ScheduleCalendar({
 	const [dateRangeStart, setDateRangeStart] = useState<string | null>(null)
 	const [dateRangeEnd, setDateRangeEnd] = useState<string | null>(null)
 	const [selectedPeriodsForEdit, setSelectedPeriodsForEdit] = useState<SchedulePeriodWithCity[]>([])
+	const [isMobile, setIsMobile] = useState<boolean>(typeof window !== 'undefined' && window.innerWidth < 640)
 
 	// Получаем цвет для города
 	const getCityColor = (cityId: string) => {
@@ -71,6 +72,16 @@ export default function ScheduleCalendar({
 			setSelectedPeriodsForEdit([])
 		}
 	}, [periods])
+
+	// Отслеживаем размер экрана
+	useEffect(() => {
+		const handleResize = () => {
+			setIsMobile(window.innerWidth < 640)
+		}
+
+		window.addEventListener('resize', handleResize)
+		return () => window.removeEventListener('resize', handleResize)
+	}, [])
 
 	// Генерируем информацию о днях на основе периодов и бронирований
 	useEffect(() => {
@@ -197,7 +208,7 @@ export default function ScheduleCalendar({
 		return (
 			<div
 				key={dateStr}
-				className={`min-h-[100px] p-2 transition-all relative ${isPastDate
+				className={`min-h-[80px] sm:min-h-[100px] md:min-h-[100px] p-1 sm:p-2 md:p-2 transition-all relative flex flex-col h-full w-full ${isPastDate
 					? 'bg-slate-50 cursor-not-allowed opacity-60'
 					: rangePosition
 						? 'bg-ocean-100 cursor-pointer'
@@ -206,7 +217,7 @@ export default function ScheduleCalendar({
 				onClick={() => !isPastDate && handleDateRangeClick(dateStr)}
 			>
 				{/* День месяца */}
-				<div className={`text-xs font-semibold w-6 h-6 rounded-full flex items-center justify-center mb-2 ${rangePosition === 'start' || rangePosition === 'end'
+				<div className={`text-xs sm:text-sm font-semibold w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center mb-1 sm:mb-2 flex-shrink-0 ${rangePosition === 'start' || rangePosition === 'end'
 					? 'text-white bg-ocean-600'
 					: isToday
 						? 'text-white bg-ocean-600'
@@ -215,26 +226,28 @@ export default function ScheduleCalendar({
 					{dayInfo.dayOfMonth}
 				</div>
 
-				{/* Статус бронирований */}
+				{/* Статус бронирований - скрыто на мобильных, показано на планшетах */}
 				{hasPeriods && (dayInfo.bookedSlots > 0 || dayInfo.freeSlots > 0) && (
-					<div className="mb-2 text-xs flex gap-2">
+					<div className="hidden sm:flex mb-1 sm:mb-2 text-xs gap-1 sm:gap-2 flex-shrink-0">
 						{dayInfo.bookedSlots > 0 && (
-							<div className="flex items-center gap-1">
-								<div className="w-2 h-2 rounded-full bg-red-500"></div>
-								<span className="text-red-600 font-medium">{dayInfo.bookedSlots}</span>
+							<div className="flex items-center gap-0.5">
+								<div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-red-500"></div>
+								<span className="text-red-600 font-medium text-xs">{dayInfo.bookedSlots}</span>
 							</div>
 						)}
 						{dayInfo.freeSlots > 0 && (
-							<div className="flex items-center gap-1">
-								<div className="w-2 h-2 rounded-full bg-green-500"></div>
-								<span className="text-green-600 font-medium">{dayInfo.freeSlots}</span>
+							<div className="flex items-center gap-0.5">
+								<div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-green-500"></div>
+								<span className="text-green-600 font-medium text-xs">{dayInfo.freeSlots}</span>
 							</div>
 						)}
 					</div>
-				)}				{/* Периоды на этот день */}
+				)}
+
+				{/* Периоды на этот день - показываем максимум 2 на мобильных */}
 				{hasPeriods && (
-					<div className="space-y-1">
-						{dayInfo.periods.map((period) => {
+					<div className="space-y-0.5 sm:space-y-1 overflow-hidden flex-grow">
+						{dayInfo.periods.slice(0, isMobile ? 2 : undefined).map((period) => {
 							const cityColor = getCityColor(period.city_id)
 							return (
 								<div
@@ -245,14 +258,19 @@ export default function ScheduleCalendar({
 											onPeriodEdit(period)
 										}
 									}}
-									className={`px-1.5 py-1 rounded ${cityColor.bg} ${cityColor.text} cursor-pointer hover:opacity-80 transition-opacity`}
+									className={`px-1 py-0.5 sm:px-1.5 sm:py-1 rounded ${cityColor.bg} ${cityColor.text} cursor-pointer hover:opacity-80 transition-opacity`}
 									title={`${period.city?.name}: ${period.work_start_time.slice(0, 5)} - ${period.work_end_time.slice(0, 5)}`}
 								>
-									<div className="text-[12px] font-medium leading-tight">{period.city?.name}</div>
-									<div className="text-[12px] leading-tight">{`${period.work_start_time.slice(0, 5)} - ${period.work_end_time.slice(0, 5)}`}</div>
+									<div className="text-[10px] sm:text-[12px] font-medium leading-tight truncate">{period.city?.name}</div>
+									<div className="text-[10px] sm:text-[12px] leading-tight">{`${period.work_start_time.slice(0, 5)} - ${period.work_end_time.slice(0, 5)}`}</div>
 								</div>
 							)
 						})}
+						{isMobile && dayInfo.periods.length > 2 && (
+							<div className="text-[10px] text-slate-500 px-1 font-medium flex-shrink-0">
+								+{dayInfo.periods.length - 2} ещё
+							</div>
+						)}
 					</div>
 				)}
 			</div>
@@ -307,8 +325,8 @@ export default function ScheduleCalendar({
 			{/* Календарь */}
 			<div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
 				{/* Легенда городов - на самый верх */}
-				<div className="p-3 bg-slate-50 border-b border-slate-200">
-					<div className="flex items-center gap-2 flex-wrap">
+				<div className="p-2 sm:p-3 bg-slate-50 border-b border-slate-200 overflow-x-auto">
+					<div className="flex items-center gap-1 sm:gap-2 flex-wrap min-w-fit">
 						{cities.map((city, index) => {
 							const cityColor = cityColors[index % cityColors.length]
 							const isSelected = selectedCityFilter === city.id
@@ -319,46 +337,44 @@ export default function ScheduleCalendar({
 										// Переключаем фильтр: если выбран - отключаем, иначе включаем
 										onCityFilterChange(isSelected ? '' : city.id)
 									}}
-									className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all ${isSelected
+									className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg transition-all text-xs sm:text-sm whitespace-nowrap flex-shrink-0 ${isSelected
 										? `${cityColor.bg} border-2 ${cityColor.border} font-semibold`
 										: 'hover:bg-slate-100 border-2 border-transparent'
 										}`}
 								>
-									<div className={`w-3 h-3 rounded-sm ${cityColor.solid}`}></div>
-									<span className="text-sm font-medium text-slate-700">{city.name}</span>
+									<div className={`w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm flex-shrink-0 ${cityColor.solid}`}></div>
+									<span className="font-medium text-slate-700">{city.name}</span>
 								</button>
 							)
 						})}
 					</div>
 				</div>
 
-				<div className="p-3">
+				<div className="p-2 sm:p-3">
 					{/* Панель действий и информации - объединённая с кнопками месяца */}
-					<div className="mb-4 p-3 bg-slate-50 border border-slate-200 rounded-lg h-16 flex items-center justify-between">
+					<div className="mb-4 p-2 sm:p-3 bg-slate-50 border border-slate-200 rounded-lg min-h-16 sm:h-16 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
 						{/* Левая часть - месяц и навигация */}
-						<div className="flex gap-2">
-							<div className="flex items-center gap-2">
-								<button
-									onClick={handlePrevMonth}
-									className="p-2 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors"
-									title="Предыдущий месяц"
-								>
-									<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-									</svg>
-								</button>
-								<button
-									onClick={handleNextMonth}
-									className="p-2 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors"
-									title="Следующий месяц"
-								>
-									<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-									</svg>
-								</button>
-							</div>
+						<div className="flex gap-1 sm:gap-2 items-center w-full sm:w-auto">
+							<button
+								onClick={handlePrevMonth}
+								className="p-1.5 sm:p-2 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors flex-shrink-0"
+								title="Предыдущий месяц"
+							>
+								<svg className="w-4 h-4 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+								</svg>
+							</button>
+							<button
+								onClick={handleNextMonth}
+								className="p-1.5 sm:p-2 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors flex-shrink-0"
+								title="Следующий месяц"
+							>
+								<svg className="w-4 h-4 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+								</svg>
+							</button>
 
-							<h3 className="text-lg font-medium text-slate-800">
+							<h3 className="text-sm sm:text-lg font-medium text-slate-800 whitespace-nowrap">
 								{monthNames[month]} {year}
 							</h3>
 						</div>
@@ -366,44 +382,44 @@ export default function ScheduleCalendar({
 						{/* Правая часть - кнопки действий */}
 						{dateRangeStart && (
 							<>
-								<div className="flex items-center gap-2">
-									<div className="flex justify-center mr-4">
+								<div className="flex items-center gap-1 sm:gap-2 w-full sm:w-auto flex-wrap sm:flex-nowrap">
+									<div className="flex justify-center flex-grow sm:flex-grow-0">
 										{dateRangeStart ? (
 											dateRangeEnd ? (
-												<div className="flex items-center gap-2">
-													<svg className="w-5 h-5 text-ocean-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+												<div className="flex items-center gap-1 sm:gap-2">
+													<svg className="w-4 h-4 sm:w-5 sm:h-5 text-ocean-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 														<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
 													</svg>
 													<div className="flex flex-col">
-														<span className="text-sm font-medium text-slate-700">
-															{new Date(dateRangeStart + 'T00:00:00').toLocaleDateString('ru-RU')} - {new Date(dateRangeEnd + 'T00:00:00').toLocaleDateString('ru-RU')}
+														<span className="text-xs sm:text-sm font-medium text-slate-700 leading-tight">
+															{new Date(dateRangeStart + 'T00:00:00').toLocaleDateString('ru-RU', { month: 'short', day: 'numeric' })} - {new Date(dateRangeEnd + 'T00:00:00').toLocaleDateString('ru-RU', { month: 'short', day: 'numeric' })}
 															{(() => {
 																const start = new Date(dateRangeStart + 'T00:00:00')
 																const end = new Date(dateRangeEnd + 'T00:00:00')
 																const daysCount = Math.floor((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1
-																return ` (${daysCount} д.)`
+																return ` (${daysCount}д)`
 															})()}
 														</span>
 													</div>
 												</div>
 											) : (
-												<div className="flex items-center gap-2">
-													<svg className="w-5 h-5 text-ocean-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+												<div className="flex items-center gap-1 sm:gap-2">
+													<svg className="w-4 h-4 sm:w-5 sm:h-5 text-ocean-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 														<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
 													</svg>
 													<div className="flex flex-col">
-														<span className="text-sm font-medium text-slate-700">
-															{new Date(dateRangeStart + 'T00:00:00').toLocaleDateString('ru-RU')}
+														<span className="text-xs sm:text-sm font-medium text-slate-700 leading-tight">
+															{new Date(dateRangeStart + 'T00:00:00').toLocaleDateString('ru-RU', { month: 'short', day: 'numeric' })}
 														</span>
 													</div>
 												</div>
 											)
 										) : (
-											<div className="flex items-center gap-2 text-slate-600">
-												<svg className="w-5 h-5 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<div className="flex items-center gap-1 sm:gap-2 text-slate-600">
+												<svg className="w-4 h-4 sm:w-5 sm:h-5 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 													<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
 												</svg>
-												<span className="text-sm">Выберите диапазон дат на календаре</span>
+												<span className="text-xs sm:text-sm">Выберите диапазон</span>
 											</div>
 										)}
 									</div>
@@ -411,10 +427,10 @@ export default function ScheduleCalendar({
 									{onCreatePeriodForRange && (
 										<button
 											onClick={() => onCreatePeriodForRange(dateRangeStart, dateRangeEnd || dateRangeStart)}
-											className="p-2 rounded-lg bg-white text-green-600 hover:bg-green-50 transition-all border border-green-200"
+											className="p-1.5 sm:p-2 rounded-lg bg-white text-green-600 hover:bg-green-50 transition-all border border-green-200 flex-shrink-0"
 											title="Добавить период на выбранный диапазон"
 										>
-											<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+											<svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
 												<path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
 											</svg>
 										</button>
@@ -445,10 +461,10 @@ export default function ScheduleCalendar({
 												setDateRangeEnd(null)
 												setSelectedPeriodsForEdit([])
 											}}
-											className="p-2 rounded-lg bg-white text-red-600 hover:bg-red-50 transition-all border border-red-200"
+											className="p-1.5 sm:p-2 rounded-lg bg-white text-red-600 hover:bg-red-50 transition-all border border-red-200 flex-shrink-0"
 											title="Удалить периоды"
 										>
-											<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+											<svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
 												<path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
 											</svg>
 										</button>
@@ -459,7 +475,7 @@ export default function ScheduleCalendar({
 											setDateRangeEnd(null)
 											setSelectedPeriodsForEdit([])
 										}}
-										className="px-3 py-2 rounded-lg bg-slate-200 text-slate-700 hover:bg-slate-300 transition-all text-sm font-medium"
+										className="px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg bg-slate-200 text-slate-700 hover:bg-slate-300 transition-all text-xs sm:text-sm font-medium flex-shrink-0"
 										title="Отменить выбор"
 									>
 										Отмена
@@ -470,11 +486,11 @@ export default function ScheduleCalendar({
 					</div>
 
 					{/* Дни недели */}
-					<div className="grid grid-cols-7 mb-2">
+					<div className="grid grid-cols-7 mb-1 sm:mb-2">
 						{dayNames.map((day) => (
 							<div
 								key={day}
-								className="text-center text-xs font-bold text-slate-600 py-2 uppercase tracking-wide"
+								className="text-center text-[10px] sm:text-xs font-bold text-slate-600 py-1 sm:py-2 uppercase tracking-wide"
 							>
 								{day}
 							</div>
@@ -482,14 +498,14 @@ export default function ScheduleCalendar({
 					</div>
 
 					{/* Сетка дней */}
-					<div className="grid grid-cols-7 rounded-lg overflow-hidden border-t border-l border-slate-200">
+					<div className="grid grid-cols-7 rounded-lg overflow-hidden border-t border-l border-slate-200 gap-0">
 						{calendarDays.map((dateStr, idx) => {
 							return (
 								<div
 									key={idx}
-									className={`border-r border-b border-slate-200 ${dateStr ? getDayCell(dateStr) : 'min-h-[90px] bg-slate-100/50 rounded-none'}`}
+									className={`border-r border-b border-slate-200 ${!dateStr ? 'min-h-[60px] sm:min-h-[90px] bg-slate-100/50 rounded-none' : ''}`}
 								>
-									{dateStr ? getDayCell(dateStr) : <div className="min-h-[100px] rounded-none" />}
+									{dateStr ? getDayCell(dateStr) : <div className="min-h-[60px] sm:min-h-[100px] rounded-none" />}
 								</div>
 							)
 						})}

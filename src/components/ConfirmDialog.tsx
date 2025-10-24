@@ -31,7 +31,7 @@ export default function ConfirmDialog({
 
 	return (
 		<div
-			className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 !m-0"
+			className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-2 !m-0"
 			onClick={onClose}
 		>
 			<div
