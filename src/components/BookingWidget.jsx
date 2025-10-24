@@ -2,14 +2,12 @@ import React, { useState, useEffect } from 'react'
 import { getCities } from '../lib/cities'
 import { getPublicActiveSchedulePeriodsByCity } from '../lib/schedule'
 import { getPublicBookingsByCityAndDates, createPublicBooking } from '../lib/bookings'
-import { generateSlotsForDateAndCity } from '../lib/slots'
+import { getOrCreateSlotsForDate } from '../lib/timeSlots'
 import Toast from './Toast'
 
 const BookingWidget = () => {
 	const [cities, setCities] = useState([])
 	const [selectedCity, setSelectedCity] = useState(null)
-	const [periods, setPeriods] = useState([])
-	const [bookings, setBookings] = useState([])
 	const [loading, setLoading] = useState(true)
 	const [loadingSlots, setLoadingSlots] = useState(false)
 
@@ -55,7 +53,6 @@ const BookingWidget = () => {
 			try {
 				setLoading(true)
 				const periodsData = await getPublicActiveSchedulePeriodsByCity(selectedCity)
-				setPeriods(periodsData)
 
 				const dates = new Set()
 				periodsData.forEach(period => {
@@ -68,26 +65,6 @@ const BookingWidget = () => {
 					}
 				})
 				setAvailableDates(Array.from(dates))
-
-				const today = new Date().toISOString().split('T')[0]
-				const threeMonthsLater = new Date()
-				threeMonthsLater.setMonth(threeMonthsLater.getMonth() + 3)
-				const dateEnd = threeMonthsLater.toISOString().split('T')[0]
-
-				const bookingsData = await getPublicBookingsByCityAndDates(selectedCity, today, dateEnd)
-				setBookings(bookingsData.map(b => ({
-					id: b.id,
-					period_id: b.period_id,
-					booking_date: b.booking_date,
-					start_time: b.start_time,
-					end_time: b.end_time,
-					service_id: null,
-					client_name: '',
-					client_phone: '',
-					client_email: '',
-					status: b.status,
-					notes: null,
-				})))
 			} catch (error) {
 				console.error('Error loading data:', error)
 				setToast({ message: 'Ошибка загрузки данных', type: 'error' })
@@ -104,8 +81,18 @@ const BookingWidget = () => {
 		async function loadSlots() {
 			try {
 				setLoadingSlots(true)
-				const slots = generateSlotsForDateAndCity(periods, bookings, selectedDate, selectedCity)
-				setDaySlots(slots)
+				// Получаем или создаём слоты из БД
+				const slots = await getOrCreateSlotsForDate(selectedCity, selectedDate)
+				// Преобразуем в формат для отображения
+				const formattedSlots = slots.map(slot => ({
+					id: slot.id,
+					periodId: slot.period_id,
+					date: slot.slot_date,
+					startTime: slot.start_time.slice(0, 5), // HH:MM
+					endTime: slot.end_time.slice(0, 5), // HH:MM
+					isBooked: slot.is_booked,
+				}))
+				setDaySlots(formattedSlots)
 			} catch (error) {
 				console.error('Error loading slots:', error)
 				setToast({ message: 'Ошибка загрузки слотов', type: 'error' })
@@ -114,7 +101,7 @@ const BookingWidget = () => {
 			}
 		}
 		loadSlots()
-	}, [selectedDate, selectedCity, periods, bookings])
+	}, [selectedDate, selectedCity])
 
 	const generateCalendar = () => {
 		const year = currentMonth.getFullYear()
@@ -127,7 +114,8 @@ const BookingWidget = () => {
 		const days = []
 		const today = new Date()
 		today.setHours(0, 0, 0, 0)
-		const todayStr = today.toISOString().split('T')[0]
+		// Форматируем сегодняшнюю дату локально
+		const todayStr = `${String(today.getFullYear()).padStart(4, '0')}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
 
 		for (let i = 0; i < startingDayOfWeek; i++) {
 			days.push(null)
@@ -135,7 +123,12 @@ const BookingWidget = () => {
 
 		for (let day = 1; day <= daysInMonth; day++) {
 			const date = new Date(year, month, day)
-			const dateStr = date.toISOString().split('T')[0]
+			// Форматируем дату локально, без конвертации в UTC
+			const year_str = String(date.getFullYear()).padStart(4, '0')
+			const month_str = String(date.getMonth() + 1).padStart(2, '0')
+			const day_str = String(date.getDate()).padStart(2, '0')
+			const dateStr = `${year_str}-${month_str}-${day_str}`
+
 			const isAvailable = availableDates.includes(dateStr)
 			const isPast = date < today
 			const isSelected = selectedDate === dateStr
@@ -200,24 +193,17 @@ const BookingWidget = () => {
 			if (result.success) {
 				setStep(3)
 				setToast({ message: 'Бронирование успешно создано!', type: 'success' })
-				const bookingsData = await getPublicBookingsByCityAndDates(
-					selectedCity,
-					selectedDate,
-					selectedDate
-				)
-				setBookings(prev => [...prev, ...bookingsData.map(b => ({
-					id: b.id,
-					period_id: b.period_id,
-					booking_date: b.booking_date,
-					start_time: b.start_time,
-					end_time: b.end_time,
-					service_id: null,
-					client_name: '',
-					client_phone: '',
-					client_email: '',
-					status: b.status,
-					notes: null,
-				}))])
+				// Перезагружаем слоты, чтобы показать обновлённые данные
+				const slots = await getOrCreateSlotsForDate(selectedCity, selectedDate)
+				const formattedSlots = slots.map(slot => ({
+					id: slot.id,
+					periodId: slot.period_id,
+					date: slot.slot_date,
+					startTime: slot.start_time.slice(0, 5),
+					endTime: slot.end_time.slice(0, 5),
+					isBooked: slot.is_booked,
+				}))
+				setDaySlots(formattedSlots)
 			} else {
 				setToast({ message: result.error || 'Ошибка создания бронирования', type: 'error' })
 			}

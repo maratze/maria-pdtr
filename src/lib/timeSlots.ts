@@ -253,3 +253,144 @@ export async function getAllTimeSlots(filters?: {
 
 	return data || [];
 }
+
+/**
+ * Получить или создать слоты для конкретной даты и города (публичный метод)
+ * Проверяет наличие слотов в БД, если их нет - создает на основе периодов расписания
+ */
+export async function getOrCreateSlotsForDate(
+	cityId: string,
+	date: string
+): Promise<TimeSlot[]> {
+	// Получаем активные периоды для этой даты и города
+	const { data: periods, error: periodsError } = await supabase
+		.from('schedule_periods')
+		.select('*')
+		.eq('city_id', cityId)
+		.lte('start_date', date)
+		.gte('end_date', date);
+
+	if (periodsError) {
+		console.error('Error fetching periods:', periodsError);
+		throw periodsError;
+	}
+
+	if (!periods || periods.length === 0) {
+		// Нет активных периодов для этой даты
+		return [];
+	}
+
+	const allSlots: TimeSlot[] = [];
+
+	for (const period of periods) {
+		// Проверяем, существуют ли слоты для этого периода и даты
+		const { data: existingSlots, error: slotsError } = await supabase
+			.from('time_slots')
+			.select('*')
+			.eq('period_id', (period as any).id)
+			.eq('slot_date', date)
+			.order('start_time');
+
+		if (slotsError) {
+			console.error('Error fetching existing slots:', slotsError);
+			throw slotsError;
+		}
+
+		if (existingSlots && existingSlots.length > 0) {
+			// Слоты уже существуют
+			allSlots.push(...(existingSlots as TimeSlot[]));
+		} else {
+			// Слотов нет - нужно создать
+			const slotsToCreate = generateSlotsForPeriodAndDate(
+				(period as any).id,
+				date,
+				(period as any).work_start_time,
+				(period as any).work_end_time,
+				60 // 1 час по умолчанию
+			);
+
+			// Создаем слоты в БД
+			const { data: createdSlots, error: createError } = await supabase
+				.from('time_slots')
+				.insert(slotsToCreate as any)
+				.select();
+
+			if (createError) {
+				console.error('Error creating slots:', createError);
+				throw createError;
+			}
+
+			if (createdSlots) {
+				allSlots.push(...(createdSlots as TimeSlot[]));
+			}
+		}
+	}
+
+	return allSlots;
+}
+
+/**
+ * Вспомогательная функция для генерации слотов для создания в БД
+ */
+function generateSlotsForPeriodAndDate(
+	periodId: string,
+	date: string,
+	workStartTime: string,
+	workEndTime: string,
+	slotDurationMinutes: number
+): Array<{
+	period_id: string;
+	slot_date: string;
+	start_time: string;
+	end_time: string;
+	is_booked: boolean;
+}> {
+	const slots: Array<{
+		period_id: string;
+		slot_date: string;
+		start_time: string;
+		end_time: string;
+		is_booked: boolean;
+	}> = [];
+
+	// Парсим время начала и конца работы
+	const startTime = parseTime(workStartTime);
+	const endTime = parseTime(workEndTime);
+
+	// Генерируем слоты с интервалом
+	let currentTime = startTime;
+
+	while (currentTime + slotDurationMinutes <= endTime) {
+		const slotStart = formatTime(currentTime);
+		const slotEnd = formatTime(currentTime + slotDurationMinutes);
+
+		slots.push({
+			period_id: periodId,
+			slot_date: date,
+			start_time: slotStart + ':00',
+			end_time: slotEnd + ':00',
+			is_booked: false,
+		});
+
+		currentTime += slotDurationMinutes;
+	}
+
+	return slots;
+}
+
+/**
+ * Парсит время в формате HH:MM в минуты от начала дня
+ */
+function parseTime(timeString: string): number {
+	const [hours, minutes] = timeString.split(':').map(Number);
+	return hours * 60 + minutes;
+}
+
+/**
+ * Форматирует минуты от начала дня в HH:MM
+ */
+function formatTime(minutes: number): string {
+	const hours = Math.floor(minutes / 60);
+	const mins = minutes % 60;
+	return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+}
