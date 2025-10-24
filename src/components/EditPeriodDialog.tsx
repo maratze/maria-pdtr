@@ -5,6 +5,25 @@ import type { City, SchedulePeriodWithCity } from '../types/booking'
 import { generateSlotsForDateAndCity, type OptimizedBooking } from '../lib/slots'
 import { createBookingsForSlots, getBookingsByPeriodAndDate } from '../lib/bookings'
 
+// Функция для форматирования телефона
+function formatPhone(phone: string): string {
+	if (!phone) return phone
+
+	// Убираем все не-цифры
+	const cleaned = phone.replace(/\D/g, '')
+
+	// Если начинается с 8, заменяем на 7
+	const normalized = cleaned.startsWith('8') ? '7' + cleaned.slice(1) : cleaned
+
+	// Форматируем: +7 (XXX) XXX-XX-XX
+	if (normalized.startsWith('7') && normalized.length === 11) {
+		return `+7 (${normalized.slice(1, 4)}) ${normalized.slice(4, 7)}-${normalized.slice(7, 9)}-${normalized.slice(9, 11)}`
+	}
+
+	// Если формат не подходит, возвращаем как есть
+	return phone
+}
+
 interface EditPeriodDialogProps {
 	isOpen: boolean
 	period: SchedulePeriodWithCity | null
@@ -156,7 +175,7 @@ export default function EditPeriodDialog({
 
 	// Обработчик бронирования слотов
 	const handleBookingSubmit = async () => {
-		if (!period || selectedSlots.length === 0 || !clientName || !clientEmail || !clientPhone) {
+		if (!period || selectedSlots.length === 0 || !clientName || !clientPhone) {
 			return
 		}
 
@@ -506,20 +525,20 @@ export default function EditPeriodDialog({
 									className="w-full h-10 px-3 py-2.5 border border-slate-300 rounded-lg text-slate-900 text-sm focus:ring-2 focus:ring-ocean-500 focus:border-transparent outline-none transition-colors"
 									placeholder="+7 (900) 000-00-00"
 								/>
-								</div>
+							</div>
 
-								<div>
-									<label className="block text-sm font-medium text-slate-700 mb-2">
-										Email
-									</label>
-									<input
-										type="email"
-										value={clientEmail}
-										onChange={(e) => setClientEmail(e.target.value)}
-										className="w-full h-10 px-3 py-2.5 border border-slate-300 rounded-lg text-slate-900 text-sm focus:ring-2 focus:ring-ocean-500 focus:border-transparent outline-none transition-colors"
-										placeholder="your@email.com (опционально)"
-									/>
-								</div>
+							<div>
+								<label className="block text-sm font-medium text-slate-700 mb-2">
+									Email
+								</label>
+								<input
+									type="email"
+									value={clientEmail}
+									onChange={(e) => setClientEmail(e.target.value)}
+									className="w-full h-10 px-3 py-2.5 border border-slate-300 rounded-lg text-slate-900 text-sm focus:ring-2 focus:ring-ocean-500 focus:border-transparent outline-none transition-colors"
+									placeholder="your@email.com (опционально)"
+								/>
+							</div>
 						</div>
 					</form>
 				) : mode === 'details' && selectedBookingDetails ? (
@@ -552,7 +571,7 @@ export default function EditPeriodDialog({
 									href={`tel:${selectedBookingDetails.client_phone}`}
 									className="text-sm text-ocean-600 hover:text-ocean-700 font-medium"
 								>
-									{selectedBookingDetails.client_phone}
+									{formatPhone(selectedBookingDetails.client_phone)}
 								</a>
 							</div>
 
@@ -564,24 +583,6 @@ export default function EditPeriodDialog({
 								>
 									{selectedBookingDetails.client_email}
 								</a>
-							</div>
-
-							{/* Статус */}
-							<div>
-								<p className="text-xs text-slate-500 font-medium mb-1 uppercase tracking-wide">Статус</p>
-								<span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${selectedBookingDetails.status === 'confirmed'
-									? 'bg-green-100 text-green-800'
-									: selectedBookingDetails.status === 'pending'
-										? 'bg-yellow-100 text-yellow-800'
-										: selectedBookingDetails.status === 'cancelled'
-											? 'bg-red-100 text-red-800'
-											: 'bg-slate-100 text-slate-800'
-									}`}>
-									{selectedBookingDetails.status === 'confirmed' && 'Подтверждено'}
-									{selectedBookingDetails.status === 'pending' && 'Ожидает подтверждения'}
-									{selectedBookingDetails.status === 'cancelled' && 'Отменено'}
-									{selectedBookingDetails.status === 'completed' && 'Завершено'}
-								</span>
 							</div>
 						</div>
 					</div>
@@ -644,7 +645,7 @@ export default function EditPeriodDialog({
 							<button
 								type="button"
 								onClick={handleBookingSubmit}
-								disabled={isLoading || selectedSlots.length === 0 || !clientName || !clientEmail || !clientPhone}
+								disabled={isLoading || selectedSlots.length === 0 || !clientName || !clientPhone}
 								className="flex-1 px-4 py-2.5 h-10 rounded-lg bg-ocean-600 text-white text-sm font-regular hover:bg-ocean-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed order-1 sm:order-2"
 							>
 								{isLoading ? 'Бронирование...' : `Забронировать (${selectedSlots.length})`}
