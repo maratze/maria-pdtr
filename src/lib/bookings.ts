@@ -151,6 +151,99 @@ export async function createBooking(
 }
 
 /**
+ * Создать публичное бронирование (для клиентов на сайте)
+ * Создает слот если его нет и затем бронирование
+ */
+export async function createPublicBooking(
+	periodId: string,
+	date: string,
+	startTime: string,
+	endTime: string,
+	clientName: string,
+	clientPhone: string,
+	clientEmail: string
+): Promise<{ success: boolean; booking_id?: string; error?: string }> {
+	try {
+		// Проверяем, существует ли слот
+		const { data: existingSlot, error: slotCheckError } = await supabase
+			.from('time_slots')
+			.select('id, is_booked')
+			.eq('period_id', periodId)
+			.eq('slot_date', date)
+			.eq('start_time', startTime + ':00')
+			.eq('end_time', endTime + ':00')
+			.maybeSingle() as { data: { id: string; is_booked: boolean } | null; error: any };
+
+		if (slotCheckError) {
+			console.error('Error checking slot:', slotCheckError);
+			return { success: false, error: slotCheckError.message };
+		}
+
+		let slotId: string;
+
+		if (existingSlot) {
+			// Слот существует - проверяем, не забронирован ли он
+			if (existingSlot.is_booked) {
+				return {
+					success: false,
+					error: 'Этот слот уже забронирован. Пожалуйста, выберите другое время.'
+				};
+			}
+			slotId = existingSlot.id;
+		} else {
+			// Слот не существует - создаем его
+			const { data: newSlot, error: slotCreateError } = await supabase
+				.from('time_slots')
+				.insert({
+					period_id: periodId,
+					slot_date: date,
+					start_time: startTime + ':00',
+					end_time: endTime + ':00',
+					is_booked: false,
+				} as any)
+				.select('id')
+				.single() as { data: { id: string } | null; error: any };
+
+			if (slotCreateError || !newSlot) {
+				console.error('Error creating slot:', slotCreateError);
+				return { success: false, error: slotCreateError?.message || 'Не удалось создать слот' };
+			}
+
+			slotId = newSlot.id;
+		}
+
+		// Создаем бронирование
+		const { data: booking, error: bookingError } = await supabase
+			.from('bookings')
+			.insert({
+				slot_id: slotId,
+				service_id: null,
+				client_name: clientName,
+				client_phone: clientPhone,
+				client_email: clientEmail,
+				status: 'pending',
+			} as any)
+			.select('id')
+			.single() as { data: { id: string } | null; error: any };
+
+		if (bookingError || !booking) {
+			console.error('Error creating booking:', bookingError);
+			return { success: false, error: bookingError?.message || 'Не удалось создать бронирование' };
+		}
+
+		// Слот автоматически помечается как забронированный через триггеры БД
+
+		return { success: true, booking_id: booking.id };
+	} catch (error) {
+		console.error('Error in createPublicBooking:', error);
+		return {
+			success: false,
+			error: error instanceof Error ? error.message : 'Неизвестная ошибка'
+		};
+	}
+}
+
+/**
  * Обновить бронирование (только для админа)
  */
 export async function updateBooking(
@@ -302,6 +395,57 @@ export async function getBookingsByPeriodAndDate(
 		client_name: item.client_name,
 		client_phone: item.client_phone,
 		client_email: item.client_email,
+		status: item.status,
+	}));
+}
+
+/**
+ * Получить бронирования для конкретного города и дат (публичная версия)
+ */
+export async function getPublicBookingsByCityAndDates(
+	cityId: string,
+	dateFrom: string,
+	dateTo: string
+): Promise<Array<{
+	id: string;
+	period_id: string;
+	booking_date: string;
+	start_time: string;
+	end_time: string;
+	status: string;
+}>> {
+	const { data, error } = await supabase
+		.from('bookings')
+		.select(`
+			id,
+			status,
+			time_slot:time_slots!inner(
+				start_time,
+				end_time,
+				period_id,
+				slot_date,
+				schedule_period:schedule_periods!inner(
+					city_id
+				)
+			)
+		`)
+		.eq('time_slot.schedule_period.city_id', cityId)
+		.gte('time_slot.slot_date', dateFrom)
+		.lte('time_slot.slot_date', dateTo)
+		.in('status', ['pending', 'confirmed']);
+
+	if (error) {
+		console.error('Error fetching public bookings:', error);
+		throw error;
+	}
+
+	// Преобразуем данные в нужный формат
+	return (data || []).map((item: any) => ({
+		id: item.id,
+		period_id: item.time_slot.period_id,
+		booking_date: item.time_slot.slot_date,
+		start_time: item.time_slot.start_time.slice(0, 5), // HH:MM
+		end_time: item.time_slot.end_time.slice(0, 5), // HH:MM
 		status: item.status,
 	}));
 }

@@ -1,4 +1,4 @@
-import { supabaseAdmin } from './supabaseClient';
+import { supabase, supabaseAdmin } from './supabaseClient';
 import type {
 	SchedulePeriod,
 	SchedulePeriodInsert,
@@ -225,6 +225,55 @@ export async function getActiveSchedulePeriodsByCity(
 
 	if (error) {
 		console.error('Error fetching active schedule periods by city:', error);
+		throw error;
+	}
+
+	return data || [];
+}
+
+/**
+ * Получить активные периоды расписания (публичная версия для клиентов)
+ */
+export async function getPublicActiveSchedulePeriods(): Promise<SchedulePeriodWithCity[]> {
+	const today = new Date().toISOString().split('T')[0];
+
+	const { data, error } = await supabase
+		.from('schedule_periods')
+		.select(`
+      *,
+      city:cities(*)
+    `)
+		.gte('end_date', today)
+		.order('start_date', { ascending: true });
+
+	if (error) {
+		console.error('Error fetching public active schedule periods:', error);
+		throw error;
+	}
+
+	return data || [];
+}
+
+/**
+ * Получить активные периоды расписания для конкретного города (публичная версия)
+ */
+export async function getPublicActiveSchedulePeriodsByCity(
+	cityId: string
+): Promise<SchedulePeriodWithCity[]> {
+	const today = new Date().toISOString().split('T')[0];
+
+	const { data, error } = await supabase
+		.from('schedule_periods')
+		.select(`
+      *,
+      city:cities(*)
+    `)
+		.eq('city_id', cityId)
+		.gte('end_date', today)
+		.order('start_date', { ascending: true });
+
+	if (error) {
+		console.error('Error fetching public active schedule periods by city:', error);
 		throw error;
 	}
 
