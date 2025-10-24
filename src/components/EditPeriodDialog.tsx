@@ -497,19 +497,6 @@ export default function EditPeriodDialog({
 
 							<div>
 								<label className="block text-sm font-medium text-slate-700 mb-2">
-									Email <span className="text-red-500">*</span>
-								</label>
-								<input
-									type="email"
-									value={clientEmail}
-									onChange={(e) => setClientEmail(e.target.value)}
-									className="w-full h-10 px-3 py-2.5 border border-slate-300 rounded-lg text-slate-900 text-sm focus:ring-2 focus:ring-ocean-500 focus:border-transparent outline-none transition-colors"
-									placeholder="your@email.com"
-								/>
-							</div>
-
-							<div>
-								<label className="block text-sm font-medium text-slate-700 mb-2">
 									Телефон <span className="text-red-500">*</span>
 								</label>
 								<input
@@ -519,7 +506,20 @@ export default function EditPeriodDialog({
 									className="w-full h-10 px-3 py-2.5 border border-slate-300 rounded-lg text-slate-900 text-sm focus:ring-2 focus:ring-ocean-500 focus:border-transparent outline-none transition-colors"
 									placeholder="+7 (900) 000-00-00"
 								/>
-							</div>
+								</div>
+
+								<div>
+									<label className="block text-sm font-medium text-slate-700 mb-2">
+										Email
+									</label>
+									<input
+										type="email"
+										value={clientEmail}
+										onChange={(e) => setClientEmail(e.target.value)}
+										className="w-full h-10 px-3 py-2.5 border border-slate-300 rounded-lg text-slate-900 text-sm focus:ring-2 focus:ring-ocean-500 focus:border-transparent outline-none transition-colors"
+										placeholder="your@email.com (опционально)"
+									/>
+								</div>
 						</div>
 					</form>
 				) : mode === 'details' && selectedBookingDetails ? (
