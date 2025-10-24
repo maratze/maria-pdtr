@@ -310,9 +310,6 @@ const BookingWidget = () => {
 							</div>
 						)}
 					</div>
-					<p className="text-sm text-slate-300 mb-8 break-all">
-						Подтверждение отправлено на {clientEmail}
-					</p>
 					<button
 						onClick={handleReset}
 						className="px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg bg-ocean-600 text-white font-medium text-sm sm:text-base hover:bg-ocean-700 transition-colors"
