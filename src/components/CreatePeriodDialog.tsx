@@ -23,9 +23,9 @@ export default function CreatePeriodDialog({
 	onSubmit,
 	isLoading = false,
 }: CreatePeriodDialogProps) {
-	const [selectedCity, setSelectedCity] = useState<string>('')
+	const [selectedCity, setSelectedCity] = useState<string>(cities.length > 0 ? cities[0].id : '')
 	const [startTime, setStartTime] = useState('10:00')
-	const [endTime, setEndTime] = useState('18:00')
+	const [endTime, setEndTime] = useState('19:00')
 	const [error, setError] = useState<string | null>(null)
 
 	if (!isOpen || !startDate) return null

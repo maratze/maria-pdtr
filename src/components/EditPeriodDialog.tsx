@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
 import Dropdown from './Dropdown'
 import AdminPreloader from './AdminPreloader'
+import ConfirmDialog from './ConfirmDialog'
+import Toast from './Toast'
 import type { City, SchedulePeriodWithCity } from '../types/booking'
 import { generateSlotsForDateAndCity, type OptimizedBooking } from '../lib/slots'
-import { createBookingsForSlots, getBookingsByPeriodAndDate } from '../lib/bookings'
+import { createBookingsForSlots, getBookingsByPeriodAndDate, deleteBooking } from '../lib/bookings'
 
 // Функция для форматирования телефона
 function formatPhone(phone: string): string {
@@ -63,6 +65,11 @@ export default function EditPeriodDialog({
 
 	// Состояние для показа деталей бронирования
 	const [selectedBookingDetails, setSelectedBookingDetails] = useState<OptimizedBooking | null>(null)
+
+	// Состояние для удаления бронирования
+	const [deleteConfirm, setDeleteConfirm] = useState<{ bookingId: string; clientName: string } | null>(null)
+	const [deleteLoading, setDeleteLoading] = useState(false)
+	const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
 
 	// Проверяем наличие броней за день
 	const hasBookings = daySlots.some(slot => slot.isBooked)
@@ -214,6 +221,33 @@ export default function EditPeriodDialog({
 		} catch (error) {
 			console.error('Error booking slots:', error)
 			setBookingError(error instanceof Error ? error.message : 'Неизвестная ошибка')
+		}
+	}
+
+	// Обработчик удаления бронирования
+	const handleDeleteBooking = async () => {
+		if (!deleteConfirm) return
+
+		try {
+			setDeleteLoading(true)
+			await deleteBooking(deleteConfirm.bookingId)
+			setToast({ message: 'Бронирование успешно удалено', type: 'success' })
+			setDeleteConfirm(null)
+			setSelectedBookingDetails(null)
+			setMode('edit')
+
+			// Перезагружаем бронирования
+			await loadBookingsForPeriod()
+
+			// Вызываем колбэк для обновления родительского компонента
+			if (onBookingSuccess) {
+				await onBookingSuccess()
+			}
+		} catch (error) {
+			console.error('Error deleting booking:', error)
+			setToast({ message: 'Ошибка при удалении бронирования', type: 'error' })
+		} finally {
+			setDeleteLoading(false)
 		}
 	}
 
@@ -591,16 +625,28 @@ export default function EditPeriodDialog({
 				{/* Кнопки */}
 				<div className="flex flex-col sm:flex-row gap-2 sm:gap-3 p-4 md:p-6 border-t border-slate-200 bg-slate-50 rounded-b-xl flex-shrink-0">
 					{mode === 'details' ? (
-						<button
-							type="button"
-							onClick={() => {
-								setMode('edit')
-								setSelectedBookingDetails(null)
-							}}
-							className="flex-1 px-4 py-2.5 h-10 rounded-lg bg-slate-100 text-slate-700 text-sm font-medium hover:bg-slate-200 transition-colors"
-						>
-							Закрыть
-						</button>
+						<>
+							<button
+								type="button"
+								onClick={() => {
+									setMode('edit')
+									setSelectedBookingDetails(null)
+								}}
+								className="flex-1 px-4 py-2.5 h-10 rounded-lg bg-slate-100 text-slate-700 text-sm font-medium hover:bg-slate-200 transition-colors order-2 sm:order-1"
+							>
+								Закрыть
+							</button>
+							<button
+								type="button"
+								onClick={() => setDeleteConfirm({
+									bookingId: selectedBookingDetails!.id,
+									clientName: selectedBookingDetails!.client_name
+								})}
+								className="flex-1 px-4 py-2.5 h-10 rounded-lg bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition-colors order-1 sm:order-2"
+							>
+								Удалить
+							</button>
+						</>
 					) : mode === 'edit' ? (
 						<>
 							<button
@@ -654,6 +700,28 @@ export default function EditPeriodDialog({
 					)}
 				</div>
 			</div>
+
+			{/* Toast уведомления */}
+			{toast && (
+				<Toast
+					message={toast.message}
+					type={toast.type}
+					onClose={() => setToast(null)}
+				/>
+			)}
+
+			{/* Диалог подтверждения удаления */}
+			<ConfirmDialog
+				isOpen={deleteConfirm !== null}
+				onClose={() => setDeleteConfirm(null)}
+				onConfirm={handleDeleteBooking}
+				title="Удалить бронирование?"
+				description="Это действие нельзя отменить. Слот станет доступным для бронирования."
+				itemName={deleteConfirm?.clientName}
+				confirmText="Удалить"
+				confirmLoading={deleteLoading}
+				variant="danger"
+			/>
 		</div>
 	)
 }

@@ -1,18 +1,22 @@
 import { useEffect, useState } from 'react'
 import type { TimeSlot, BookingWithDetails } from '../types/booking'
-import { getBookingsBySlot } from '../lib/bookings'
+import { getBookingsBySlot, deleteBooking } from '../lib/bookings'
 import Toast from './Toast'
+import ConfirmDialog from './ConfirmDialog'
 
 interface SlotDetailsDialogProps {
 	isOpen: boolean
 	slot: TimeSlot | null
 	onClose: () => void
+	onBookingDeleted?: () => void
 }
 
-export default function SlotDetailsDialog({ isOpen, slot, onClose }: SlotDetailsDialogProps) {
+export default function SlotDetailsDialog({ isOpen, slot, onClose, onBookingDeleted }: SlotDetailsDialogProps) {
 	const [bookings, setBookings] = useState<BookingWithDetails[]>([])
 	const [loading, setLoading] = useState(false)
 	const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'warning' | 'info' } | null>(null)
+	const [deleteConfirm, setDeleteConfirm] = useState<{ bookingId: string; clientName: string } | null>(null)
+	const [deleteLoading, setDeleteLoading] = useState(false)
 
 	useEffect(() => {
 		if (isOpen && slot) {
@@ -32,6 +36,30 @@ export default function SlotDetailsDialog({ isOpen, slot, onClose }: SlotDetails
 			setToast({ message: 'Ошибка загрузки бронирований', type: 'error' })
 		} finally {
 			setLoading(false)
+		}
+	}
+
+	async function handleDeleteBooking() {
+		if (!deleteConfirm) return
+
+		try {
+			setDeleteLoading(true)
+			await deleteBooking(deleteConfirm.bookingId)
+			setToast({ message: 'Бронирование успешно удалено', type: 'success' })
+			setDeleteConfirm(null)
+
+			// Перезагружаем бронирования
+			await loadBookings()
+
+			// Вызываем колбэк для обновления родительского компонента
+			if (onBookingDeleted) {
+				onBookingDeleted()
+			}
+		} catch (error) {
+			console.error('Error deleting booking:', error)
+			setToast({ message: 'Ошибка при удалении бронирования', type: 'error' })
+		} finally {
+			setDeleteLoading(false)
 		}
 	}
 
@@ -115,8 +143,8 @@ export default function SlotDetailsDialog({ isOpen, slot, onClose }: SlotDetails
 									<p className="text-xs text-slate-500 mb-1">Статус</p>
 									<span
 										className={`inline-block px-3 py-1 rounded-lg text-xs font-medium ${slot.is_booked
-												? 'bg-red-100 text-red-800'
-												: 'bg-emerald-100 text-emerald-800'
+											? 'bg-red-100 text-red-800'
+											: 'bg-emerald-100 text-emerald-800'
 											}`}
 									>
 										{slot.is_booked ? 'Забронировано' : 'Свободно'}
@@ -266,7 +294,7 @@ export default function SlotDetailsDialog({ isOpen, slot, onClose }: SlotDetails
 														</div>
 													)}
 
-													<div>
+													<div className="flex items-center justify-between">
 														<p className="text-xs text-slate-500">
 															Создано:{' '}
 															{new Date(booking.created_at || '').toLocaleDateString(
@@ -280,6 +308,12 @@ export default function SlotDetailsDialog({ isOpen, slot, onClose }: SlotDetails
 																}
 															)}
 														</p>
+														<button
+															onClick={() => setDeleteConfirm({ bookingId: booking.id, clientName: booking.client_name })}
+															className="text-xs text-red-600 hover:text-red-700 font-medium hover:underline transition-colors"
+														>
+															Удалить
+														</button>
 													</div>
 												</div>
 											</div>
@@ -291,6 +325,19 @@ export default function SlotDetailsDialog({ isOpen, slot, onClose }: SlotDetails
 					</div>
 				</div>
 			</div>
+
+			{/* Диалог подтверждения удаления */}
+			<ConfirmDialog
+				isOpen={deleteConfirm !== null}
+				onClose={() => setDeleteConfirm(null)}
+				onConfirm={handleDeleteBooking}
+				title="Удалить бронирование?"
+				description="Это действие нельзя отменить. Слот станет доступным для бронирования."
+				itemName={deleteConfirm?.clientName}
+				confirmText="Удалить"
+				confirmLoading={deleteLoading}
+				variant="danger"
+			/>
 		</>
 	)
 }
