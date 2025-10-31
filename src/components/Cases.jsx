@@ -8,7 +8,6 @@ const Cases = () => {
 	const [selectedCase, setSelectedCase] = useState(null)
 	const [isHovered, setIsHovered] = useState(false)
 	const [isTransitioning, setIsTransitioning] = useState(false)
-	const [isMobile, setIsMobile] = useState(false)
 	const [cases, setCases] = useState([])
 	const [loading, setLoading] = useState(true)
 
@@ -23,16 +22,6 @@ const Cases = () => {
 			setLoading(false)
 		}
 		loadCases()
-	}, [])
-
-	// Отслеживание размера экрана
-	useEffect(() => {
-		const checkMobile = () => {
-			setIsMobile(window.innerWidth < 640)
-		}
-		checkMobile()
-		window.addEventListener('resize', checkMobile)
-		return () => window.removeEventListener('resize', checkMobile)
 	}, [])
 
 	const nextSlide = () => {
@@ -70,12 +59,6 @@ const Cases = () => {
 	const closeModal = () => {
 		setSelectedCase(null)
 		document.body.style.overflow = 'unset'
-	}
-
-	const truncateText = (text, limit = 120) => {
-		const plainText = text.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
-		if (plainText.length <= limit) return plainText
-		return plainText.substring(0, limit) + '...'
 	}
 
 	// Создаем массив кейсов
@@ -230,7 +213,7 @@ const Cases = () => {
 								const isActive = index === currentSlide
 								return (
 									<div key={caseItem.id} className="w-full flex-shrink-0 px-2 sm:px-4 flex items-center">
-										<div className="w-full bg-white/95 backdrop-blur-sm border border-ocean-200/50 rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 shadow-lg transition-all duration-300 min-h-[495px] flex flex-col">
+										<div className="w-full bg-white/95 backdrop-blur-sm border border-ocean-200/50 rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 shadow-lg transition-all duration-300 min-h-[470px] md:min-h-[570px] flex flex-col">
 											{/* Case Header with Number */}
 											<div className="flex items-start gap-3 sm:gap-4 mb-4 sm:mb-6">
 												<div className="flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-gradient-to-r from-ocean-600 to-ocean-600 text-white rounded-lg sm:rounded-xl flex items-center justify-center text-xl sm:text-2xl font-medium">
@@ -251,9 +234,10 @@ const Cases = () => {
 												<h4 className="text-xs sm:text-sm font-medium text-red-600 uppercase tracking-wide mb-2">
 													Проблема
 												</h4>
-												<p className="text-sm sm:text-base text-slate-600 leading-relaxed">
-													{truncateText(caseItem.problem, isMobile ? 100 : 120)}
-												</p>
+												<div
+													className="case-content text-sm sm:text-base text-slate-600 leading-relaxed line-clamp-3"
+													dangerouslySetInnerHTML={{ __html: caseItem.problem }}
+												/>
 											</div>
 
 											{/* Solution Preview */}
@@ -261,9 +245,10 @@ const Cases = () => {
 												<h4 className="text-xs sm:text-sm font-medium text-ocean-600 uppercase tracking-wide mb-2">
 													Решение
 												</h4>
-												<p className="text-sm sm:text-base text-slate-700 leading-relaxed">
-													{truncateText(caseItem.solution, isMobile ? 100 : 120)}
-												</p>
+												<div
+													className="case-content text-sm sm:text-base text-slate-700 leading-relaxed line-clamp-3"
+													dangerouslySetInnerHTML={{ __html: caseItem.solution }}
+												/>
 											</div>
 
 											{/* Result Preview */}
@@ -271,9 +256,10 @@ const Cases = () => {
 												<h4 className="text-xs sm:text-sm font-medium text-green-600 uppercase tracking-wide mb-2">
 													Результат
 												</h4>
-												<p className="text-sm sm:text-base text-slate-700 leading-relaxed">
-													{truncateText(caseItem.result, isMobile ? 100 : 120)}
-												</p>
+												<div
+													className="case-content text-sm sm:text-base text-slate-700 leading-relaxed line-clamp-3"
+													dangerouslySetInnerHTML={{ __html: caseItem.result }}
+												/>
 											</div>
 
 											{/* Read More Button */}
@@ -398,7 +384,7 @@ const Cases = () => {
 									Проблема
 								</h4>
 								<div
-									className="text-sm sm:text-base text-slate-600 leading-relaxed"
+									className="case-content text-sm sm:text-base text-slate-600 leading-relaxed"
 									dangerouslySetInnerHTML={{ __html: selectedCase.problem }}
 								/>
 							</div>
@@ -409,7 +395,7 @@ const Cases = () => {
 									Решение
 								</h4>
 								<div
-									className="text-sm sm:text-base text-slate-700 leading-relaxed"
+									className="case-content text-sm sm:text-base text-slate-700 leading-relaxed"
 									dangerouslySetInnerHTML={{ __html: selectedCase.solution }}
 								/>
 							</div>
@@ -420,7 +406,7 @@ const Cases = () => {
 									Результат
 								</h4>
 								<div
-									className="text-sm sm:text-base text-slate-700 leading-relaxed"
+									className="case-content text-sm sm:text-base text-slate-700 leading-relaxed"
 									dangerouslySetInnerHTML={{ __html: selectedCase.result }}
 								/>
 							</div>

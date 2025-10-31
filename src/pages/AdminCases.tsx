@@ -3,6 +3,7 @@ import { listAllCases, createCase, updateCase, deleteCase } from '../lib/cases'
 import AdminPreloader from '../components/AdminPreloader'
 import Toast from '../components/Toast'
 import ConfirmDialog from '../components/ConfirmDialog'
+import RichTextEditor from '../components/RichTextEditor'
 import type { Case, CaseInsert } from '../types/case'
 
 export default function AdminCases() {
@@ -207,32 +208,26 @@ export default function AdminCases() {
 								/>
 								<div>
 									<label className="block text-sm font-medium text-slate-700 mb-1">Проблема</label>
-									<textarea
+									<RichTextEditor
 										value={formData.problem}
-										onChange={(e) => setFormData({ ...formData, problem: e.target.value })}
-										placeholder="Описание проблемы пациента (HTML поддерживается)"
-										rows={4}
-										className="w-full text-sm rounded-lg border border-slate-200 px-3 py-2 focus:border-ocean-400 focus:outline-none focus:ring-2 focus:ring-ocean-100"
+										onChange={(value) => setFormData({ ...formData, problem: value })}
+										placeholder="Описание проблемы пациента"
 									/>
 								</div>
 								<div>
 									<label className="block text-sm font-medium text-slate-700 mb-1">Решение</label>
-									<textarea
+									<RichTextEditor
 										value={formData.solution}
-										onChange={(e) => setFormData({ ...formData, solution: e.target.value })}
-										placeholder="Описание решения (HTML поддерживается)"
-										rows={4}
-										className="w-full text-sm rounded-lg border border-slate-200 px-3 py-2 focus:border-ocean-400 focus:outline-none focus:ring-2 focus:ring-ocean-100"
+										onChange={(value) => setFormData({ ...formData, solution: value })}
+										placeholder="Описание решения"
 									/>
 								</div>
 								<div>
 									<label className="block text-sm font-medium text-slate-700 mb-1">Результат</label>
-									<textarea
+									<RichTextEditor
 										value={formData.result}
-										onChange={(e) => setFormData({ ...formData, result: e.target.value })}
-										placeholder="Описание результата (HTML поддерживается)"
-										rows={4}
-										className="w-full text-sm rounded-lg border border-slate-200 px-3 py-2 focus:border-ocean-400 focus:outline-none focus:ring-2 focus:ring-ocean-100"
+										onChange={(value) => setFormData({ ...formData, result: value })}
+										placeholder="Описание результата"
 									/>
 								</div>
 								<div className="flex flex-col-reverse sm:flex-row gap-3 pt-2">
@@ -301,32 +296,26 @@ export default function AdminCases() {
 										/>
 										<div>
 											<label className="block text-sm font-medium text-slate-700 mb-1">Проблема</label>
-											<textarea
+											<RichTextEditor
 												value={editData.problem}
-												onChange={(e) => setEditData({ ...editData, problem: e.target.value })}
-												placeholder="Описание проблемы пациента (HTML поддерживается)"
-												rows={4}
-												className="w-full text-sm rounded-lg border border-slate-200 px-3 py-2 focus:border-ocean-400 focus:outline-none focus:ring-2 focus:ring-ocean-100"
+												onChange={(value) => setEditData({ ...editData, problem: value })}
+												placeholder="Описание проблемы пациента"
 											/>
 										</div>
 										<div>
 											<label className="block text-sm font-medium text-slate-700 mb-1">Решение</label>
-											<textarea
+											<RichTextEditor
 												value={editData.solution}
-												onChange={(e) => setEditData({ ...editData, solution: e.target.value })}
-												placeholder="Описание решения (HTML поддерживается)"
-												rows={4}
-												className="w-full text-sm rounded-lg border border-slate-200 px-3 py-2 focus:border-ocean-400 focus:outline-none focus:ring-2 focus:ring-ocean-100"
+												onChange={(value) => setEditData({ ...editData, solution: value })}
+												placeholder="Описание решения"
 											/>
 										</div>
 										<div>
 											<label className="block text-sm font-medium text-slate-700 mb-1">Результат</label>
-											<textarea
+											<RichTextEditor
 												value={editData.result}
-												onChange={(e) => setEditData({ ...editData, result: e.target.value })}
-												placeholder="Описание результата (HTML поддерживается)"
-												rows={4}
-												className="w-full text-sm rounded-lg border border-slate-200 px-3 py-2 focus:border-ocean-400 focus:outline-none focus:ring-2 focus:ring-ocean-100"
+												onChange={(value) => setEditData({ ...editData, result: value })}
+												placeholder="Описание результата"
 											/>
 										</div>
 										<div className="flex items-center gap-2">
