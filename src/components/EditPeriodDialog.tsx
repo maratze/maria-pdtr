@@ -61,6 +61,7 @@ export default function EditPeriodDialog({
 	const [clientPhone, setClientPhone] = useState('')
 	const [clientEmail, setClientEmail] = useState('')
 	const [bookingError, setBookingError] = useState<string | null>(null)
+	const [bookingLoading, setBookingLoading] = useState(false)
 	const [timeError, setTimeError] = useState<string | null>(null)
 
 	// Состояние для показа деталей бронирования
@@ -158,7 +159,10 @@ export default function EditPeriodDialog({
 			setClientPhone('')
 			setClientEmail('')
 			setBookingError(null)
+			setBookingLoading(false) // Сбрасываем состояние загрузки
 			setTimeError(null)
+			setToast(null) // Сбрасываем toast при закрытии
+			setDeleteConfirm(null) // Сбрасываем диалог подтверждения
 		}
 	}, [isOpen])
 
@@ -187,6 +191,7 @@ export default function EditPeriodDialog({
 		}
 
 		setBookingError(null)
+		setBookingLoading(true)
 
 		try {
 			// Подготавливаем выбранные слоты
@@ -221,6 +226,8 @@ export default function EditPeriodDialog({
 		} catch (error) {
 			console.error('Error booking slots:', error)
 			setBookingError(error instanceof Error ? error.message : 'Неизвестная ошибка')
+		} finally {
+			setBookingLoading(false)
 		}
 	}
 
@@ -683,7 +690,7 @@ export default function EditPeriodDialog({
 							<button
 								type="button"
 								onClick={onClose}
-								disabled={isLoading}
+								disabled={bookingLoading}
 								className="flex-1 px-4 py-2.5 h-10 rounded-lg border border-slate-200 text-slate-600 text-sm font-regular hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed order-2 sm:order-1"
 							>
 								Отмена
@@ -691,10 +698,16 @@ export default function EditPeriodDialog({
 							<button
 								type="button"
 								onClick={handleBookingSubmit}
-								disabled={isLoading || selectedSlots.length === 0 || !clientName || !clientPhone}
-								className="flex-1 px-4 py-2.5 h-10 rounded-lg bg-ocean-600 text-white text-sm font-regular hover:bg-ocean-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed order-1 sm:order-2"
+								disabled={bookingLoading || selectedSlots.length === 0 || !clientName || !clientPhone}
+								className="flex-1 px-4 py-2.5 h-10 rounded-lg bg-ocean-600 text-white text-sm font-regular hover:bg-ocean-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed order-1 sm:order-2 flex items-center justify-center gap-2"
 							>
-								{isLoading ? 'Бронирование...' : `Забронировать (${selectedSlots.length})`}
+								{bookingLoading && (
+									<svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+										<path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+									</svg>
+								)}
+								{bookingLoading ? 'Бронирование...' : `Забронировать (${selectedSlots.length})`}
 							</button>
 						</>
 					)}
