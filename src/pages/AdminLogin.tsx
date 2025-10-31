@@ -31,7 +31,7 @@ export default function AdminLogin() {
 		}
 
 		// Redirect to admin panel on success
-		navigate('/admin/reviews')
+		navigate('/admin/schedule')
 	}
 
 	if (authLoading) {
