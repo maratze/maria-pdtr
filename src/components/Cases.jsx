@@ -213,29 +213,24 @@ const Cases = () => {
 
 				{/* Carousel Container */}
 				<div
-					className="relative max-w-6xl mx-auto group"
+					className="relative max-w-4xl mx-auto group"
 					onMouseEnter={() => setIsHovered(true)}
 					onMouseLeave={() => setIsHovered(false)}
 				>
 					{/* Carousel */}
-					<div className="relative rounded-2xl">
+					<div className="relative rounded-2xl overflow-hidden">
 						<div
 							className="flex items-center transition-transform duration-300 ease-in-out"
 							style={{
-								transform: isMobile
-									? `translateX(calc(-${currentSlide * 92}% + 4%))`
-									: `translateX(calc(-${currentSlide * 80}% + 10%))`
+								transform: `translateX(-${currentSlide * 100}%)`
 							}}
 						>
 							{displayCases.map((caseItem, index) => {
 								// Активен слайд на позиции currentSlide
 								const isActive = index === currentSlide
 								return (
-									<div key={caseItem.id} className="w-[92%] sm:w-4/5 flex-shrink-0 px-2 sm:px-4 flex items-center">
-										<div className={`w-full bg-white/95 backdrop-blur-sm border border-ocean-200/50 rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 shadow-lg transition-all duration-300 ${isActive
-											? 'scale-100 opacity-100'
-											: 'scale-95 opacity-60'
-											}`}>
+									<div key={caseItem.id} className="w-full flex-shrink-0 px-2 sm:px-4 flex items-center">
+										<div className="w-full bg-white/95 backdrop-blur-sm border border-ocean-200/50 rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 shadow-lg transition-all duration-300 min-h-[495px] flex flex-col">
 											{/* Case Header with Number */}
 											<div className="flex items-start gap-3 sm:gap-4 mb-4 sm:mb-6">
 												<div className="flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-gradient-to-r from-ocean-600 to-ocean-600 text-white rounded-lg sm:rounded-xl flex items-center justify-center text-xl sm:text-2xl font-medium">
@@ -282,7 +277,7 @@ const Cases = () => {
 											</div>
 
 											{/* Read More Button */}
-											<div className="pt-3 sm:pt-4 border-t border-slate-200">
+											<div className="mt-auto pt-3 sm:pt-4 border-t border-slate-200">
 												<button
 													onClick={() => openModal(caseItem)}
 													className="inline-flex items-center gap-2 text-ocean-600 hover:text-ocean-700 font-medium text-xs sm:text-sm transition-colors duration-200"
@@ -319,7 +314,7 @@ const Cases = () => {
 					{/* Navigation Arrows */}
 					<button
 						onClick={prevSlide}
-						className={`absolute left-0 sm:left-0 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white hover:scale-110 text-ocean-600 p-2 sm:p-3 lg:p-4 rounded-full shadow-xl transition-all duration-300 backdrop-blur-sm transform hover:shadow-2xl hover:shadow-ocean-500/25 z-10 ${isHovered ? 'opacity-100 translate-x-0' : 'opacity-100 -translate-x-1 sm:-translate-x-2'
+						className={`absolute -left-8 sm:-left-12 lg:-left-16 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white hover:scale-110 text-ocean-600 p-2 sm:p-3 lg:p-4 rounded-full shadow-xl transition-all duration-300 backdrop-blur-sm transform hover:shadow-2xl hover:shadow-ocean-500/25 z-10 ${isHovered ? 'opacity-100 translate-x-0' : 'opacity-100 -translate-x-1 sm:-translate-x-2'
 							}`}
 					>
 						<svg className="w-5 h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -328,7 +323,7 @@ const Cases = () => {
 					</button>
 					<button
 						onClick={nextSlide}
-						className={`absolute right-0 sm:right-0 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white hover:scale-110 text-ocean-600 p-2 sm:p-3 lg:p-4 rounded-full shadow-xl transition-all duration-300 backdrop-blur-sm transform hover:shadow-2xl hover:shadow-ocean-500/25 z-10 ${isHovered ? 'opacity-100 translate-x-0' : 'opacity-100 translate-x-1 sm:translate-x-2'
+						className={`absolute -right-8 sm:-right-12 lg:-right-16 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white hover:scale-110 text-ocean-600 p-2 sm:p-3 lg:p-4 rounded-full shadow-xl transition-all duration-300 backdrop-blur-sm transform hover:shadow-2xl hover:shadow-ocean-500/25 z-10 ${isHovered ? 'opacity-100 translate-x-0' : 'opacity-100 translate-x-1 sm:translate-x-2'
 							}`}
 					>
 						<svg className="w-5 h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
