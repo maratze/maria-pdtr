@@ -130,15 +130,17 @@ const Cases = () => {
 						<SectionDescription text="Реальные истории пациентов, которые восстановили здоровье с помощью P-DTR метода" isDarkMode={true} />
 					</div>
 
-					{/* Preloader Container */}
-					<div className="flex justify-center py-12 sm:py-16">
+					{/* Preloader */}
+					<div className="flex items-center justify-center py-12 sm:py-16">
 						<div className="text-center">
-							<div className="inline-block">
-								<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+							<div className="inline-flex items-center justify-center">
+								<div className="w-12 h-12 border-4 border-slate-200/30 border-t-white rounded-full animate-spin"></div>
 							</div>
-							<p className="text-white text-base sm:text-lg font-light">Загрузка кейсов...</p>
+							<p className="text-white mt-4 text-base sm:text-lg font-light">Загрузка кейсов...</p>
 						</div>
-					</div>					{/* CTA */}
+					</div>
+
+					{/* CTA */}
 					<div className="text-center mt-12 sm:mt-16 px-4">
 						<p className="text-sm sm:text-base text-slate-200 mb-4 sm:mb-6">
 							Хотите получить такие же результаты?
@@ -218,7 +220,7 @@ const Cases = () => {
 					{/* Carousel */}
 					<div className="relative rounded-2xl">
 						<div
-							className="flex transition-transform duration-300 ease-in-out"
+							className="flex items-center transition-transform duration-300 ease-in-out"
 							style={{
 								transform: isMobile
 									? `translateX(calc(-${currentSlide * 92}% + 4%))`
@@ -229,8 +231,8 @@ const Cases = () => {
 								// Активен слайд на позиции currentSlide
 								const isActive = index === currentSlide
 								return (
-									<div key={caseItem.id} className="w-[92%] sm:w-4/5 flex-shrink-0 px-2 sm:px-4">
-										<div className={`bg-white/95 backdrop-blur-sm border border-ocean-200/50 rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 shadow-lg transition-all duration-300 ${isActive
+									<div key={caseItem.id} className="w-[92%] sm:w-4/5 flex-shrink-0 px-2 sm:px-4 flex items-center">
+										<div className={`w-full bg-white/95 backdrop-blur-sm border border-ocean-200/50 rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 shadow-lg transition-all duration-300 ${isActive
 											? 'scale-100 opacity-100'
 											: 'scale-95 opacity-60'
 											}`}>
