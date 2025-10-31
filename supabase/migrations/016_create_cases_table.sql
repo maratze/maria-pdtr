@@ -6,7 +6,6 @@ CREATE TABLE IF NOT EXISTS public.cases (
     solution TEXT NOT NULL,
     result TEXT NOT NULL,
     duration TEXT NOT NULL,
-    display_order INTEGER DEFAULT 0,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -38,9 +37,6 @@ CREATE POLICY "Authenticated users can delete cases"
     FOR DELETE
     TO authenticated
     USING (true);
-
--- Create index for ordering
-CREATE INDEX idx_cases_display_order ON public.cases(display_order);
 
 -- Create function to update updated_at timestamp
 CREATE OR REPLACE FUNCTION public.update_cases_updated_at()

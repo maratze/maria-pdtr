@@ -71,10 +71,10 @@ export default function AdminCases() {
 			return
 		}
 
-		// Реактивно добавляем новый кейс в список с сортировкой
+		// Реактивно добавляем новый кейс в список с сортировкой от новых к старым
 		if (result?.data && result.data.length > 0) {
 			const updatedCases = [...cases, result.data[0]]
-			updatedCases.sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
+			updatedCases.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
 			setCases(updatedCases)
 		}
 

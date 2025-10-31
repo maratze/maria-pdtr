@@ -6,7 +6,7 @@ export async function getCases() {
 	const { data, error } = await supabase
 		.from('cases')
 		.select('*')
-		.order('display_order', { ascending: true })
+		.order('created_at', { ascending: false })
 
 	return { data: data as Case[] | null, error }
 }
@@ -86,7 +86,7 @@ export async function listAllCases() {
 	const { data, error } = await supabaseAdmin
 		.from('cases')
 		.select('*')
-		.order('display_order', { ascending: true })
+		.order('created_at', { ascending: false })
 
 	return { data: data as Case[] | null, error }
 }

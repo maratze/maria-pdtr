@@ -5,7 +5,6 @@ export interface Case {
 	solution: string
 	result: string
 	duration: string
-	display_order: number
 	created_at: string
 	updated_at: string
 }
@@ -16,7 +15,6 @@ export interface CaseInsert {
 	solution: string
 	result: string
 	duration: string
-	display_order?: number
 }
 
 export interface CaseUpdate {
@@ -25,5 +23,4 @@ export interface CaseUpdate {
 	solution?: string
 	result?: string
 	duration?: string
-	display_order?: number
 }

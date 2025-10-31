@@ -4,12 +4,10 @@ import SectionDescription from './SectionDescription'
 import { getCases } from '../lib/cases'
 
 const Cases = () => {
-	const [currentSlide, setCurrentSlide] = useState(0) // Логический индекс для точек навигации
-	const [position, setPosition] = useState(3) // Физическая позиция (начинаем со второй копии)
+	const [currentSlide, setCurrentSlide] = useState(0)
 	const [selectedCase, setSelectedCase] = useState(null)
 	const [isHovered, setIsHovered] = useState(false)
 	const [isTransitioning, setIsTransitioning] = useState(false)
-	const [isManualNavigation, setIsManualNavigation] = useState(false) // Флаг для ручной навигации
 	const [isMobile, setIsMobile] = useState(false)
 	const [cases, setCases] = useState([])
 	const [loading, setLoading] = useState(true)
@@ -38,19 +36,19 @@ const Cases = () => {
 	}, [])
 
 	const nextSlide = () => {
-		if (isTransitioning) return
+		if (isTransitioning || cases.length === 0) return
 		setIsTransitioning(true)
 
-		setPosition(prev => prev + 1)
+		setCurrentSlide(prev => (prev + 1) % cases.length)
 
 		setTimeout(() => setIsTransitioning(false), 300)
 	}
 
 	const prevSlide = () => {
-		if (isTransitioning) return
+		if (isTransitioning || cases.length === 0) return
 		setIsTransitioning(true)
 
-		setPosition(prev => prev - 1)
+		setCurrentSlide(prev => (prev - 1 + cases.length) % cases.length)
 
 		setTimeout(() => setIsTransitioning(false), 300)
 	}
@@ -58,16 +56,10 @@ const Cases = () => {
 	const goToSlide = (index) => {
 		if (isTransitioning) return
 		setIsTransitioning(true)
-		setIsManualNavigation(true)
 
-		// Используем вторую копию для точек навигации
 		setCurrentSlide(index)
-		setPosition(index + cases.length) // Вторая копия: позиции 3, 4, 5
 
-		setTimeout(() => {
-			setIsTransitioning(false)
-			setIsManualNavigation(false)
-		}, 300)
+		setTimeout(() => setIsTransitioning(false), 300)
 	}
 
 	const openModal = (caseItem) => {
@@ -86,39 +78,19 @@ const Cases = () => {
 		return plainText.substring(0, limit) + '...'
 	}
 
-	// Создаем минимальный расширенный массив для бесконечной прокрутки (best practice)
-	const getExtendedCases = () => {
-		return [...cases, ...cases, ...cases] // 3 копии - минимум для плавности
-	}
+	// Создаем массив кейсов
+	const displayCases = cases
 
-	const extendedCases = getExtendedCases()
-
-	// Синхронизация currentSlide с position (только для автоматической прокрутки)
+	// Авторотация карусели
 	useEffect(() => {
-		if (!isManualNavigation) {
-			// Для 3 копий: позиция 3,4,5 соответствует слайдам 0,1,2
-			const slideIndex = position - cases.length
-			if (slideIndex >= 0 && slideIndex < cases.length) {
-				setCurrentSlide(slideIndex)
-			}
-		}
-	}, [position, cases.length, isManualNavigation])
+		if (cases.length === 0 || isHovered) return
 
-	// Best practice: мгновенный сброс позиции для бесконечной прокрутки
-	useEffect(() => {
-		if (!isTransitioning && !isManualNavigation) {
-			// Когда доходим до последней копии - перепрыгиваем к эквивалентной позиции в средней копии
-			if (position >= extendedCases.length - cases.length) {
-				const equivalentPosition = position - cases.length
-				setPosition(equivalentPosition)
-			}
-			// Когда доходим до первой копии - перепрыгиваем к эквивалентной позиции в средней копии
-			else if (position < cases.length) {
-				const equivalentPosition = position + cases.length
-				setPosition(equivalentPosition)
-			}
-		}
-	}, [position, isTransitioning, isManualNavigation, cases.length, extendedCases.length])
+		const interval = setInterval(() => {
+			setCurrentSlide(prev => (prev + 1) % cases.length)
+		}, 5000) // Переключение каждые 5 секунд
+
+		return () => clearInterval(interval)
+	}, [cases.length, isHovered])
 
 	// Показываем загрузку или пустое состояние
 	if (loading) {
@@ -249,19 +221,15 @@ const Cases = () => {
 							className="flex transition-transform duration-300 ease-in-out"
 							style={{
 								transform: isMobile
-									? `translateX(calc(-${position * 92}% + 4%))`
-									: `translateX(calc(-${position * 80}% + 10%))`
+									? `translateX(calc(-${currentSlide * 92}% + 4%))`
+									: `translateX(calc(-${currentSlide * 80}% + 10%))`
 							}}
 						>
-							{extendedCases.map((caseItem, index) => {
-								// Активен слайд на позиции position
-								const isActive = index === position
-								// Создаем уникальный ключ для избежания проблем с дублированными элементами
-								const uniqueKey = `${caseItem.id}-${Math.floor(index / cases.length)}-${index}`
-								// Используем display_order для отображения номера
-								const displayNumber = caseItem.display_order || (index % cases.length) + 1
+							{displayCases.map((caseItem, index) => {
+								// Активен слайд на позиции currentSlide
+								const isActive = index === currentSlide
 								return (
-									<div key={uniqueKey} className="w-[92%] sm:w-4/5 flex-shrink-0 px-2 sm:px-4">
+									<div key={caseItem.id} className="w-[92%] sm:w-4/5 flex-shrink-0 px-2 sm:px-4">
 										<div className={`bg-white/95 backdrop-blur-sm border border-ocean-200/50 rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 shadow-lg transition-all duration-300 ${isActive
 											? 'scale-100 opacity-100'
 											: 'scale-95 opacity-60'
@@ -269,7 +237,7 @@ const Cases = () => {
 											{/* Case Header with Number */}
 											<div className="flex items-start gap-3 sm:gap-4 mb-4 sm:mb-6">
 												<div className="flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-gradient-to-r from-ocean-600 to-ocean-600 text-white rounded-lg sm:rounded-xl flex items-center justify-center text-xl sm:text-2xl font-medium">
-													{String(displayNumber).padStart(2, '0')}
+													{String(index + 1).padStart(2, '0')}
 												</div>
 												<div className="flex-1 min-w-0">
 													<h3 className="text-lg sm:text-xl lg:text-2xl font-regular text-slate-700 break-words leading-5">
