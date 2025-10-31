@@ -45,9 +45,10 @@ function Hero() {
 							e.preventDefault()
 							const targetElement = document.getElementById('booking')
 							if (targetElement) {
-								const elementPosition = targetElement.offsetTop
+								const elementPosition = targetElement.getBoundingClientRect().top + window.pageYOffset
+								const offsetPosition = elementPosition
 								window.scrollTo({
-									top: elementPosition,
+									top: offsetPosition,
 									behavior: 'smooth'
 								})
 							}
