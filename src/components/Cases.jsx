@@ -314,8 +314,7 @@ const Cases = () => {
 					{/* Navigation Arrows */}
 					<button
 						onClick={prevSlide}
-						className={`absolute -left-8 sm:-left-12 lg:-left-16 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white hover:scale-110 text-ocean-600 p-2 sm:p-3 lg:p-4 rounded-full shadow-xl transition-all duration-300 backdrop-blur-sm transform hover:shadow-2xl hover:shadow-ocean-500/25 z-10 ${isHovered ? 'opacity-100 translate-x-0' : 'opacity-100 -translate-x-1 sm:-translate-x-2'
-							}`}
+						className="absolute -left-2 lg:-left-16 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-ocean-600 p-2 sm:p-3 lg:p-4 rounded-full shadow-xl transition-all duration-300 backdrop-blur-sm transform hover:shadow-2xl hover:shadow-ocean-500/25 z-10 opacity-100 -translate-x-1 sm:-translate-x-2"
 					>
 						<svg className="w-5 h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -323,8 +322,7 @@ const Cases = () => {
 					</button>
 					<button
 						onClick={nextSlide}
-						className={`absolute -right-8 sm:-right-12 lg:-right-16 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white hover:scale-110 text-ocean-600 p-2 sm:p-3 lg:p-4 rounded-full shadow-xl transition-all duration-300 backdrop-blur-sm transform hover:shadow-2xl hover:shadow-ocean-500/25 z-10 ${isHovered ? 'opacity-100 translate-x-0' : 'opacity-100 translate-x-1 sm:translate-x-2'
-							}`}
+						className="absolute -right-2 lg:-right-16 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-ocean-600 p-2 sm:p-3 lg:p-4 rounded-full shadow-xl transition-all duration-300 backdrop-blur-sm transform hover:shadow-2xl hover:shadow-ocean-500/25 z-10 opacity-100 translate-x-1 sm:translate-x-2"
 					>
 						<svg className="w-5 h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
