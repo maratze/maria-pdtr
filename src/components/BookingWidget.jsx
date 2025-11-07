@@ -5,10 +5,7 @@ import { getPublicBookingsByCityAndDates, createPublicBooking } from '../lib/boo
 import { getOrCreateSlotsForDate } from '../lib/timeSlots'
 import {
 	generateClientFingerprint,
-	getClientIP,
-	getHoneypotFieldConfig,
-	checkHoneypot,
-	createFormTimingCheck
+	getClientIP
 } from '../lib/antiSpam'
 import Toast from './Toast'
 
@@ -29,10 +26,8 @@ const BookingWidget = () => {
 	const [clientName, setClientName] = useState('')
 	const [clientPhone, setClientPhone] = useState('')
 	const [clientEmail, setClientEmail] = useState('')
-	const [honeypotValue, setHoneypotValue] = useState('')
 	const [clientIP, setClientIP] = useState(null)
 	const [clientFingerprint, setClientFingerprint] = useState(null)
-	const [formTiming, setFormTiming] = useState(null)
 	const [bookingLoading, setBookingLoading] = useState(false)
 	const [toast, setToast] = useState(null)
 	const [localError, setLocalError] = useState(null)
@@ -205,8 +200,6 @@ const BookingWidget = () => {
 		if (step === 1 && selectedSlots.length > 0) {
 			setStep(2)
 			setLocalError(null) // Очищаем ошибку при переходе на следующий шаг
-			// Начинаем отслеживать время заполнения формы
-			setFormTiming(createFormTimingCheck())
 		}
 	}
 
@@ -224,20 +217,6 @@ const BookingWidget = () => {
 		setLocalError(null) // Очищаем предыдущие ошибки
 
 		if (selectedSlots.length === 0 || !clientName || !clientPhone) return
-
-		// Проверка honeypot поля (защита от ботов)
-		if (!checkHoneypot(honeypotValue)) {
-			const errorMsg = 'Ошибка валидации формы'
-			setLocalError(errorMsg)
-			return
-		}
-
-		// Проверка времени заполнения формы (защита от ботов)
-		if (formTiming && !formTiming.check()) {
-			const errorMsg = 'Пожалуйста, уделите время заполнению формы'
-			setLocalError(errorMsg)
-			return
-		}
 
 		try {
 			setBookingLoading(true)
@@ -581,15 +560,6 @@ const BookingWidget = () => {
 													onChange={(e) => setClientEmail(e.target.value)}
 													className="w-full px-3 sm:px-4 py-2 sm:py-2.5 bg-white/5 border border-white/10 rounded text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-ocean-500 focus:border-transparent"
 													placeholder="your@email.com (опционально)"
-												/>
-											</div>
-
-											{/* Honeypot поле - скрыто от пользователя, только для ботов */}
-											<div style={getHoneypotFieldConfig().style}>
-												<input
-													{...getHoneypotFieldConfig().attributes}
-													value={honeypotValue}
-													onChange={(e) => setHoneypotValue(e.target.value)}
 												/>
 											</div>
 

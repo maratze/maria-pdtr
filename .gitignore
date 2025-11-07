@@ -95,3 +95,5 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
+
+supabase-commands.ts

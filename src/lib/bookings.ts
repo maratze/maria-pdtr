@@ -153,7 +153,7 @@ export async function createBooking(
 /**
  * Создать публичное бронирование (для клиентов на сайте)
  * Создает слот если его нет и затем бронирование
- * С проверкой rate limiting
+ * С проверкой блокировки пользователя
  */
 export async function createPublicBooking(
 	periodId: string,
@@ -167,7 +167,7 @@ export async function createPublicBooking(
 	clientFingerprint?: string
 ): Promise<{ success: boolean; booking_id?: string; error?: string }> {
 	try {
-		// Проверка rate limit если предоставлен IP
+		// Проверка блокировки пользователя
 		if (clientIP) {
 			const { data: rateLimitCheck, error: rateLimitError } = await supabase.rpc(
 				'check_rate_limit',
@@ -176,13 +176,13 @@ export async function createPublicBooking(
 					p_client_fingerprint: clientFingerprint || null,
 					p_client_phone: clientPhone,
 					p_client_email: clientEmail,
-				}
-			);
+				} as any
+			) as { data: { allowed: boolean; reason: string } | null; error: any };
 
 			if (rateLimitError) {
 				console.error('Rate limit check error:', rateLimitError);
 			} else if (rateLimitCheck && !rateLimitCheck.allowed) {
-				// Логируем неудачную попытку
+				// Логируем заблокированную попытку
 				await supabase.rpc('log_booking_attempt', {
 					p_ip_address: clientIP,
 					p_client_fingerprint: clientFingerprint || null,
@@ -190,11 +190,11 @@ export async function createPublicBooking(
 					p_client_phone: clientPhone,
 					p_client_email: clientEmail,
 					p_success: false,
-				});
+				} as any);
 
 				return {
 					success: false,
-					error: rateLimitCheck.reason || 'Превышен лимит бронирований',
+					error: rateLimitCheck.reason || 'Доступ к бронированию ограничен',
 				};
 			}
 		}
