@@ -39,6 +39,8 @@ const AdminSecurity: React.FC = () => {
 		isOpen: boolean;
 		title: string;
 		message: string;
+		confirmText?: string;
+		variant?: 'warning' | 'danger';
 		onConfirm: () => void;
 	} | null>(null);
 
@@ -247,6 +249,22 @@ const AdminSecurity: React.FC = () => {
 		setShowBlockForm(true);
 	};
 
+	const handleDeleteAttempt = async (id: string) => {
+		if (!supabaseAdmin) return;
+
+		try {
+			const { error } = await supabaseAdmin.from('booking_attempts').delete().eq('id', id);
+
+			if (error) throw error;
+
+			setToast({ message: 'Попытка удалена', type: 'success' });
+			await refreshData();
+		} catch (error) {
+			console.error('Error deleting attempt:', error);
+			setToast({ message: 'Ошибка удаления попытки', type: 'error' });
+		}
+	};
+
 	// Проверка, заблокирован ли клиент
 	const isClientBlocked = (ip: string, phone: string, email: string): boolean => {
 		return blockedClients.some(
@@ -444,18 +462,7 @@ const AdminSecurity: React.FC = () => {
 
 			{/* Заблокированные клиенты */}
 			{blockedClients.length > 0 && (
-				<div className="bg-white rounded-xl border border-slate-200 overflow-hidden relative">
-					{refreshing && (
-						<div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] flex items-center justify-center z-10 rounded-xl">
-							<div className="flex flex-col items-center gap-2">
-								<svg className="animate-spin h-8 w-8 text-ocean-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-									<circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-									<path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-								</svg>
-								<span className="text-sm text-slate-600 font-medium">Обновление...</span>
-							</div>
-						</div>
-					)}
+				<div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
 					<div className="p-4 border-b border-slate-200">
 						<h2 className="text-base font-normal text-slate-900">
 							Заблокированные клиенты ({blockedClients.length})
@@ -532,6 +539,8 @@ const AdminSecurity: React.FC = () => {
 														isOpen: true,
 														title: 'Снять блокировку?',
 														message: 'Вы уверены, что хотите снять блокировку с этого клиента?',
+														confirmText: 'Разблокировать',
+														variant: 'warning',
 														onConfirm: () => handleUnblock(client.id),
 													})
 												}
@@ -550,18 +559,7 @@ const AdminSecurity: React.FC = () => {
 
 			{/* Последние попытки */}
 			{attempts.length > 0 && (
-				<div className="bg-white rounded-xl border border-slate-200 overflow-hidden relative">
-					{refreshing && (
-						<div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] flex items-center justify-center z-10 rounded-xl">
-							<div className="flex flex-col items-center gap-2">
-								<svg className="animate-spin h-8 w-8 text-ocean-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-									<circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-									<path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-								</svg>
-								<span className="text-sm text-slate-600 font-medium">Обновление...</span>
-							</div>
-						</div>
-					)}
+				<div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
 					<div className="p-4 border-b border-slate-200">
 						<h2 className="text-base font-normal text-slate-900">
 							Последние попытки бронирования (100)
@@ -630,24 +628,41 @@ const AdminSecurity: React.FC = () => {
 											)}
 										</td>
 										<td className="px-4 py-3 text-sm text-right">
-											{isClientBlocked(
-												attempt.ip_address,
-												attempt.client_phone,
-												attempt.client_email
-											) ? (
-												<span className="inline-flex items-center px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs font-medium">
-													Заблокирован
-												</span>
-											) : (
+											<div className="flex items-center justify-end gap-3">
+												{isClientBlocked(
+													attempt.ip_address,
+													attempt.client_phone,
+													attempt.client_email
+												) ? (
+													<span className="inline-flex items-center px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs font-medium">
+														Заблокирован
+													</span>
+												) : (
+													<button
+														onClick={() =>
+															handleQuickBlock(attempt.ip_address, attempt.client_phone)
+														}
+														className="text-[13px] text-ocean-600 hover:text-ocean-700 transition-colors"
+													>
+														Заблокировать
+													</button>
+												)}
 												<button
 													onClick={() =>
-														handleQuickBlock(attempt.ip_address, attempt.client_phone)
+														setConfirmDialog({
+															isOpen: true,
+															title: 'Удалить попытку?',
+															message: 'Вы уверены, что хотите удалить эту попытку бронирования из журнала?',
+															confirmText: 'Удалить',
+															variant: 'danger',
+															onConfirm: () => handleDeleteAttempt(attempt.id),
+														})
 													}
-													className="text-[13px] text-ocean-600 hover:text-ocean-700 transition-colors"
+													className="text-[13px] text-red-600 hover:text-red-700 transition-colors"
 												>
-													Заблокировать
+													Удалить
 												</button>
-											)}
+											</div>
 										</td>
 									</tr>
 								))}
@@ -675,8 +690,8 @@ const AdminSecurity: React.FC = () => {
 						setConfirmDialog(null);
 					}}
 					onClose={() => setConfirmDialog(null)}
-					confirmText="Разблокировать"
-					variant="warning"
+					confirmText={confirmDialog.confirmText || 'Подтвердить'}
+					variant={confirmDialog.variant || 'warning'}
 				/>
 			)}
 		</div>
