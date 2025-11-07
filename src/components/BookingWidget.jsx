@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { getCities } from '../lib/cities'
 import { getPublicActiveSchedulePeriodsByCity } from '../lib/schedule'
-import { getPublicBookingsByCityAndDates, createPublicBooking } from '../lib/bookings'
+import { getPublicBookingsByCityAndDates, createPublicBooking, logSuspiciousSessionActivity } from '../lib/bookings'
 import { getOrCreateSlotsForDate } from '../lib/timeSlots'
 import {
 	generateClientFingerprint,
@@ -31,6 +31,7 @@ const BookingWidget = () => {
 	const [bookingLoading, setBookingLoading] = useState(false)
 	const [toast, setToast] = useState(null)
 	const [localError, setLocalError] = useState(null)
+	const [sessionBookingsCount, setSessionBookingsCount] = useState(0) // Счётчик бронирований в сессии
 
 	useEffect(() => {
 		async function loadCities() {
@@ -44,7 +45,7 @@ const BookingWidget = () => {
 					setSelectedCity(citiesData[0].id)
 				}
 
-				// Инициализируем защиту от спама
+				// Инициализируем fingerprint и IP для логирования
 				try {
 					const fingerprint = generateClientFingerprint()
 					setClientFingerprint(fingerprint)
@@ -245,6 +246,22 @@ const BookingWidget = () => {
 			}
 
 			if (allSuccess) {
+				// Увеличиваем счётчик бронирований в сессии
+				const newCount = sessionBookingsCount + selectedSlots.length
+				setSessionBookingsCount(newCount)
+
+				// Логируем подозрительную активность если больше 3 слотов за сессию
+				if (newCount > 3 && clientIP) {
+					await logSuspiciousSessionActivity(
+						clientIP,
+						clientFingerprint,
+						clientName,
+						clientPhone,
+						clientEmail,
+						newCount
+					)
+				}
+
 				setStep(3)
 				setLocalError(null) // Очищаем ошибку при успехе
 				const message = selectedSlots.length === 1

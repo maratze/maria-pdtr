@@ -3,6 +3,8 @@ import SectionHeader from './SectionHeader';
 import SectionDescription from './SectionDescription';
 import BookingWidget from './BookingWidget';
 import { getServices } from '../lib/services';
+import { checkIfUserBlocked } from '../lib/bookings';
+import { generateClientFingerprint, getClientIP } from '../lib/antiSpam';
 
 // Вспомогательная функция для форматирования длительности
 function formatDuration(from, to, type) {
@@ -31,6 +33,8 @@ function formatPrice(price, priceFrom) {
 const Services = () => {
 	const [services, setServices] = useState([])
 	const [loading, setLoading] = useState(true)
+	const [isUserBlocked, setIsUserBlocked] = useState(false)
+	const [blockCheckComplete, setBlockCheckComplete] = useState(false)
 
 	useEffect(() => {
 		async function loadServices() {
@@ -42,6 +46,26 @@ const Services = () => {
 			setLoading(false)
 		}
 		loadServices()
+	}, [])
+
+	// Проверка блокировки пользователя
+	useEffect(() => {
+		async function checkBlockStatus() {
+			try {
+				const fingerprint = generateClientFingerprint()
+				const ip = await getClientIP()
+
+				const blockCheck = await checkIfUserBlocked(ip, fingerprint)
+				setIsUserBlocked(blockCheck.blocked)
+			} catch (error) {
+				console.error('Error checking block status:', error)
+				// При ошибке не блокируем
+				setIsUserBlocked(false)
+			} finally {
+				setBlockCheckComplete(true)
+			}
+		}
+		checkBlockStatus()
 	}, [])
 
 	return (
@@ -120,18 +144,20 @@ const Services = () => {
 					)}
 				</div>
 
-				{/* Онлайн запись */}
-				<div className="max-w-4xl mx-auto">
-					{/* Заголовок раздела */}
-					<div id="booking" className="text-center mb-8 sm:mb-12 pt-24">
-						<SectionHeader title="Онлайн запись" isDarkMode={true} />
-						<SectionDescription text="Выберите удобные дату и время для консультации" isDarkMode={true} />
-					</div>
+				{/* Онлайн запись - показываем только после проверки блокировки и если пользователь не заблокирован */}
+				{blockCheckComplete && !isUserBlocked && (
+					<div className="max-w-4xl mx-auto">
+						{/* Заголовок раздела */}
+						<div id="booking" className="text-center mb-8 sm:mb-12 pt-24">
+							<SectionHeader title="Онлайн запись" isDarkMode={true} />
+							<SectionDescription text="Выберите удобные дату и время для консультации" isDarkMode={true} />
+						</div>
 
-					<div className="bg-white/5 backdrop-blur-sm rounded-xl sm:rounded-2xl overflow-hidden border border-white/10 p-4 sm:p-6 md:p-8">
-						<BookingWidget />
+						<div className="bg-white/5 backdrop-blur-sm rounded-xl sm:rounded-2xl overflow-hidden border border-white/10 p-4 sm:p-6 md:p-8">
+							<BookingWidget />
+						</div>
 					</div>
-				</div>
+				)}
 			</div>
 		</section>
 	)

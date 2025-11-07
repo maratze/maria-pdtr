@@ -151,9 +151,94 @@ export async function createBooking(
 }
 
 /**
+ * Проверить, заблокирован ли пользователь
+ */
+export async function checkIfUserBlocked(
+	clientIP?: string,
+	clientFingerprint?: string,
+	clientPhone?: string,
+	clientEmail?: string
+): Promise<{ blocked: boolean; reason?: string }> {
+	if (!clientIP) {
+		return { blocked: false };
+	}
+
+	try {
+		const { data: rateLimitCheckArray, error: rateLimitError } = await supabase.rpc(
+			'check_rate_limit',
+			{
+				p_ip_address: clientIP,
+				p_client_fingerprint: clientFingerprint || null,
+				p_client_phone: clientPhone || '',
+				p_client_email: clientEmail || '',
+			} as any
+		) as { data: Array<{ allowed: boolean; reason: string }> | null; error: any };
+
+		const rateLimitCheck = rateLimitCheckArray && rateLimitCheckArray.length > 0
+			? rateLimitCheckArray[0]
+			: null;
+
+		if (rateLimitError) {
+			console.error('Rate limit check error:', rateLimitError);
+			return { blocked: false }; // При ошибке не блокируем
+		}
+
+		if (rateLimitCheck && !rateLimitCheck.allowed) {
+			return { blocked: true, reason: rateLimitCheck.reason };
+		}
+
+		return { blocked: false };
+	} catch (error) {
+		console.error('Error checking if user blocked:', error);
+		return { blocked: false }; // При ошибке не блокируем
+	}
+}
+
+/**
+ * Логировать подозрительную активность в рамках сессии
+ */
+export async function logSuspiciousSessionActivity(
+	clientIP: string,
+	clientFingerprint: string | null,
+	clientName: string,
+	clientPhone: string,
+	clientEmail: string,
+	bookingsCount: number
+): Promise<void> {
+	if (!supabaseAdmin) return;
+
+	try {
+		const oneHourAgo = new Date();
+		oneHourAgo.setHours(oneHourAgo.getHours() - 1);
+
+		// Проверяем, не логировали ли мы уже эту сессию
+		const { count: existingLogCount } = await supabaseAdmin
+			.from('booking_attempts')
+			.select('id', { count: 'exact', head: true })
+			.eq('ip_address', clientIP)
+			.eq('client_phone', clientPhone)
+			.gte('attempt_time', oneHourAgo.toISOString());
+
+		// Логируем только если еще не было записи за последний час
+		if (!existingLogCount || existingLogCount === 0) {
+			await supabase.rpc('log_booking_attempt', {
+				p_ip_address: clientIP,
+				p_client_fingerprint: clientFingerprint,
+				p_client_name: `${clientName} (${bookingsCount} слотов за сессию)`,
+				p_client_phone: clientPhone,
+				p_client_email: clientEmail,
+				p_success: true,
+			} as any);
+		}
+	} catch (error) {
+		console.error('Error logging suspicious session activity:', error);
+	}
+}
+
+/**
  * Создать публичное бронирование (для клиентов на сайте)
  * Создает слот если его нет и затем бронирование
- * С проверкой блокировки пользователя
+ * БЕЗ проверки блокировки - проверка должна быть на уровне UI
  */
 export async function createPublicBooking(
 	periodId: string,
@@ -167,38 +252,6 @@ export async function createPublicBooking(
 	clientFingerprint?: string
 ): Promise<{ success: boolean; booking_id?: string; error?: string }> {
 	try {
-		// Проверка блокировки пользователя
-		if (clientIP) {
-			const { data: rateLimitCheck, error: rateLimitError } = await supabase.rpc(
-				'check_rate_limit',
-				{
-					p_ip_address: clientIP,
-					p_client_fingerprint: clientFingerprint || null,
-					p_client_phone: clientPhone,
-					p_client_email: clientEmail,
-				} as any
-			) as { data: { allowed: boolean; reason: string } | null; error: any };
-
-			if (rateLimitError) {
-				console.error('Rate limit check error:', rateLimitError);
-			} else if (rateLimitCheck && !rateLimitCheck.allowed) {
-				// Логируем заблокированную попытку
-				await supabase.rpc('log_booking_attempt', {
-					p_ip_address: clientIP,
-					p_client_fingerprint: clientFingerprint || null,
-					p_client_name: clientName,
-					p_client_phone: clientPhone,
-					p_client_email: clientEmail,
-					p_success: false,
-				} as any);
-
-				return {
-					success: false,
-					error: rateLimitCheck.reason || 'Доступ к бронированию ограничен',
-				};
-			}
-		}
-
 		// Проверяем, существует ли слот
 		const { data: existingSlot, error: slotCheckError } = await supabase
 			.from('time_slots')
@@ -315,48 +368,93 @@ export async function createPublicBooking(
 		if (bookingError || !booking) {
 			console.error('Error creating booking:', bookingError);
 
-			// Логируем неудачную попытку
-			if (clientIP) {
-				await supabase.rpc('log_booking_attempt', {
-					p_ip_address: clientIP,
-					p_client_fingerprint: clientFingerprint || null,
-					p_client_name: clientName,
-					p_client_phone: clientPhone,
-					p_client_email: clientEmail,
-					p_success: false,
-				} as any);
+			// Логируем неудачную попытку (без дубликатов)
+			if (clientIP && supabaseAdmin) {
+				const oneHourAgo = new Date();
+				oneHourAgo.setHours(oneHourAgo.getHours() - 1);
+
+				// Проверяем, есть ли уже запись с таким IP и телефоном за последний час
+				const { count: existingLogCount } = await supabaseAdmin
+					.from('booking_attempts')
+					.select('id', { count: 'exact', head: true })
+					.eq('ip_address', clientIP)
+					.eq('client_phone', clientPhone)
+					.eq('success', false)
+					.gte('attempt_time', oneHourAgo.toISOString());
+
+				// Логируем только если еще не было записи за последний час
+				if (!existingLogCount || existingLogCount === 0) {
+					await supabase.rpc('log_booking_attempt', {
+						p_ip_address: clientIP,
+						p_client_fingerprint: clientFingerprint || null,
+						p_client_name: clientName,
+						p_client_phone: clientPhone,
+						p_client_email: clientEmail,
+						p_success: false,
+					} as any);
+				}
 			}
 
 			return { success: false, error: bookingError?.message || 'Не удалось создать бронирование' };
 		}
 
 		// Логируем подозрительную активность (> 3 бронирований)
-		if (isSuspicious && clientIP) {
-			await supabase.rpc('log_booking_attempt', {
-				p_ip_address: clientIP,
-				p_client_fingerprint: clientFingerprint || null,
-				p_client_name: clientName,
-				p_client_phone: clientPhone,
-				p_client_email: clientEmail,
-				p_success: true,
-			} as any);
-		}
+		// Проверяем, не логировали ли мы уже эту комбинацию IP + телефон за последний час
+		if (isSuspicious && clientIP && supabaseAdmin) {
+			const oneHourAgo = new Date();
+			oneHourAgo.setHours(oneHourAgo.getHours() - 1);
 
-		return { success: true, booking_id: booking.id };
-	} catch (error) {
-		console.error('Error in createPublicBooking:', error);
+			// Проверяем, есть ли уже запись с таким IP и телефоном за последний час
+			const { count: existingLogCount } = await supabaseAdmin
+				.from('booking_attempts')
+				.select('id', { count: 'exact', head: true })
+				.eq('ip_address', clientIP)
+				.eq('client_phone', clientPhone)
+				.gte('attempt_time', oneHourAgo.toISOString());
 
-		// Логируем ошибку
-		if (clientIP) {
-			try {
+			// Логируем только если еще не было записи за последний час
+			if (!existingLogCount || existingLogCount === 0) {
 				await supabase.rpc('log_booking_attempt', {
 					p_ip_address: clientIP,
 					p_client_fingerprint: clientFingerprint || null,
 					p_client_name: clientName,
 					p_client_phone: clientPhone,
 					p_client_email: clientEmail,
-					p_success: false,
+					p_success: true,
 				} as any);
+			}
+		}
+
+		return { success: true, booking_id: booking.id };
+	} catch (error) {
+		console.error('Error in createPublicBooking:', error);
+
+		// Логируем ошибку (без дубликатов)
+		if (clientIP && supabaseAdmin) {
+			try {
+				const oneHourAgo = new Date();
+				oneHourAgo.setHours(oneHourAgo.getHours() - 1);
+
+				// Проверяем, есть ли уже запись с таким IP и телефоном за последний час
+				const { count: existingLogCount } = await supabaseAdmin
+					.from('booking_attempts')
+					.select('id', { count: 'exact', head: true })
+					.eq('ip_address', clientIP)
+					.eq('client_phone', clientPhone)
+					.eq('success', false)
+					.gte('attempt_time', oneHourAgo.toISOString());
+
+				// Логируем только если еще не было записи за последний час
+				if (!existingLogCount || existingLogCount === 0) {
+					await supabase.rpc('log_booking_attempt', {
+						p_ip_address: clientIP,
+						p_client_fingerprint: clientFingerprint || null,
+						p_client_name: clientName,
+						p_client_phone: clientPhone,
+						p_client_email: clientEmail,
+						p_success: false,
+					} as any);
+				}
 			} catch (logError) {
 				console.error('Error logging attempt:', logError);
 			}
