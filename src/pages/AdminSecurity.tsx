@@ -14,6 +14,7 @@ interface BookingAttempt {
 	attempt_time: string;
 	success: boolean;
 	blocked: boolean;
+	total_slots_count: number;
 }
 
 interface BlockedClient {
@@ -630,6 +631,9 @@ const AdminSecurity: React.FC = () => {
 										Email
 									</th>
 									<th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wide">
+										Слоты
+									</th>
+									<th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wide">
 										Статус
 									</th>
 									<th className="px-4 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wide">
@@ -660,6 +664,9 @@ const AdminSecurity: React.FC = () => {
 										</td>
 										<td className="px-4 py-3 text-sm text-slate-900 max-w-[200px] truncate">
 											{attempt.client_email}
+										</td>
+										<td className="px-4 py-3 text-sm text-slate-900 font-medium">
+											{attempt.total_slots_count || 0}
 										</td>
 										<td className="px-4 py-3 text-sm">
 											{attempt.success ? (

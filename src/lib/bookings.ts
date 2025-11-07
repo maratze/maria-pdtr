@@ -218,12 +218,12 @@ export async function logSuspiciousSessionActivity(
 		// Если хотя бы телефон или email отличаются - это другой человек, логируем
 		let query = supabaseAdmin
 			.from('booking_attempts')
-			.select('id, client_phone, client_email')
+			.select('id, client_phone, client_email, total_slots_count')
 			.eq('ip_address', clientIP)
 			.gte('attempt_time', oneHourAgo.toISOString());
 
 		const { data: existingAttempts } = await query as {
-			data: Array<{ id: string; client_phone: string; client_email: string }> | null
+			data: Array<{ id: string; client_phone: string; client_email: string; total_slots_count: number }> | null
 		};
 
 		// Проверяем, есть ли запись с точно такими же данными (IP + телефон + email)
@@ -234,8 +234,24 @@ export async function logSuspiciousSessionActivity(
 					attempt.client_email === (clientEmail || '')
 			);
 
-			// Если нашли точное совпадение - не логируем дубликат
+			// Если нашли точное совпадение - обновляем существующую запись, увеличивая счётчик
 			if (exactMatch) {
+				const newTotalCount = (exactMatch.total_slots_count || 0) + bookingsCount;
+				const isSuccess = bookingsCount > 0;
+				const logName = isSuccess
+					? clientName
+					: `${clientName} (неудачная попытка)`;
+
+				await (supabaseAdmin as any)
+					.from('booking_attempts')
+					.update({
+						total_slots_count: newTotalCount,
+						client_name: logName,
+						attempt_time: new Date().toISOString(),
+						success: isSuccess
+					})
+					.eq('id', exactMatch.id);
+
 				return;
 			}
 		}
@@ -244,7 +260,7 @@ export async function logSuspiciousSessionActivity(
 		// (новый IP или тот же IP, но другой телефон/email)
 		const isSuccess = bookingsCount > 0;
 		const logName = isSuccess
-			? `${clientName} (${bookingsCount} ${bookingsCount === 1 ? 'слот' : bookingsCount < 5 ? 'слота' : 'слотов'})`
+			? clientName
 			: `${clientName} (неудачная попытка)`;
 
 		await supabase.rpc('log_booking_attempt', {
@@ -255,6 +271,24 @@ export async function logSuspiciousSessionActivity(
 			p_client_email: clientEmail,
 			p_success: isSuccess,
 		} as any);
+
+		// Обновляем колонку total_slots_count для только что созданной записи
+		// RPC функция не поддерживает эту колонку, поэтому обновляем отдельно
+		const { data: newAttempt } = await supabaseAdmin
+			.from('booking_attempts')
+			.select('id')
+			.eq('ip_address', clientIP)
+			.eq('client_phone', clientPhone)
+			.order('attempt_time', { ascending: false })
+			.limit(1)
+			.single();
+
+		if (newAttempt) {
+			await (supabaseAdmin as any)
+				.from('booking_attempts')
+				.update({ total_slots_count: bookingsCount })
+				.eq('id', (newAttempt as any).id);
+		}
 	} catch (error) {
 		console.error('Error logging suspicious session activity:', error);
 	}
