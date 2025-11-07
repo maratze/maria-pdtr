@@ -35,6 +35,7 @@ const BookingWidget = () => {
 	const [formTiming, setFormTiming] = useState(null)
 	const [bookingLoading, setBookingLoading] = useState(false)
 	const [toast, setToast] = useState(null)
+	const [localError, setLocalError] = useState(null)
 
 	useEffect(() => {
 		async function loadCities() {
@@ -194,9 +195,11 @@ const BookingWidget = () => {
 		if (isAlreadySelected) {
 			// Убираем из выбранных
 			setSelectedSlots(selectedSlots.filter(s => s.id !== slot.id))
+			setLocalError(null) // Очищаем ошибку
 		} else {
 			// Проверяем лимит перед добавлением
 			if (selectedSlots.length >= MAX_SLOTS_PER_BOOKING) {
+				setLocalError(`Можно выбрать максимум ${MAX_SLOTS_PER_BOOKING} слота за одно бронирование`)
 				setToast({
 					message: `Можно выбрать максимум ${MAX_SLOTS_PER_BOOKING} слота за одно бронирование`,
 					type: 'error'
@@ -205,12 +208,14 @@ const BookingWidget = () => {
 			}
 			// Добавляем к выбранным
 			setSelectedSlots([...selectedSlots, slot])
+			setLocalError(null) // Очищаем ошибку
 		}
 	}
 
 	const handleNextStep = () => {
 		if (step === 1 && selectedSlots.length > 0) {
 			setStep(2)
+			setLocalError(null) // Очищаем ошибку при переходе на следующий шаг
 			// Начинаем отслеживать время заполнения формы
 			setFormTiming(createFormTimingCheck())
 		}
@@ -227,13 +232,17 @@ const BookingWidget = () => {
 
 	const handleSubmit = async (e) => {
 		e.preventDefault()
+		setLocalError(null) // Очищаем предыдущие ошибки
+
 		if (selectedSlots.length === 0 || !clientName || !clientPhone) return
 
 		// Проверка количества слотов (защита от массового захвата)
 		const MAX_SLOTS_PER_BOOKING = 3
 		if (selectedSlots.length > MAX_SLOTS_PER_BOOKING) {
+			const errorMsg = `Можно забронировать максимум ${MAX_SLOTS_PER_BOOKING} слота за раз. Пожалуйста, уменьшите количество.`
+			setLocalError(errorMsg)
 			setToast({
-				message: `Можно забронировать максимум ${MAX_SLOTS_PER_BOOKING} слота за раз. Пожалуйста, уменьшите количество.`,
+				message: errorMsg,
 				type: 'error'
 			})
 			return
@@ -241,14 +250,18 @@ const BookingWidget = () => {
 
 		// Проверка honeypot поля (защита от ботов)
 		if (!checkHoneypot(honeypotValue)) {
-			setToast({ message: 'Ошибка валидации формы', type: 'error' })
+			const errorMsg = 'Ошибка валидации формы'
+			setLocalError(errorMsg)
+			setToast({ message: errorMsg, type: 'error' })
 			return
 		}
 
 		// Проверка времени заполнения формы (защита от ботов)
 		if (formTiming && !formTiming.check()) {
+			const errorMsg = 'Пожалуйста, уделите время заполнению формы'
+			setLocalError(errorMsg)
 			setToast({
-				message: 'Пожалуйста, уделите время заполнению формы',
+				message: errorMsg,
 				type: 'error'
 			})
 			return
@@ -282,6 +295,7 @@ const BookingWidget = () => {
 
 			if (allSuccess) {
 				setStep(3)
+				setLocalError(null) // Очищаем ошибку при успехе
 				const message = selectedSlots.length === 1
 					? 'Бронирование успешно создано!'
 					: `Успешно забронировано ${selectedSlots.length} слотов!`
@@ -298,10 +312,13 @@ const BookingWidget = () => {
 				}))
 				setDaySlots(formattedSlots)
 			} else {
+				setLocalError(errorMessage)
 				setToast({ message: errorMessage, type: 'error' })
 			}
 		} catch (error) {
-			setToast({ message: 'Ошибка создания бронирования', type: 'error' })
+			const errorMsg = 'Ошибка создания бронирования'
+			setLocalError(errorMsg)
+			setToast({ message: errorMsg, type: 'error' })
 		} finally {
 			setBookingLoading(false)
 		}
@@ -314,6 +331,7 @@ const BookingWidget = () => {
 		setClientName('')
 		setClientPhone('')
 		setClientEmail('')
+		setLocalError(null) // Очищаем ошибку при сбросе
 	}
 
 	const monthNames = [
@@ -496,14 +514,6 @@ const BookingWidget = () => {
 										<p className="text-slate-400 text-center py-4 text-sm">Нет доступных слотов на эту дату</p>
 									) : (
 										<>
-											<div className="mb-3 p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg">
-												<p className="text-xs text-amber-300 flex items-center gap-2">
-													<svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-														<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-													</svg>
-													<span>Можно выбрать максимум 3 слота за одно бронирование</span>
-												</p>
-											</div>
 											<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
 												{daySlots.map((slot, idx) => {
 													const isSelected = selectedSlots.some(s => s.id === slot.id)
@@ -612,6 +622,18 @@ const BookingWidget = () => {
 													onChange={(e) => setHoneypotValue(e.target.value)}
 												/>
 											</div>
+
+											{/* Локальное отображение ошибки над кнопкой */}
+											{localError && (
+												<div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
+													<div className="flex items-start gap-2">
+														<svg className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+															<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+														</svg>
+														<p className="text-sm text-red-300">{localError}</p>
+													</div>
+												</div>
+											)}
 
 											<div className="flex gap-2">
 												<button
