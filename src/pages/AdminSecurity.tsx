@@ -31,6 +31,7 @@ interface BlockedClient {
 
 const AdminSecurity: React.FC = () => {
 	const [loading, setLoading] = useState(true);
+	const [refreshing, setRefreshing] = useState(false);
 	const [attempts, setAttempts] = useState<BookingAttempt[]>([]);
 	const [blockedClients, setBlockedClients] = useState<BlockedClient[]>([]);
 	const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
@@ -79,10 +80,13 @@ const AdminSecurity: React.FC = () => {
 	// Реактивное обновление без лоадера
 	const refreshData = async () => {
 		try {
+			setRefreshing(true);
 			await Promise.all([loadAttempts(), loadBlockedClients(), loadStats()]);
 		} catch (error) {
 			console.error('Error refreshing data:', error);
 			setToast({ message: 'Ошибка обновления данных', type: 'error' });
+		} finally {
+			setRefreshing(false);
 		}
 	};
 
@@ -243,6 +247,16 @@ const AdminSecurity: React.FC = () => {
 		setShowBlockForm(true);
 	};
 
+	// Проверка, заблокирован ли клиент
+	const isClientBlocked = (ip: string, phone: string, email: string): boolean => {
+		return blockedClients.some(
+			(blocked) =>
+				(blocked.ip_address && blocked.ip_address === ip) ||
+				(blocked.phone_number && blocked.phone_number === phone) ||
+				(blocked.email && blocked.email === email)
+		);
+	};
+
 	if (loading) return <AdminPreloader />;
 
 	return (
@@ -288,9 +302,20 @@ const AdminSecurity: React.FC = () => {
 					</button>
 					<button
 						onClick={refreshData}
-						className="px-3 py-2 h-10 rounded-lg border border-slate-200 text-slate-600 text-sm font-normal hover:bg-slate-50 transition-colors"
+						disabled={refreshing}
+						className="flex items-center gap-2 px-3 py-2 h-10 rounded-lg border border-slate-200 text-slate-600 text-sm font-normal hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 					>
-						Обновить
+						{refreshing ? (
+							<>
+								<svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+									<circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+									<path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+								</svg>
+								Обновление...
+							</>
+						) : (
+							'Обновить'
+						)}
 					</button>
 				</div>
 			</div>
@@ -419,7 +444,18 @@ const AdminSecurity: React.FC = () => {
 
 			{/* Заблокированные клиенты */}
 			{blockedClients.length > 0 && (
-				<div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+				<div className="bg-white rounded-xl border border-slate-200 overflow-hidden relative">
+					{refreshing && (
+						<div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] flex items-center justify-center z-10 rounded-xl">
+							<div className="flex flex-col items-center gap-2">
+								<svg className="animate-spin h-8 w-8 text-ocean-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+									<circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+									<path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+								</svg>
+								<span className="text-sm text-slate-600 font-medium">Обновление...</span>
+							</div>
+						</div>
+					)}
 					<div className="p-4 border-b border-slate-200">
 						<h2 className="text-base font-normal text-slate-900">
 							Заблокированные клиенты ({blockedClients.length})
@@ -583,14 +619,24 @@ const AdminSecurity: React.FC = () => {
 											)}
 										</td>
 										<td className="px-4 py-3 text-sm text-right">
-											<button
-												onClick={() =>
-													handleQuickBlock(attempt.ip_address, attempt.client_phone)
-												}
-												className="text-[13px] text-ocean-600 hover:text-ocean-700 transition-colors"
-											>
-												Заблокировать
-											</button>
+											{isClientBlocked(
+												attempt.ip_address,
+												attempt.client_phone,
+												attempt.client_email
+											) ? (
+												<span className="inline-flex items-center px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs font-medium">
+													Заблокирован
+												</span>
+											) : (
+												<button
+													onClick={() =>
+														handleQuickBlock(attempt.ip_address, attempt.client_phone)
+													}
+													className="text-[13px] text-ocean-600 hover:text-ocean-700 transition-colors"
+												>
+													Заблокировать
+												</button>
+											)}
 										</td>
 									</tr>
 								))}
