@@ -319,7 +319,7 @@ const AdminSecurity: React.FC = () => {
 		<div className="space-y-3">
 			{/* Stats Card */}
 			<div className="bg-white rounded-xl border border-slate-200 p-4">
-				<p className="text-sm text-slate-500 mb-3">Статистика за последние сутки</p>
+				<p className="text-sm text-slate-500 mb-3">Статистика за последние 24 часа</p>
 				<div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
 					<div className="flex flex-col">
 						<p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-1">Попыток</p>

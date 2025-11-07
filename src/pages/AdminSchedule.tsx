@@ -284,7 +284,7 @@ export default function AdminSchedule() {
 				onClose={() => setDeleteMultipleIds([])}
 				onConfirm={confirmDeleteMultiple}
 				title="Подтверждение удаления"
-				description={`Вы уверены, что хотите удалить ${deleteMultipleIds.length} период${deleteMultipleIds.length === 1 ? '' : deleteMultipleIds.length < 5 ? 'а' : 'ов'}? Это действие нельзя отменить.`}
+				description={`Вы уверены, что хотите удалить ${deleteMultipleIds.length} период${deleteMultipleIds.length === 1 ? '' : deleteMultipleIds.length < 6 ? 'а' : 'ов'}? Это действие нельзя отменить.`}
 				confirmText="Удалить"
 				confirmLoading={deleteMultipleLoading}
 				variant="danger"

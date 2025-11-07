@@ -542,7 +542,7 @@ const BookingWidget = () => {
 													onClick={handleNextStep}
 													className="w-full mt-4 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg bg-ocean-600 text-white font-medium text-sm hover:bg-ocean-700 transition-colors"
 												>
-													Продолжить ({selectedSlots.length} {selectedSlots.length === 1 ? 'слот' : selectedSlots.length < 5 ? 'слота' : 'слотов'})
+													Продолжить ({selectedSlots.length} {selectedSlots.length === 1 ? 'слот' : selectedSlots.length < 6 ? 'слота' : 'слотов'})
 												</button>
 											)}
 										</>

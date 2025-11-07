@@ -1,7 +1,6 @@
--- Ограничение на максимальное количество активных бронирований
--- Защита от массового захвата всех слотов
+-- Исправляем функцию check_rate_limit: считаем только неудачные попытки за час
+-- Успешные бронирования проверяются отдельно по лимиту в 3 бронирования за 24 часа
 
--- Обновляем функцию check_rate_limit с проверкой активных бронирований
 CREATE OR REPLACE FUNCTION public.check_rate_limit(
     p_ip_address inet,
     p_client_fingerprint text DEFAULT NULL,
@@ -76,7 +75,7 @@ BEGIN
             RETURN;
         END IF;
         
-        -- НОВАЯ ПРОВЕРКА: Количество активных (будущих) бронирований по телефону
+        -- Количество активных (будущих) бронирований по телефону
         SELECT COUNT(*) INTO v_active_bookings
         FROM public.bookings b
         JOIN public.time_slots ts ON b.slot_id = ts.id
@@ -94,16 +93,16 @@ BEGIN
         END IF;
     END IF;
     
-    -- Подсчет попыток за последний час (только НЕУДАЧНЫЕ для защиты от спама)
+    -- ИСПРАВЛЕНО: Подсчет только НЕУДАЧНЫХ попыток за последний час (защита от спама/атак)
     SELECT COUNT(*) INTO v_attempts_1hour
     FROM public.booking_attempts
     WHERE ip_address = p_ip_address
     AND success = false
     AND attempt_time > now() - interval '1 hour';
     
-    -- Лимит: максимум 5 неудачных попыток в час
-    IF v_attempts_1hour >= 5 THEN
-        RETURN QUERY SELECT false, 'Превышен лимит попыток бронирования. Попробуйте через час'::text, 0;
+    -- Лимит: максимум 10 неудачных попыток в час
+    IF v_attempts_1hour >= 10 THEN
+        RETURN QUERY SELECT false, 'Превышен лимит неудачных попыток бронирования. Попробуйте через час'::text, 0;
         RETURN;
     END IF;
     
@@ -121,39 +120,8 @@ BEGIN
     END IF;
     
     -- Все проверки пройдены
-    RETURN QUERY SELECT true, 'OK'::text, (5 - v_attempts_1hour)::integer;
+    RETURN QUERY SELECT true, 'OK'::text, (10 - v_attempts_1hour)::integer;
 END;
 $$;
 
--- Создаем функцию для получения информации об активных бронированиях клиента
-CREATE OR REPLACE FUNCTION public.get_client_active_bookings_count(
-    p_client_phone text
-)
-RETURNS integer
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public
-AS $$
-DECLARE
-    v_count integer;
-BEGIN
-    SELECT COUNT(*) INTO v_count
-    FROM public.bookings b
-    JOIN public.time_slots ts ON b.slot_id = ts.id
-    WHERE b.client_phone = p_client_phone
-    AND b.status IN ('pending', 'confirmed')
-    AND (
-        ts.slot_date > CURRENT_DATE
-        OR (ts.slot_date = CURRENT_DATE AND ts.start_time > CURRENT_TIME)
-    );
-    
-    RETURN v_count;
-END;
-$$;
-
--- Даем доступ к новой функции
-GRANT EXECUTE ON FUNCTION public.get_client_active_bookings_count TO anon, authenticated;
-
--- Комментарии
-COMMENT ON FUNCTION public.check_rate_limit IS 'Проверяет все ограничения для бронирования: блокировки, rate limits, активные бронирования';
-COMMENT ON FUNCTION public.get_client_active_bookings_count IS 'Возвращает количество активных (будущих) бронирований клиента по номеру телефона';
+COMMENT ON FUNCTION public.check_rate_limit IS 'Проверяет все ограничения для бронирования: блокировки, rate limits (10 неудачных попыток/час, 3 успешных бронирования/день), активные бронирования';

@@ -16,9 +16,9 @@ function formatDuration(from: number, to: number, type: DurationType): string {
 		case 'minutes':
 			return `${value} мин.`
 		case 'hours':
-			return `${value} ${from === 1 ? 'час' : from < 5 ? 'часа' : 'часов'}`
+			return `${value} ${from === 1 ? 'час' : from < 6 ? 'часа' : 'часов'}`
 		case 'sessions':
-			return `${value} ${from === 1 ? 'сеанс' : from < 5 ? 'сеанса' : 'сеансов'}`
+			return `${value} ${from === 1 ? 'сеанс' : from < 6 ? 'сеанса' : 'сеансов'}`
 		default:
 			return ''
 	}
