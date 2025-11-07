@@ -192,41 +192,70 @@ const AdminSecurity: React.FC = () => {
 
 			if (error) throw error;
 
-			// Удаляем все бронирования заблокированного клиента
+			// Удаляем все АКТИВНЫЕ бронирования заблокированного клиента
+			// Удаление происходит по всем идентификаторам для максимальной эффективности
 			let deletedCount = 0;
+			const deletedIds = new Set<string>(); // Чтобы не считать дубликаты
 
 			// Удаляем по IP адресу
 			if (blockForm.ip_address) {
-				const { error: deleteError, count } = await supabaseAdmin
+				const { data: bookingsToDelete } = await supabaseAdmin
 					.from('bookings')
-					.delete({ count: 'exact' })
-					.eq('ip_address', blockForm.ip_address);
+					.select('id')
+					.eq('client_ip', blockForm.ip_address)
+					.in('status', ['pending', 'confirmed']) as { data: Array<{ id: string }> | null };
 
-				if (!deleteError && count) deletedCount += count;
+				if (bookingsToDelete) {
+					for (const booking of bookingsToDelete) {
+						deletedIds.add(booking.id);
+					}
+				}
 			}
 
 			// Удаляем по телефону
 			if (blockForm.phone_number) {
-				const { error: deleteError, count } = await supabaseAdmin
+				const { data: bookingsToDelete } = await supabaseAdmin
 					.from('bookings')
-					.delete({ count: 'exact' })
-					.eq('client_phone', blockForm.phone_number);
+					.select('id')
+					.eq('client_phone', blockForm.phone_number)
+					.in('status', ['pending', 'confirmed']) as { data: Array<{ id: string }> | null };
 
-				if (!deleteError && count) deletedCount += count;
+				if (bookingsToDelete) {
+					for (const booking of bookingsToDelete) {
+						deletedIds.add(booking.id);
+					}
+				}
 			}
 
 			// Удаляем по email
 			if (blockForm.email) {
+				const { data: bookingsToDelete } = await supabaseAdmin
+					.from('bookings')
+					.select('id')
+					.eq('client_email', blockForm.email)
+					.in('status', ['pending', 'confirmed']) as { data: Array<{ id: string }> | null };
+
+				if (bookingsToDelete) {
+					for (const booking of bookingsToDelete) {
+						deletedIds.add(booking.id);
+					}
+				}
+			}
+
+			// Удаляем все найденные бронирования одним запросом
+			if (deletedIds.size > 0) {
 				const { error: deleteError, count } = await supabaseAdmin
 					.from('bookings')
 					.delete({ count: 'exact' })
-					.eq('client_email', blockForm.email);
+					.in('id', Array.from(deletedIds));
 
-				if (!deleteError && count) deletedCount += count;
+				if (!deleteError && count) {
+					deletedCount = count;
+				}
 			}
 
 			const message = deletedCount > 0
-				? `Клиент заблокирован, удалено бронирований: ${deletedCount}`
+				? `Клиент заблокирован, удалено активных бронирований: ${deletedCount}`
 				: 'Клиент заблокирован';
 
 			setToast({ message, type: 'success' });
@@ -259,22 +288,6 @@ const AdminSecurity: React.FC = () => {
 		} catch (error) {
 			console.error('Error unblocking:', error);
 			setToast({ message: 'Ошибка снятия блокировки', type: 'error' });
-		}
-	};
-
-	const handleAutoBlock = async () => {
-		if (!supabaseAdmin) return;
-
-		try {
-			const { error } = await supabaseAdmin.rpc('auto_block_suspicious_activity');
-
-			if (error) throw error;
-
-			setToast({ message: 'Автоматическая блокировка выполнена', type: 'success' });
-			await refreshData();
-		} catch (error) {
-			console.error('Error auto-blocking:', error);
-			setToast({ message: 'Ошибка автоблокировки', type: 'error' });
 		}
 	};
 
@@ -349,12 +362,6 @@ const AdminSecurity: React.FC = () => {
 							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
 						</svg>
 						Заблокировать клиента
-					</button>
-					<button
-						onClick={handleAutoBlock}
-						className="px-3 py-2 h-10 rounded-lg bg-slate-100 text-slate-700 text-sm font-normal hover:bg-slate-200 transition-colors"
-					>
-						Автоблокировка подозрительных
 					</button>
 					<button
 						onClick={refreshData}

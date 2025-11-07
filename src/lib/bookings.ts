@@ -351,7 +351,7 @@ export async function createPublicBooking(
 			}
 		}
 
-		// Создаем бронирование
+		// Создаем бронирование с сохранением IP и fingerprint
 		const { data: booking, error: bookingError } = await supabase
 			.from('bookings')
 			.insert({
@@ -360,6 +360,8 @@ export async function createPublicBooking(
 				client_name: clientName,
 				client_phone: clientPhone,
 				client_email: clientEmail,
+				client_ip: clientIP || null,
+				client_fingerprint: clientFingerprint || null,
 				status: 'pending',
 			} as any)
 			.select('id')
