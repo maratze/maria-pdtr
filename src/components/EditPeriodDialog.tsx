@@ -69,7 +69,6 @@ export default function EditPeriodDialog({
 
 	// Состояние для удаления бронирования
 	const [deleteConfirm, setDeleteConfirm] = useState<{ bookingId: string; clientName: string } | null>(null)
-	const [deleteLoading, setDeleteLoading] = useState(false)
 	const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
 
 	// Проверяем наличие броней за день
@@ -98,11 +97,13 @@ export default function EditPeriodDialog({
 	}, [isOpen, period])
 
 	// Загружаем бронирования и генерируем слоты
-	async function loadBookingsForPeriod() {
+	async function loadBookingsForPeriod(showLoader: boolean = true) {
 		if (!period) return
 
 		try {
-			setLoadingBookings(true)
+			if (showLoader) {
+				setLoadingBookings(true)
+			}
 
 			// Загружаем бронирования из базы данных
 			const bookingsData = await getBookingsByPeriodAndDate(period.id, period.start_date)
@@ -133,7 +134,9 @@ export default function EditPeriodDialog({
 			const slots = generateSlotsForDateAndCity(periods, [], period.start_date, period.city_id)
 			setDaySlots(slots)
 		} finally {
-			setLoadingBookings(false)
+			if (showLoader) {
+				setLoadingBookings(false)
+			}
 		}
 	}
 
@@ -236,15 +239,14 @@ export default function EditPeriodDialog({
 		if (!deleteConfirm) return
 
 		try {
-			setDeleteLoading(true)
 			await deleteBooking(deleteConfirm.bookingId)
 			setToast({ message: 'Бронирование успешно удалено', type: 'success' })
 			setDeleteConfirm(null)
 			setSelectedBookingDetails(null)
 			setMode('edit')
 
-			// Перезагружаем бронирования
-			await loadBookingsForPeriod()
+			// Перезагружаем бронирования БЕЗ прелоадера
+			await loadBookingsForPeriod(false)
 
 			// Вызываем колбэк для обновления родительского компонента
 			if (onBookingSuccess) {
@@ -253,8 +255,6 @@ export default function EditPeriodDialog({
 		} catch (error) {
 			console.error('Error deleting booking:', error)
 			setToast({ message: 'Ошибка при удалении бронирования', type: 'error' })
-		} finally {
-			setDeleteLoading(false)
 		}
 	}
 
@@ -453,7 +453,7 @@ export default function EditPeriodDialog({
 									<div className="border-t border-slate-200 mb-2"></div>
 
 									<p className="text-sm font-medium text-slate-700 mb-3">Слоты за день ({daySlots.length}) - выберите для бронирования</p>
-									<div className="grid grid-cols-2 gap-2">
+									<div className="grid grid-cols-1 gap-2">
 										{daySlots.map((slot, idx) => {
 											// Найдем информацию о бронировании для этого слота
 											const booking = slot.isBooked
@@ -483,7 +483,7 @@ export default function EditPeriodDialog({
 														}
 													}}
 													disabled={!!isPastDate && !slot.isBooked}
-													className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${isPastDate && !slot.isBooked
+													className={`px-3 py-2.5 rounded-lg text-left transition-all ${isPastDate && !slot.isBooked
 														? 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed opacity-50'
 														: selectedSlots.includes(idx.toString())
 															? 'bg-ocean-500 text-white border border-ocean-600'
@@ -492,7 +492,46 @@ export default function EditPeriodDialog({
 																: 'bg-green-50 text-green-700 border border-green-200 hover:bg-green-100'
 														}`}
 												>
-													{slot.startTime} - {slot.endTime}
+													<div className="flex items-center justify-between gap-2">
+														<div className="flex-1 min-w-0">
+															<div className="text-sm font-semibold mb-0.5">
+																{slot.startTime} - {slot.endTime}
+															</div>
+															{booking && (
+																<div className="space-y-0.5">
+																	<div className="text-xs font-medium truncate">
+																		{booking.client_name}
+																	</div>
+																	<div className="text-xs opacity-90">
+																		{formatPhone(booking.client_phone)}
+																	</div>
+																</div>
+															)}
+														</div>
+														{booking && (
+															<div className="flex items-center gap-1.5">
+																<button
+																	type="button"
+																	onClick={(e) => {
+																		e.stopPropagation()
+																		setDeleteConfirm({
+																			bookingId: booking.id,
+																			clientName: booking.client_name
+																		})
+																	}}
+																	className="p-1.5 rounded-md hover:bg-red-200/50 transition-colors"
+																	title="Удалить бронирование"
+																>
+																	<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+																		<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+																	</svg>
+																</button>
+																<svg className="w-4 h-4 flex-shrink-0 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+																	<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+																</svg>
+															</div>
+														)}
+													</div>
 												</button>
 											)
 										})}
@@ -732,7 +771,6 @@ export default function EditPeriodDialog({
 				description="Это действие нельзя отменить. Слот станет доступным для бронирования."
 				itemName={deleteConfirm?.clientName}
 				confirmText="Удалить"
-				confirmLoading={deleteLoading}
 				variant="danger"
 			/>
 		</div>
