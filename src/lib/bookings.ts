@@ -196,7 +196,9 @@ export async function checkIfUserBlocked(
 
 /**
  * Логировать подозрительную активность в рамках сессии
- * Предотвращает дубликаты: сначала проверяет по IP, потом по телефону
+ * Логирует если: 
+ * - Новый IP
+ * - Одинаковый IP, но другой телефон или email (разные люди с одного IP)
  */
 export async function logSuspiciousSessionActivity(
 	clientIP: string,
@@ -212,37 +214,34 @@ export async function logSuspiciousSessionActivity(
 		const oneHourAgo = new Date();
 		oneHourAgo.setHours(oneHourAgo.getHours() - 1);
 
-		// Сначала проверяем по IP адресу (основной уникальный идентификатор)
-		const { data: existingByIP } = await supabaseAdmin
+		// Проверяем комбинацию IP + телефон + email
+		// Если хотя бы телефон или email отличаются - это другой человек, логируем
+		let query = supabaseAdmin
 			.from('booking_attempts')
-			.select('id')
+			.select('id, client_phone, client_email')
 			.eq('ip_address', clientIP)
-			.gte('attempt_time', oneHourAgo.toISOString())
-			.limit(1)
-			.maybeSingle();
+			.gte('attempt_time', oneHourAgo.toISOString());
 
-		// Если есть запись с таким IP за последний час - не логируем
-		if (existingByIP) {
-			return;
-		}
+		const { data: existingAttempts } = await query as {
+			data: Array<{ id: string; client_phone: string; client_email: string }> | null
+		};
 
-		// Если по IP не нашли, проверяем по телефону
-		if (clientPhone) {
-			const { data: existingByPhone } = await supabaseAdmin
-				.from('booking_attempts')
-				.select('id')
-				.eq('client_phone', clientPhone)
-				.gte('attempt_time', oneHourAgo.toISOString())
-				.limit(1)
-				.maybeSingle();
+		// Проверяем, есть ли запись с точно такими же данными (IP + телефон + email)
+		if (existingAttempts && existingAttempts.length > 0) {
+			const exactMatch = existingAttempts.find(
+				attempt =>
+					attempt.client_phone === clientPhone &&
+					attempt.client_email === (clientEmail || '')
+			);
 
-			// Если есть запись с таким телефоном за последний час - не логируем
-			if (existingByPhone) {
+			// Если нашли точное совпадение - не логируем дубликат
+			if (exactMatch) {
 				return;
 			}
 		}
 
-		// Если не нашли дубликатов - создаём новую запись
+		// Если не нашли точного совпадения - создаём новую запись
+		// (новый IP или тот же IP, но другой телефон/email)
 		const isSuccess = bookingsCount > 0;
 		const logName = isSuccess
 			? `${clientName} (${bookingsCount} ${bookingsCount === 1 ? 'слот' : bookingsCount < 5 ? 'слота' : 'слотов'})`
