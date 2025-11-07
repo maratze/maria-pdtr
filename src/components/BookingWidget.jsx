@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { getCities } from '../lib/cities'
 import { getPublicActiveSchedulePeriodsByCity } from '../lib/schedule'
 import { getPublicBookingsByCityAndDates, createPublicBooking, logSuspiciousSessionActivity } from '../lib/bookings'
-import { getOrCreateSlotsForDate } from '../lib/timeSlots'
+import { getOrCreateSlotsForDate, getAvailableSlotsByCityAndDateRange } from '../lib/timeSlots'
 import {
 	generateClientFingerprint,
 	getClientIP
@@ -72,30 +72,33 @@ const BookingWidget = () => {
 				setLoading(true)
 				const periodsData = await getPublicActiveSchedulePeriodsByCity(selectedCity)
 
-				const dates = new Set()
+				if (periodsData.length === 0) {
+					setAvailableDates([])
+					setLoading(false)
+					return
+				}
+
+				// Находим минимальную и максимальную даты периодов
+				let minDate = periodsData[0].start_date
+				let maxDate = periodsData[0].end_date
+
 				periodsData.forEach(period => {
-					// Используем даты напрямую из БД без создания Date объектов
-					// period.start_date и period.end_date уже в формате YYYY-MM-DD
-					const start = period.start_date
-					const end = period.end_date
-
-					// Если start_date === end_date (период на один день)
-					if (start === end) {
-						dates.add(start)
-					} else {
-						// Если период на несколько дней
-						const currentDate = new Date(start + 'T00:00:00')
-						const endDate = new Date(end + 'T00:00:00')
-
-						while (currentDate <= endDate) {
-							const dateStr = `${String(currentDate.getFullYear()).padStart(4, '0')}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}`
-							dates.add(dateStr)
-							currentDate.setDate(currentDate.getDate() + 1)
-						}
-					}
+					if (period.start_date < minDate) minDate = period.start_date
+					if (period.end_date > maxDate) maxDate = period.end_date
 				})
-				setAvailableDates(Array.from(dates))
+
+				// Получаем все доступные слоты для города в диапазоне дат одним запросом
+				const availableSlots = await getAvailableSlotsByCityAndDateRange(selectedCity, minDate, maxDate)
+
+				// Собираем уникальные даты с доступными слотами
+				const datesWithAvailableSlots = new Set()
+				availableSlots.forEach(slot => {
+					datesWithAvailableSlots.add(slot.slot_date)
+				})
+
+				setAvailableDates(Array.from(datesWithAvailableSlots))
 			} catch (error) {
+				console.error('Error loading available dates:', error)
 				setToast({ message: 'Ошибка загрузки данных', type: 'error' })
 			} finally {
 				setLoading(false)
@@ -112,15 +115,17 @@ const BookingWidget = () => {
 				setLoadingSlots(true)
 				// Получаем или создаём слоты из БД
 				const slots = await getOrCreateSlotsForDate(selectedCity, selectedDate)
-				// Преобразуем в формат для отображения
-				const formattedSlots = slots.map(slot => ({
-					id: slot.id,
-					periodId: slot.period_id,
-					date: slot.slot_date,
-					startTime: slot.start_time.slice(0, 5), // HH:MM
-					endTime: slot.end_time.slice(0, 5), // HH:MM
-					isBooked: slot.is_booked,
-				}))
+				// Преобразуем в формат для отображения - показываем только доступные слоты
+				const formattedSlots = slots
+					.filter(slot => !slot.is_booked) // Фильтруем только незабронированные
+					.map(slot => ({
+						id: slot.id,
+						periodId: slot.period_id,
+						date: slot.slot_date,
+						startTime: slot.start_time.slice(0, 5), // HH:MM
+						endTime: slot.end_time.slice(0, 5), // HH:MM
+						isBooked: slot.is_booked,
+					}))
 				setDaySlots(formattedSlots)
 			} catch (error) {
 				setToast({ message: 'Ошибка загрузки слотов', type: 'error' })
@@ -182,8 +187,6 @@ const BookingWidget = () => {
 	}
 
 	const handleSlotSelect = (slot) => {
-		if (slot.isBooked) return
-
 		const isAlreadySelected = selectedSlots.some(s => s.id === slot.id);
 
 		if (isAlreadySelected) {
@@ -221,12 +224,10 @@ const BookingWidget = () => {
 
 		try {
 			setBookingLoading(true)
-			let allSuccess = true
-			let errorMessage = ''
 
-			// Создаём бронирование для каждого выбранного слота
-			for (const slot of selectedSlots) {
-				const result = await createPublicBooking(
+			// ОПТИМИЗАЦИЯ: Создаём все бронирования параллельно вместо последовательного цикла
+			const bookingPromises = selectedSlots.map(slot =>
+				createPublicBooking(
 					slot.periodId,
 					slot.date,
 					slot.startTime,
@@ -237,50 +238,53 @@ const BookingWidget = () => {
 					clientIP,
 					clientFingerprint
 				)
+			)
 
-				if (!result.success) {
-					allSuccess = false
-					errorMessage = result.error || 'Ошибка создания бронирования'
-					break
-				}
-			}
+			// Ждём завершения всех запросов
+			const results = await Promise.all(bookingPromises)
 
-			if (allSuccess) {
-				// Увеличиваем счётчик бронирований в сессии
+			// Проверяем результаты
+			const failedResult = results.find(result => !result.success)
+
+			if (failedResult) {
+				setLocalError(failedResult.error || 'Ошибка создания бронирования')
+			} else {
+				// Все бронирования успешны
 				const newCount = sessionBookingsCount + selectedSlots.length
 				setSessionBookingsCount(newCount)
 
 				// Логируем подозрительную активность если больше 3 слотов за сессию
+				// Это выполняется асинхронно и не блокирует UI
 				if (newCount > 3 && clientIP) {
-					await logSuspiciousSessionActivity(
+					logSuspiciousSessionActivity(
 						clientIP,
 						clientFingerprint,
 						clientName,
 						clientPhone,
 						clientEmail,
 						newCount
-					)
+					).catch(err => console.error('Logging error:', err))
 				}
 
 				setStep(3)
 				setLocalError(null) // Очищаем ошибку при успехе
-				const message = selectedSlots.length === 1
-					? 'Бронирование успешно создано!'
-					: `Успешно забронировано ${selectedSlots.length} слотов!`;
 
-				// Перезагружаем слоты, чтобы показать обновлённые данные
-				const slots = await getOrCreateSlotsForDate(selectedCity, selectedDate)
-				const formattedSlots = slots.map(slot => ({
-					id: slot.id,
-					periodId: slot.period_id,
-					date: slot.slot_date,
-					startTime: slot.start_time.slice(0, 5),
-					endTime: slot.end_time.slice(0, 5),
-					isBooked: slot.is_booked,
-				}))
-				setDaySlots(formattedSlots)
-			} else {
-				setLocalError(errorMessage)
+				// Перезагружаем слоты асинхронно, чтобы показать обновлённые данные
+				getOrCreateSlotsForDate(selectedCity, selectedDate)
+					.then(slots => {
+						const formattedSlots = slots
+							.filter(slot => !slot.is_booked) // Показываем только доступные
+							.map(slot => ({
+								id: slot.id,
+								periodId: slot.period_id,
+								date: slot.slot_date,
+								startTime: slot.start_time.slice(0, 5),
+								endTime: slot.end_time.slice(0, 5),
+								isBooked: slot.is_booked,
+							}))
+						setDaySlots(formattedSlots)
+					})
+					.catch(err => console.error('Error reloading slots:', err))
 			}
 		} catch (error) {
 			const errorMsg = 'Ошибка создания бронирования'
@@ -483,21 +487,17 @@ const BookingWidget = () => {
 											<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
 												{daySlots.map((slot, idx) => {
 													const isSelected = selectedSlots.some(s => s.id === slot.id)
-													const isBooked = slot.isBooked
 
 													return (
 														<button
 															key={idx}
 															type="button"
-															onClick={() => !isBooked && handleSlotSelect(slot)}
-															disabled={isBooked}
+															onClick={() => handleSlotSelect(slot)}
 															className={`
 																px-3 py-2.5 rounded text-sm font-medium transition-all border relative
 																${isSelected
 																	? 'bg-ocean-600 text-white border-ocean-600'
-																	: isBooked
-																		? 'bg-white/5 text-slate-500 border-white/10 cursor-not-allowed'
-																		: 'bg-white/5 text-slate-300 border-white/10 hover:bg-white/10 hover:border-white/20'
+																	: 'bg-white/5 text-slate-300 border-white/10 hover:bg-white/10 hover:border-white/20'
 																}
 															`}
 														>

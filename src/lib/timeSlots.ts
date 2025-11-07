@@ -391,3 +391,30 @@ function formatTime(minutes: number): string {
 	const mins = minutes % 60;
 	return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
 }
+
+/**
+ * Получить все доступные слоты для города в диапазоне дат (оптимизированный метод)
+ * Возвращает только незабронированные слоты
+ */
+export async function getAvailableSlotsByCityAndDateRange(
+	cityId: string,
+	dateFrom: string,
+	dateTo: string
+): Promise<TimeSlot[]> {
+	const { data, error } = await supabase
+		.from('time_slots')
+		.select('*, schedule_period:schedule_periods!inner(city_id)')
+		.eq('schedule_period.city_id', cityId)
+		.gte('slot_date', dateFrom)
+		.lte('slot_date', dateTo)
+		.eq('is_booked', false)
+		.order('slot_date')
+		.order('start_time');
+
+	if (error) {
+		console.error('Error fetching available slots by city and date range:', error);
+		throw error;
+	}
+
+	return (data || []) as TimeSlot[];
+}
