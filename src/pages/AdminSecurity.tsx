@@ -600,7 +600,7 @@ const AdminSecurity: React.FC = () => {
 				<div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
 					<div className="p-4 border-b border-slate-200">
 						<h2 className="text-base font-normal text-slate-900">
-							Последние попытки бронирования (100)
+							Последние подозрительные попытки бронирования
 						</h2>
 					</div>
 					<div className="overflow-x-auto">

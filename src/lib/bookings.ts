@@ -247,6 +247,57 @@ export async function createPublicBooking(
 			slotId = newSlot.id;
 		}
 
+		// Проверяем количество активных бронирований пользователя (подозрительная активность)
+		let isSuspicious = false;
+		if (clientIP || clientPhone || clientFingerprint) {
+			// Подсчитываем активные бронирования по телефону, IP или fingerprint за последние 7 дней
+			const weekAgo = new Date();
+			weekAgo.setDate(weekAgo.getDate() - 7);
+
+			let query = supabase
+				.from('bookings')
+				.select('id', { count: 'exact', head: true })
+				.in('status', ['pending', 'confirmed'])
+				.gte('created_at', weekAgo.toISOString());
+
+			// Проверяем по телефону (наиболее надежный идентификатор)
+			if (clientPhone) {
+				const { count: phoneCount } = await query.eq('client_phone', clientPhone);
+				if (phoneCount && phoneCount > 3) {
+					isSuspicious = true;
+				}
+			}
+
+			// Проверяем по fingerprint (если телефон не дал результата)
+			if (!isSuspicious && clientFingerprint && supabaseAdmin) {
+				// Используем admin client для доступа к booking_attempts
+				const { count: fingerprintCount } = await supabaseAdmin
+					.from('booking_attempts')
+					.select('id', { count: 'exact', head: true })
+					.eq('client_fingerprint', clientFingerprint)
+					.eq('success', true)
+					.gte('attempt_time', weekAgo.toISOString());
+
+				if (fingerprintCount && fingerprintCount > 3) {
+					isSuspicious = true;
+				}
+			}
+
+			// Проверяем по IP (если другие методы не дали результата)
+			if (!isSuspicious && clientIP && supabaseAdmin) {
+				const { count: ipCount } = await supabaseAdmin
+					.from('booking_attempts')
+					.select('id', { count: 'exact', head: true })
+					.eq('ip_address', clientIP)
+					.eq('success', true)
+					.gte('attempt_time', weekAgo.toISOString());
+
+				if (ipCount && ipCount > 3) {
+					isSuspicious = true;
+				}
+			}
+		}
+
 		// Создаем бронирование
 		const { data: booking, error: bookingError } = await supabase
 			.from('bookings')
@@ -279,8 +330,8 @@ export async function createPublicBooking(
 			return { success: false, error: bookingError?.message || 'Не удалось создать бронирование' };
 		}
 
-		// Логируем успешную попытку
-		if (clientIP) {
+		// Логируем подозрительную активность (> 3 бронирований)
+		if (isSuspicious && clientIP) {
 			await supabase.rpc('log_booking_attempt', {
 				p_ip_address: clientIP,
 				p_client_fingerprint: clientFingerprint || null,
@@ -290,8 +341,6 @@ export async function createPublicBooking(
 				p_success: true,
 			} as any);
 		}
-
-		// Слот автоматически помечается как забронированный через триггеры БД
 
 		return { success: true, booking_id: booking.id };
 	} catch (error) {
