@@ -187,11 +187,49 @@ const AdminSecurity: React.FC = () => {
 				blockData.blocked_until = blockedUntil.toISOString();
 			}
 
+			// Блокируем клиента
 			const { error } = await supabaseAdmin.from('blocked_clients').insert(blockData);
 
 			if (error) throw error;
 
-			setToast({ message: 'Клиент заблокирован', type: 'success' });
+			// Удаляем все бронирования заблокированного клиента
+			let deletedCount = 0;
+
+			// Удаляем по IP адресу
+			if (blockForm.ip_address) {
+				const { error: deleteError, count } = await supabaseAdmin
+					.from('bookings')
+					.delete({ count: 'exact' })
+					.eq('ip_address', blockForm.ip_address);
+
+				if (!deleteError && count) deletedCount += count;
+			}
+
+			// Удаляем по телефону
+			if (blockForm.phone_number) {
+				const { error: deleteError, count } = await supabaseAdmin
+					.from('bookings')
+					.delete({ count: 'exact' })
+					.eq('client_phone', blockForm.phone_number);
+
+				if (!deleteError && count) deletedCount += count;
+			}
+
+			// Удаляем по email
+			if (blockForm.email) {
+				const { error: deleteError, count } = await supabaseAdmin
+					.from('bookings')
+					.delete({ count: 'exact' })
+					.eq('client_email', blockForm.email);
+
+				if (!deleteError && count) deletedCount += count;
+			}
+
+			const message = deletedCount > 0
+				? `Клиент заблокирован, удалено бронирований: ${deletedCount}`
+				: 'Клиент заблокирован';
+
+			setToast({ message, type: 'success' });
 			setShowBlockForm(false);
 			setBlockForm({
 				ip_address: '',
