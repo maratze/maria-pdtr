@@ -77,6 +77,58 @@ export default function EditPeriodDialog({
 	// Проверяем, является ли период прошедшим (до текущей даты)
 	const isPastDate = period && new Date(period.start_date + 'T00:00:00') < new Date(new Date().setHours(0, 0, 0, 0))
 
+	// Проверяем, есть ли бронирования которые будут затронуты при изменении времени
+	const hasBookingsInNewRange = (newStartTime: string, newEndTime: string): boolean => {
+		if (!loadedBookings.length) return false
+
+		// Проверяем есть ли брони вне нового диапазона
+		return loadedBookings.some(booking => {
+			const bookingStart = booking.start_time
+			const bookingEnd = booking.end_time
+
+			// Если бронь начинается раньше нового начала или заканчивается позже нового конца
+			return bookingStart < newStartTime || bookingEnd > newEndTime
+		})
+	}
+
+	// Генерируем опции времени с шагом в 1 час от 06:00 до 23:00
+	const generateTimeOptions = () => {
+		const options = []
+		for (let hour = 6; hour <= 23; hour++) {
+			const timeStr = `${hour.toString().padStart(2, '0')}:00`
+			options.push({ id: timeStr, label: timeStr })
+		}
+		return options
+	}
+
+	// Фильтруем доступные опции для начала работы (не должны быть после времени окончания или затрагивать брони)
+	const getAvailableStartTimeOptions = () => {
+		const allOptions = generateTimeOptions()
+		return allOptions.filter(option => {
+			// Время начала должно быть раньше времени окончания
+			if (option.id >= endTime) return false
+
+			// Если есть брони, проверяем не затронет ли изменение существующие бронирования
+			if (hasBookings && hasBookingsInNewRange(option.id, endTime)) return false
+
+			return true
+		})
+	}
+
+	// Фильтруем доступные опции для окончания работы (не должны быть до времени начала или затрагивать брони)
+	const getAvailableEndTimeOptions = () => {
+		const allOptions = generateTimeOptions()
+		return allOptions.filter(option => {
+			// Время окончания должно быть позже времени начала
+			if (option.id <= startTime) return false
+
+			// Если есть брони, проверяем не затронет ли изменение существующие бронирования
+			if (hasBookings && hasBookingsInNewRange(startTime, option.id)) return false
+
+			return true
+		})
+	}
+
 	// Проверяем, изменились ли данные периода
 	const hasChanges = period && (
 		selectedCity !== period.city_id ||
@@ -169,23 +221,7 @@ export default function EditPeriodDialog({
 		}
 	}, [isOpen])
 
-	// Проверяем валидность времени и обновляем слоты при потере фокуса
-	const handleTimeBlur = () => {
-		if (!period) return
 
-		// Если есть брони, не обновляем слоты
-		if (hasBookings) return
-
-		setTimeError(null)
-
-		if (startTime >= endTime) {
-			setTimeError('Время окончания должно быть позже времени начала')
-			return
-		}
-
-		// Не генерируем слоты автоматически - они будут пустыми после изменения
-		// Слоты нужно будет пересоздать через submit
-	}
 
 	// Обработчик бронирования слотов
 	const handleBookingSubmit = async () => {
@@ -362,6 +398,7 @@ export default function EditPeriodDialog({
 											return
 										}
 
+										setTimeError(null)
 										if (value !== null && value !== undefined) {
 											setSelectedCity(String(value))
 											// Очищаем слоты при изменении города
@@ -381,49 +418,41 @@ export default function EditPeriodDialog({
 							{/* Время начала и окончания на одной строке */}
 							<div className="grid grid-cols-2 gap-3">
 								<div>
-									<label className="block text-sm font-medium text-slate-700 mb-2">
-										Начало <span className="text-red-500">*</span>
-									</label>
-									<input
-										type="time"
+									<Dropdown
+										options={getAvailableStartTimeOptions()}
 										value={startTime}
-										onChange={(e) => {
-											// Если есть брони, запрещаем изменение времени
-											if (hasBookings) {
-												setTimeError('Нельзя изменить время, так как есть забронированные слоты')
-												return
+										onChange={(value) => {
+											if (value !== null && value !== undefined) {
+												const newStartTime = String(value)
+												setTimeError(null)
+												setStartTime(newStartTime)
+												// Очищаем слоты при изменении времени
+												setDaySlots([])
+												setSelectedSlots([])
 											}
-											setStartTime(e.target.value)
-											// Очищаем слоты при изменении времени
-											setDaySlots([])
-											setSelectedSlots([])
 										}}
-										onBlur={handleTimeBlur}
-										disabled={hasBookings}
-										className="w-full h-10 px-3 py-2.5 border border-slate-300 rounded-lg text-slate-900 text-sm focus:ring-2 focus:ring-ocean-500 focus:border-transparent outline-none transition-colors disabled:bg-slate-100 disabled:cursor-not-allowed"
+										label="Начало"
+										placeholder="Выберите время..."
+										required={true}
 									/>
 								</div>
 								<div>
-									<label className="block text-sm font-medium text-slate-700 mb-2">
-										Окончание <span className="text-red-500">*</span>
-									</label>
-									<input
-										type="time"
+									<Dropdown
+										options={getAvailableEndTimeOptions()}
 										value={endTime}
-										onChange={(e) => {
-											// Если есть брони, запрещаем изменение времени
-											if (hasBookings) {
-												setTimeError('Нельзя изменить время, так как есть забронированные слоты')
-												return
+										onChange={(value) => {
+											if (value !== null && value !== undefined) {
+												const newEndTime = String(value)
+												setTimeError(null)
+												setEndTime(newEndTime)
+												// Очищаем слоты при изменении времени
+												setDaySlots([])
+												setSelectedSlots([])
 											}
-											setEndTime(e.target.value)
-											// Очищаем слоты при изменении времени
-											setDaySlots([])
-											setSelectedSlots([])
 										}}
-										onBlur={handleTimeBlur}
-										disabled={hasBookings}
-										className="w-full h-10 px-3 py-2.5 border border-slate-300 rounded-lg text-slate-900 text-sm focus:ring-2 focus:ring-ocean-500 focus:border-transparent outline-none transition-colors disabled:bg-slate-100 disabled:cursor-not-allowed"
+										label="Окончание"
+										placeholder="Выберите время..."
+										required={true}
 									/>
 								</div>
 							</div>
