@@ -28,6 +28,28 @@ export default function CreatePeriodDialog({
 	const [endTime, setEndTime] = useState('19:00')
 	const [error, setError] = useState<string | null>(null)
 
+	// Генерируем опции времени с шагом в 1 час от 06:00 до 23:00
+	const generateTimeOptions = () => {
+		const options = []
+		for (let hour = 6; hour <= 23; hour++) {
+			const timeStr = `${hour.toString().padStart(2, '0')}:00`
+			options.push({ id: timeStr, label: timeStr })
+		}
+		return options
+	}
+
+	// Фильтруем доступные опции для начала работы (не должны быть после времени окончания)
+	const getAvailableStartTimeOptions = () => {
+		const allOptions = generateTimeOptions()
+		return allOptions.filter(option => option.id < endTime)
+	}
+
+	// Фильтруем доступные опции для окончания работы (не должны быть до времени начала)
+	const getAvailableEndTimeOptions = () => {
+		const allOptions = generateTimeOptions()
+		return allOptions.filter(option => option.id > startTime)
+	}
+
 	if (!isOpen || !startDate) return null
 
 	// Используем startDate если endDate не установлена (для однодневного периода)
@@ -159,27 +181,35 @@ export default function CreatePeriodDialog({
 						{/* Время начала и окончания на одной строке */}
 						<div className="grid grid-cols-2 gap-3">
 							<div>
-								<label className="block text-sm font-medium text-slate-700 mb-2">
-									Начало <span className="text-red-500">*</span>
-								</label>
-								<input
-									type="time"
+								<Dropdown
+									options={getAvailableStartTimeOptions()}
 									value={startTime}
-									onChange={(e) => setStartTime(e.target.value)}
+									onChange={(value) => {
+										if (value !== null && value !== undefined) {
+											setStartTime(String(value))
+											setError(null)
+										}
+									}}
+									label="Начало"
+									placeholder="Выберите время..."
+									required={true}
 									disabled={hasDateConflict}
-									className="w-full h-10 px-3 py-2.5 border border-slate-300 rounded-lg text-slate-900 text-sm focus:ring-2 focus:ring-ocean-500 focus:border-transparent outline-none transition-colors disabled:bg-slate-50 disabled:text-slate-400 disabled:cursor-not-allowed"
 								/>
 							</div>
 							<div>
-								<label className="block text-sm font-medium text-slate-700 mb-2">
-									Окончание <span className="text-red-500">*</span>
-								</label>
-								<input
-									type="time"
+								<Dropdown
+									options={getAvailableEndTimeOptions()}
 									value={endTime}
-									onChange={(e) => setEndTime(e.target.value)}
+									onChange={(value) => {
+										if (value !== null && value !== undefined) {
+											setEndTime(String(value))
+											setError(null)
+										}
+									}}
+									label="Окончание"
+									placeholder="Выберите время..."
+									required={true}
 									disabled={hasDateConflict}
-									className="w-full h-10 px-3 py-2.5 border border-slate-300 rounded-lg text-slate-900 text-sm focus:ring-2 focus:ring-ocean-500 focus:border-transparent outline-none transition-colors disabled:bg-slate-50 disabled:text-slate-400 disabled:cursor-not-allowed"
 								/>
 							</div>
 						</div>
