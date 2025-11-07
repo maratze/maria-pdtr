@@ -153,6 +153,7 @@ export async function createBooking(
 /**
  * Создать публичное бронирование (для клиентов на сайте)
  * Создает слот если его нет и затем бронирование
+ * С проверкой rate limiting
  */
 export async function createPublicBooking(
 	periodId: string,
@@ -161,9 +162,43 @@ export async function createPublicBooking(
 	endTime: string,
 	clientName: string,
 	clientPhone: string,
-	clientEmail: string
+	clientEmail: string,
+	clientIP?: string,
+	clientFingerprint?: string
 ): Promise<{ success: boolean; booking_id?: string; error?: string }> {
 	try {
+		// Проверка rate limit если предоставлен IP
+		if (clientIP) {
+			const { data: rateLimitCheck, error: rateLimitError } = await supabase.rpc(
+				'check_rate_limit',
+				{
+					p_ip_address: clientIP,
+					p_client_fingerprint: clientFingerprint || null,
+					p_client_phone: clientPhone,
+					p_client_email: clientEmail,
+				}
+			);
+
+			if (rateLimitError) {
+				console.error('Rate limit check error:', rateLimitError);
+			} else if (rateLimitCheck && !rateLimitCheck.allowed) {
+				// Логируем неудачную попытку
+				await supabase.rpc('log_booking_attempt', {
+					p_ip_address: clientIP,
+					p_client_fingerprint: clientFingerprint || null,
+					p_client_name: clientName,
+					p_client_phone: clientPhone,
+					p_client_email: clientEmail,
+					p_success: false,
+				});
+
+				return {
+					success: false,
+					error: rateLimitCheck.reason || 'Превышен лимит бронирований',
+				};
+			}
+		}
+
 		// Проверяем, существует ли слот
 		const { data: existingSlot, error: slotCheckError } = await supabase
 			.from('time_slots')
@@ -228,7 +263,32 @@ export async function createPublicBooking(
 
 		if (bookingError || !booking) {
 			console.error('Error creating booking:', bookingError);
+
+			// Логируем неудачную попытку
+			if (clientIP) {
+				await supabase.rpc('log_booking_attempt', {
+					p_ip_address: clientIP,
+					p_client_fingerprint: clientFingerprint || null,
+					p_client_name: clientName,
+					p_client_phone: clientPhone,
+					p_client_email: clientEmail,
+					p_success: false,
+				} as any);
+			}
+
 			return { success: false, error: bookingError?.message || 'Не удалось создать бронирование' };
+		}
+
+		// Логируем успешную попытку
+		if (clientIP) {
+			await supabase.rpc('log_booking_attempt', {
+				p_ip_address: clientIP,
+				p_client_fingerprint: clientFingerprint || null,
+				p_client_name: clientName,
+				p_client_phone: clientPhone,
+				p_client_email: clientEmail,
+				p_success: true,
+			} as any);
 		}
 
 		// Слот автоматически помечается как забронированный через триггеры БД
@@ -236,6 +296,23 @@ export async function createPublicBooking(
 		return { success: true, booking_id: booking.id };
 	} catch (error) {
 		console.error('Error in createPublicBooking:', error);
+
+		// Логируем ошибку
+		if (clientIP) {
+			try {
+				await supabase.rpc('log_booking_attempt', {
+					p_ip_address: clientIP,
+					p_client_fingerprint: clientFingerprint || null,
+					p_client_name: clientName,
+					p_client_phone: clientPhone,
+					p_client_email: clientEmail,
+					p_success: false,
+				} as any);
+			} catch (logError) {
+				console.error('Error logging attempt:', logError);
+			}
+		}
+
 		return {
 			success: false,
 			error: error instanceof Error ? error.message : 'Неизвестная ошибка'

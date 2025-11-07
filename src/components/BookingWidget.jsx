@@ -3,6 +3,13 @@ import { getCities } from '../lib/cities'
 import { getPublicActiveSchedulePeriodsByCity } from '../lib/schedule'
 import { getPublicBookingsByCityAndDates, createPublicBooking } from '../lib/bookings'
 import { getOrCreateSlotsForDate } from '../lib/timeSlots'
+import {
+	generateClientFingerprint,
+	getClientIP,
+	getHoneypotFieldConfig,
+	checkHoneypot,
+	createFormTimingCheck
+} from '../lib/antiSpam'
 import Toast from './Toast'
 
 const BookingWidget = () => {
@@ -22,6 +29,10 @@ const BookingWidget = () => {
 	const [clientName, setClientName] = useState('')
 	const [clientPhone, setClientPhone] = useState('')
 	const [clientEmail, setClientEmail] = useState('')
+	const [honeypotValue, setHoneypotValue] = useState('')
+	const [clientIP, setClientIP] = useState(null)
+	const [clientFingerprint, setClientFingerprint] = useState(null)
+	const [formTiming, setFormTiming] = useState(null)
 	const [bookingLoading, setBookingLoading] = useState(false)
 	const [toast, setToast] = useState(null)
 
@@ -35,6 +46,17 @@ const BookingWidget = () => {
 					setSelectedCity(moscow.id)
 				} else if (citiesData.length > 0) {
 					setSelectedCity(citiesData[0].id)
+				}
+
+				// Инициализируем защиту от спама
+				try {
+					const fingerprint = generateClientFingerprint()
+					setClientFingerprint(fingerprint)
+
+					const ip = await getClientIP()
+					setClientIP(ip)
+				} catch (error) {
+					console.error('Error initializing anti-spam:', error)
 				}
 			} catch (error) {
 				setToast({ message: 'Ошибка загрузки городов', type: 'error' })
@@ -165,13 +187,22 @@ const BookingWidget = () => {
 	const handleSlotSelect = (slot) => {
 		if (slot.isBooked) return
 
-		// Проверяем, выбран ли уже этот слот
-		const isAlreadySelected = selectedSlots.some(s => s.id === slot.id)
+		const MAX_SLOTS_PER_BOOKING = 3
+
+		const isAlreadySelected = selectedSlots.some(s => s.id === slot.id);
 
 		if (isAlreadySelected) {
 			// Убираем из выбранных
 			setSelectedSlots(selectedSlots.filter(s => s.id !== slot.id))
 		} else {
+			// Проверяем лимит перед добавлением
+			if (selectedSlots.length >= MAX_SLOTS_PER_BOOKING) {
+				setToast({
+					message: `Можно выбрать максимум ${MAX_SLOTS_PER_BOOKING} слота за одно бронирование`,
+					type: 'error'
+				})
+				return
+			}
 			// Добавляем к выбранным
 			setSelectedSlots([...selectedSlots, slot])
 		}
@@ -180,6 +211,8 @@ const BookingWidget = () => {
 	const handleNextStep = () => {
 		if (step === 1 && selectedSlots.length > 0) {
 			setStep(2)
+			// Начинаем отслеживать время заполнения формы
+			setFormTiming(createFormTimingCheck())
 		}
 	}
 
@@ -196,6 +229,31 @@ const BookingWidget = () => {
 		e.preventDefault()
 		if (selectedSlots.length === 0 || !clientName || !clientPhone) return
 
+		// Проверка количества слотов (защита от массового захвата)
+		const MAX_SLOTS_PER_BOOKING = 3
+		if (selectedSlots.length > MAX_SLOTS_PER_BOOKING) {
+			setToast({
+				message: `Можно забронировать максимум ${MAX_SLOTS_PER_BOOKING} слота за раз. Пожалуйста, уменьшите количество.`,
+				type: 'error'
+			})
+			return
+		}
+
+		// Проверка honeypot поля (защита от ботов)
+		if (!checkHoneypot(honeypotValue)) {
+			setToast({ message: 'Ошибка валидации формы', type: 'error' })
+			return
+		}
+
+		// Проверка времени заполнения формы (защита от ботов)
+		if (formTiming && !formTiming.check()) {
+			setToast({
+				message: 'Пожалуйста, уделите время заполнению формы',
+				type: 'error'
+			})
+			return
+		}
+
 		try {
 			setBookingLoading(true)
 			let allSuccess = true
@@ -210,7 +268,9 @@ const BookingWidget = () => {
 					slot.endTime,
 					clientName,
 					clientPhone,
-					clientEmail
+					clientEmail,
+					clientIP,
+					clientFingerprint
 				)
 
 				if (!result.success) {
@@ -436,7 +496,14 @@ const BookingWidget = () => {
 										<p className="text-slate-400 text-center py-4 text-sm">Нет доступных слотов на эту дату</p>
 									) : (
 										<>
-											<p className="text-xs text-slate-400 mb-2">Вы можете выбрать несколько слотов подряд</p>
+											<div className="mb-3 p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg">
+												<p className="text-xs text-amber-300 flex items-center gap-2">
+													<svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+														<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+													</svg>
+													<span>Можно выбрать максимум 3 слота за одно бронирование</span>
+												</p>
+											</div>
 											<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
 												{daySlots.map((slot, idx) => {
 													const isSelected = selectedSlots.some(s => s.id === slot.id)
@@ -534,6 +601,15 @@ const BookingWidget = () => {
 													onChange={(e) => setClientEmail(e.target.value)}
 													className="w-full px-3 sm:px-4 py-2 sm:py-2.5 bg-white/5 border border-white/10 rounded text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-ocean-500 focus:border-transparent"
 													placeholder="your@email.com (опционально)"
+												/>
+											</div>
+
+											{/* Honeypot поле - скрыто от пользователя, только для ботов */}
+											<div style={getHoneypotFieldConfig().style}>
+												<input
+													{...getHoneypotFieldConfig().attributes}
+													value={honeypotValue}
+													onChange={(e) => setHoneypotValue(e.target.value)}
 												/>
 											</div>
 
