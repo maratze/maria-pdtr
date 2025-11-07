@@ -488,7 +488,7 @@ export default function EditPeriodDialog({
 														: selectedSlots.includes(idx.toString())
 															? 'bg-ocean-500 text-white border border-ocean-600'
 															: slot.isBooked
-																? 'bg-red-50 text-red-700 border border-red-200 cursor-pointer hover:bg-red-100'
+																? 'bg-amber-50 text-amber-800 border border-amber-200 cursor-pointer hover:bg-amber-100'
 																: 'bg-green-50 text-green-700 border border-green-200 hover:bg-green-100'
 														}`}
 												>
@@ -519,7 +519,7 @@ export default function EditPeriodDialog({
 																			clientName: booking.client_name
 																		})
 																	}}
-																	className="p-1.5 rounded-md hover:bg-red-200/50 transition-colors"
+																	className="p-1.5 rounded-md hover:bg-amber-200 transition-colors"
 																	title="Удалить бронирование"
 																>
 																	<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
