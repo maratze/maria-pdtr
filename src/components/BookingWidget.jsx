@@ -188,8 +188,6 @@ const BookingWidget = () => {
 	const handleSlotSelect = (slot) => {
 		if (slot.isBooked) return
 
-		const MAX_SLOTS_PER_BOOKING = 3
-
 		const isAlreadySelected = selectedSlots.some(s => s.id === slot.id);
 
 		if (isAlreadySelected) {
@@ -197,11 +195,6 @@ const BookingWidget = () => {
 			setSelectedSlots(selectedSlots.filter(s => s.id !== slot.id))
 			setLocalError(null) // Очищаем ошибку
 		} else {
-			// Проверяем лимит перед добавлением
-			if (selectedSlots.length >= MAX_SLOTS_PER_BOOKING) {
-				setLocalError(`Можно выбрать максимум ${MAX_SLOTS_PER_BOOKING} слота за одно бронирование`)
-				return
-			}
 			// Добавляем к выбранным
 			setSelectedSlots([...selectedSlots, slot])
 			setLocalError(null) // Очищаем ошибку
@@ -231,14 +224,6 @@ const BookingWidget = () => {
 		setLocalError(null) // Очищаем предыдущие ошибки
 
 		if (selectedSlots.length === 0 || !clientName || !clientPhone) return
-
-		// Проверка количества слотов (защита от массового захвата)
-		const MAX_SLOTS_PER_BOOKING = 3
-		if (selectedSlots.length > MAX_SLOTS_PER_BOOKING) {
-			const errorMsg = `Можно забронировать максимум ${MAX_SLOTS_PER_BOOKING} слота за раз. Пожалуйста, уменьшите количество.`
-			setLocalError(errorMsg)
-			return
-		}
 
 		// Проверка honeypot поля (защита от ботов)
 		if (!checkHoneypot(honeypotValue)) {
