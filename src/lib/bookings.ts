@@ -196,6 +196,7 @@ export async function checkIfUserBlocked(
 
 /**
  * Логировать подозрительную активность в рамках сессии
+ * Предотвращает дубликаты: сначала проверяет по IP, потом по телефону
  */
 export async function logSuspiciousSessionActivity(
 	clientIP: string,
@@ -211,25 +212,50 @@ export async function logSuspiciousSessionActivity(
 		const oneHourAgo = new Date();
 		oneHourAgo.setHours(oneHourAgo.getHours() - 1);
 
-		// Проверяем, не логировали ли мы уже эту сессию
-		const { count: existingLogCount } = await supabaseAdmin
+		// Сначала проверяем по IP адресу (основной уникальный идентификатор)
+		const { data: existingByIP } = await supabaseAdmin
 			.from('booking_attempts')
-			.select('id', { count: 'exact', head: true })
+			.select('id')
 			.eq('ip_address', clientIP)
-			.eq('client_phone', clientPhone)
-			.gte('attempt_time', oneHourAgo.toISOString());
+			.gte('attempt_time', oneHourAgo.toISOString())
+			.limit(1)
+			.maybeSingle();
 
-		// Логируем только если еще не было записи за последний час
-		if (!existingLogCount || existingLogCount === 0) {
-			await supabase.rpc('log_booking_attempt', {
-				p_ip_address: clientIP,
-				p_client_fingerprint: clientFingerprint,
-				p_client_name: `${clientName} (${bookingsCount} слотов за сессию)`,
-				p_client_phone: clientPhone,
-				p_client_email: clientEmail,
-				p_success: true,
-			} as any);
+		// Если есть запись с таким IP за последний час - не логируем
+		if (existingByIP) {
+			return;
 		}
+
+		// Если по IP не нашли, проверяем по телефону
+		if (clientPhone) {
+			const { data: existingByPhone } = await supabaseAdmin
+				.from('booking_attempts')
+				.select('id')
+				.eq('client_phone', clientPhone)
+				.gte('attempt_time', oneHourAgo.toISOString())
+				.limit(1)
+				.maybeSingle();
+
+			// Если есть запись с таким телефоном за последний час - не логируем
+			if (existingByPhone) {
+				return;
+			}
+		}
+
+		// Если не нашли дубликатов - создаём новую запись
+		const isSuccess = bookingsCount > 0;
+		const logName = isSuccess
+			? `${clientName} (${bookingsCount} ${bookingsCount === 1 ? 'слот' : bookingsCount < 5 ? 'слота' : 'слотов'})`
+			: `${clientName} (неудачная попытка)`;
+
+		await supabase.rpc('log_booking_attempt', {
+			p_ip_address: clientIP,
+			p_client_fingerprint: clientFingerprint,
+			p_client_name: logName,
+			p_client_phone: clientPhone,
+			p_client_email: clientEmail,
+			p_success: isSuccess,
+		} as any);
 	} catch (error) {
 		console.error('Error logging suspicious session activity:', error);
 	}
@@ -320,55 +346,14 @@ export async function createPublicBooking(
 			return { success: false, error: bookingError?.message || 'Не удалось создать бронирование' };
 		}
 
-		// Асинхронно логируем попытку (не блокируем основной поток)
-		// Логирование происходит в фоне и не влияет на скорость бронирования
-		if (clientIP) {
-			logBookingAttemptAsync(clientIP, clientFingerprint, clientName, clientPhone, clientEmail, true)
-				.catch(err => console.error('Background logging error:', err));
-		}
-
 		return { success: true, booking_id: booking.id };
 	} catch (error) {
 		console.error('Error in createPublicBooking:', error);
-
-		// Асинхронно логируем ошибку (не блокируем)
-		if (clientIP) {
-			logBookingAttemptAsync(clientIP, clientFingerprint, clientName, clientPhone, clientEmail, false)
-				.catch(err => console.error('Background logging error:', err));
-		}
 
 		return {
 			success: false,
 			error: error instanceof Error ? error.message : 'Неизвестная ошибка'
 		};
-	}
-}
-
-/**
- * Асинхронное логирование попытки бронирования (не блокирует основной поток)
- * Автоматически предотвращает дубликаты записей
- */
-async function logBookingAttemptAsync(
-	clientIP: string,
-	clientFingerprint: string | null | undefined,
-	clientName: string,
-	clientPhone: string,
-	clientEmail: string,
-	success: boolean
-): Promise<void> {
-	try {
-		// Используем RPC для атомарной операции с проверкой дубликатов
-		await supabase.rpc('log_booking_attempt', {
-			p_ip_address: clientIP,
-			p_client_fingerprint: clientFingerprint || null,
-			p_client_name: clientName,
-			p_client_phone: clientPhone,
-			p_client_email: clientEmail,
-			p_success: success,
-		} as any);
-	} catch (error) {
-		// Игнорируем ошибки логирования - они не должны влиять на бронирование
-		console.error('Background logging failed:', error);
 	}
 }
 

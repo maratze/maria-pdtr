@@ -248,21 +248,33 @@ const BookingWidget = () => {
 
 			if (failedResult) {
 				setLocalError(failedResult.error || 'Ошибка создания бронирования')
-			} else {
-				// Все бронирования успешны
-				const newCount = sessionBookingsCount + selectedSlots.length
-				setSessionBookingsCount(newCount)
 
-				// Логируем подозрительную активность если больше 3 слотов за сессию
-				// Это выполняется асинхронно и не блокирует UI
-				if (newCount > 3 && clientIP) {
+				// Логируем неудачную попытку
+				if (clientIP) {
 					logSuspiciousSessionActivity(
 						clientIP,
 						clientFingerprint,
 						clientName,
 						clientPhone,
 						clientEmail,
-						newCount
+						0 // 0 слотов = неудача
+					).catch(err => console.error('Logging error:', err))
+				}
+			} else {
+				// Все бронирования успешны
+				const newCount = sessionBookingsCount + selectedSlots.length
+				setSessionBookingsCount(newCount)
+
+				// Логируем успешное бронирование с количеством слотов
+				// Это выполняется асинхронно и не блокирует UI
+				if (clientIP) {
+					logSuspiciousSessionActivity(
+						clientIP,
+						clientFingerprint,
+						clientName,
+						clientPhone,
+						clientEmail,
+						selectedSlots.length // количество забронированных слотов
 					).catch(err => console.error('Logging error:', err))
 				}
 
