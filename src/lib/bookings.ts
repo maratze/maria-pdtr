@@ -310,6 +310,21 @@ export async function createPublicBooking(
 	clientFingerprint?: string
 ): Promise<{ success: boolean; booking_id?: string; error?: string }> {
 	try {
+		// ВАЖНО: Проверяем, не заблокирован ли пользователь
+		const blockCheck = await checkIfUserBlocked(
+			clientIP,
+			clientFingerprint,
+			clientPhone,
+			clientEmail
+		);
+
+		if (blockCheck.blocked) {
+			return {
+				success: false,
+				error: blockCheck.reason || 'Бронирование недоступно'
+			};
+		}
+
 		// Проверяем, существует ли слот
 		const { data: existingSlot, error: slotCheckError } = await supabase
 			.from('time_slots')
