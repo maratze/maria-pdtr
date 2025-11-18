@@ -412,14 +412,14 @@ const BookingWidget = () => {
 									{city.name}
 								</button>
 							))}
-						</div>
 					</div>
+				</div>
 
-					{/* Двухколоночный layout: календарь слева, слоты/форма справа */}
-					<div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
-						{/* ЛЕВАЯ КОЛОНКА: Календарь */}
-						<div className="w-full">
-							<div className="flex items-center justify-between mb-4">
+				{/* Двухколоночный layout: календарь слева, слоты/форма справа */}
+				<div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+					{/* ЛЕВАЯ КОЛОНКА: Календарь */}
+					<div className="w-full">
+						<div className="flex items-center justify-between mb-4">
 								<button
 									onClick={() => {
 										const newMonth = new Date(currentMonth)
