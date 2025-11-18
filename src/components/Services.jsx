@@ -121,14 +121,14 @@ const Services = () => {
 				</div>
 
 				{/* Онлайн запись - показываем всем пользователям */}
-				<div className="max-w-4xl mx-auto">
+				<div className="max-w-6xl mx-auto">
 					{/* Заголовок раздела */}
-					<div id="booking" className="text-center mb-8 sm:mb-12 pt-24">
+					<div id="booking" className="text-center mb-8 sm:mb-10 pt-24">
 						<SectionHeader title="Онлайн запись" isDarkMode={true} />
 						<SectionDescription text="Выберите удобные дату и время для консультации" isDarkMode={true} />
 					</div>
 
-					<div className="bg-white/5 backdrop-blur-sm rounded-xl sm:rounded-2xl overflow-hidden border border-white/10 p-4 sm:p-6 md:p-8">
+					<div className="bg-white/5 backdrop-blur-sm rounded-xl overflow-hidden border border-white/10 p-5 sm:p-6 lg:p-8">
 						<BookingWidget />
 					</div>
 				</div>
