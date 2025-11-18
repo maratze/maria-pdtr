@@ -3,6 +3,7 @@ import { getCities } from '../lib/cities'
 import { getPublicActiveSchedulePeriodsByCity } from '../lib/schedule'
 import { getPublicBookingsByCityAndDates, createPublicBooking } from '../lib/bookings'
 import { getOrCreateSlotsForDate, getAvailableSlotsByCityAndDateRange } from '../lib/timeSlots'
+import { sendVerificationCode, verifyCode } from '../lib/phoneVerification'
 import Toast from './Toast'
 
 const BookingWidget = () => {
@@ -30,6 +31,15 @@ const BookingWidget = () => {
 	const [emailError, setEmailError] = useState('')
 	const [phoneError, setPhoneError] = useState('')
 
+	// SMS верификация
+	const [phoneVerified, setPhoneVerified] = useState(false)
+	const [verificationCode, setVerificationCode] = useState('')
+	const [codeSent, setCodeSent] = useState(false)
+	const [sendingCode, setSendingCode] = useState(false)
+	const [verifyingCode, setVerifyingCode] = useState(false)
+	const [codeError, setCodeError] = useState('')
+	const [resendTimer, setResendTimer] = useState(0)
+
 	useEffect(() => {
 		async function loadCities() {
 			try {
@@ -49,6 +59,13 @@ const BookingWidget = () => {
 		}
 		loadCities()
 	}, [])
+
+	useEffect(() => {
+		if (resendTimer > 0) {
+			const timer = setTimeout(() => setResendTimer(resendTimer - 1), 1000)
+			return () => clearTimeout(timer)
+		}
+	}, [resendTimer])
 
 	useEffect(() => {
 		if (!selectedCity) return
@@ -199,6 +216,10 @@ const BookingWidget = () => {
 			setClientName('')
 			setClientPhone('')
 			setClientEmail('')
+			setPhoneVerified(false)
+			setVerificationCode('')
+			setCodeSent(false)
+			setCodeError('')
 		}
 	}
 
@@ -208,6 +229,21 @@ const BookingWidget = () => {
 
 		if (selectedSlots.length === 0 || !clientName || !clientPhone) return
 
+		// Проверяем верификацию телефона
+		if (!phoneVerified) {
+			if (!codeSent) {
+				// Если код еще не отправлен, отправляем его
+				await handleSendCode()
+			}
+			// Останавливаемся здесь, пользователь должен ввести код
+			return
+		}
+
+		// Если телефон подтвержден, выполняем бронирование
+		await handleBooking()
+	}
+
+	const handleBooking = async () => {
 		try {
 			setBookingLoading(true)
 
@@ -272,6 +308,11 @@ const BookingWidget = () => {
 		setEmailError('')
 		setPhoneError('')
 		setLocalError(null) // Очищаем ошибку при сбросе
+		// Сбрасываем состояние верификации
+		setPhoneVerified(false)
+		setVerificationCode('')
+		setCodeSent(false)
+		setCodeError('')
 	}
 
 	// Валидация полного формата телефона +7 999 999 99 99
@@ -327,6 +368,63 @@ const BookingWidget = () => {
 		}
 	}
 
+	// Отправка SMS кода
+	const handleSendCode = async () => {
+		// Валидация телефона
+		if (!validatePhoneNumber(clientPhone)) {
+			setPhoneError('Введите полный номер телефона в формате +7 999 999 99 99')
+			return
+		}
+
+		setSendingCode(true)
+		setCodeError('')
+
+		const result = await sendVerificationCode(clientPhone)
+
+		if (result.success) {
+			setCodeSent(true)
+			setResendTimer(60)
+			setToast({ message: result.message, type: 'success' })
+		} else {
+			setToast({ message: result.message, type: 'error' })
+		}
+
+		setSendingCode(false)
+	}
+
+	// Повторная отправка кода
+	const handleResendCode = async () => {
+		if (resendTimer > 0) return
+		await handleSendCode()
+	}
+
+	// Проверка введенного кода
+	const handleVerifyCode = async () => {
+		if (verificationCode.length !== 6) {
+			setCodeError('Введите 6-значный код')
+			return
+		}
+
+		setVerifyingCode(true)
+		setCodeError('')
+
+		const result = await verifyCode(clientPhone, verificationCode)
+
+		if (result.success) {
+			setPhoneVerified(true)
+			setToast({ message: result.message, type: 'success' })
+			// Автоматически переходим к бронированию
+			setTimeout(() => {
+				handleBooking()
+			}, 500)
+		} else {
+			setCodeError(result.message)
+			setToast({ message: result.message, type: 'error' })
+		}
+
+		setVerifyingCode(false)
+	}
+
 	const monthNames = [
 		'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
 		'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
@@ -344,7 +442,7 @@ const BookingWidget = () => {
 	}
 
 	return (
-		<div className="space-y-4 lg:space-y-5">
+		<>
 			{toast && (
 				<Toast
 					message={toast.message}
@@ -353,311 +451,379 @@ const BookingWidget = () => {
 				/>
 			)}
 
-			{step === 3 ? (
-				<div className="text-center py-8">
-					<div className="inline-flex items-center justify-center w-16 h-16 bg-green-500/20 rounded-full mb-4">
-						<svg className="w-8 h-8 text-green-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-						</svg>
-					</div>
-					<h3 className="text-xl lg:text-2xl font-light text-white mb-3">
-						{selectedSlots.length === 1 ? 'Запись успешно создана!' : 'Записи успешно созданы!'}
-					</h3>
-					<p className="text-base text-slate-300 mb-2">
-						{selectedSlots.length > 0 && new Date(selectedSlots[0].date + 'T00:00:00').toLocaleDateString('ru-RU', {
-							day: 'numeric',
-							month: 'long',
-							year: 'numeric'
-						})}
-					</p>
-					<div className="text-lg lg:text-xl text-ocean-300 mb-6">
-						{selectedSlots.length === 1 ? (
-							<p>{selectedSlots[0].startTime} - {selectedSlots[0].endTime}</p>
-						) : (
-							<div className="space-y-1">
-								{selectedSlots.map((slot, idx) => (
-									<p key={idx}>{slot.startTime} - {slot.endTime}</p>
-								))}
-							</div>
-						)}
-					</div>
-					<button
-						onClick={handleReset}
-						className="px-6 py-3 rounded-lg bg-ocean-600 text-white font-medium text-base hover:bg-ocean-700 transition-colors"
-					>
-						Записаться ещё
-					</button>
-				</div>
-			) : (
-				<>
-					<div className="mb-6 lg:mb-8">
-						<label className="block text-sm font-medium text-slate-300 mb-3">
-							Выберите город
-						</label>
-						<div className="flex flex-wrap gap-2">
-							{cities.map(city => (
-								<button
-									key={city.id}
-									onClick={() => {
-										setSelectedCity(city.id)
-										setSelectedDate(null)
-										setSelectedSlots([])
-										setStep(1)
-									}}
-									className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${selectedCity === city.id
-										? 'bg-ocean-600 text-white'
-										: 'bg-white/5 text-slate-300 hover:bg-white/10'
-										}`}
-								>
-									{city.name}
-								</button>
-							))}
+			<div className="space-y-4 lg:space-y-5">
+				{step === 3 ? (
+					<div className="text-center py-8">
+						<div className="inline-flex items-center justify-center w-16 h-16 bg-green-500/20 rounded-full mb-4">
+							<svg className="w-8 h-8 text-green-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+							</svg>
 						</div>
-					</div>
-
-					{/* Двухколоночный layout: календарь слева, слоты/форма справа */}
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-						{/* ЛЕВАЯ КОЛОНКА: Календарь */}
-						<div className="w-full">
-							<div className="flex items-center justify-between mb-4">
-								<button
-									onClick={() => {
-										const newMonth = new Date(currentMonth)
-										newMonth.setMonth(newMonth.getMonth() - 1)
-										setCurrentMonth(newMonth)
-									}}
-									className="p-2 rounded-lg text-slate-300 hover:bg-white/5 transition-colors flex-shrink-0"
-								>
-									<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-									</svg>
-								</button>
-								<h3 className="text-base lg:text-lg font-medium text-white">
-									{monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
-								</h3>
-								<button
-									onClick={() => {
-										const newMonth = new Date(currentMonth)
-										newMonth.setMonth(newMonth.getMonth() + 1)
-										setCurrentMonth(newMonth)
-									}}
-									className="p-2 rounded-lg text-slate-300 hover:bg-white/5 transition-colors flex-shrink-0"
-								>
-									<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-									</svg>
-								</button>
-							</div>
-
-							<div className="grid grid-cols-7 gap-1.5 mb-2">
-								{dayNames.map(day => (
-									<div key={day} className="text-center text-xs font-medium text-slate-400 py-2">
-										{day}
-									</div>
-								))}
-							</div>
-
-							<div className="grid grid-cols-7 gap-1.5">
-								{generateCalendar().map((day, idx) => {
-									if (!day) {
-										return <div key={`empty-${idx}`} />
-									}
-
-									return (
-										<button
-											key={day.date}
-											onClick={() => day.isAvailable && handleDateSelect(day.date)}
-											disabled={!day.isAvailable}
-											className={`
-													aspect-square rounded text-sm font-medium transition-all
-													${day.isSelected
-													? 'bg-ocean-600 text-white border-2 border-ocean-500'
-													: day.isToday
-														? 'bg-white/5 text-slate-300 border-2 border-white/60'
-														: day.isAvailable
-															? 'bg-green-500/20 text-green-300 hover:bg-green-500/30 border border-green-500/30'
-															: day.isPast
-																? 'bg-white/5 text-slate-600 cursor-not-allowed border border-white/5'
-																: 'bg-white/5 text-slate-500 cursor-not-allowed border border-white/5'
-												}
-												`}
-										>
-											{day.day}
-										</button>
-									)
-								})}
-							</div>
-						</div>
-
-						{/* ПРАВАЯ КОЛОНКА: Слоты и форма */}
-						<div className="w-full">
-							{!selectedDate ? (
-								<div className="flex items-center justify-center h-full min-h-[300px] lg:min-h-[400px]">
-									<div className="text-center">
-										<svg className="w-16 h-16 mx-auto mb-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-											<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-										</svg>
-										<p className="text-slate-400 text-sm">Выберите дату в календаре</p>
-									</div>
-								</div>
+						<h3 className="text-xl lg:text-2xl font-light text-white mb-3">
+							{selectedSlots.length === 1 ? 'Запись успешно создана!' : 'Записи успешно созданы!'}
+						</h3>
+						<p className="text-base text-slate-300 mb-2">
+							{selectedSlots.length > 0 && new Date(selectedSlots[0].date + 'T00:00:00').toLocaleDateString('ru-RU', {
+								day: 'numeric',
+								month: 'long',
+								year: 'numeric'
+							})}
+						</p>
+						<div className="text-lg lg:text-xl text-ocean-300 mb-6">
+							{selectedSlots.length === 1 ? (
+								<p>{selectedSlots[0].startTime} - {selectedSlots[0].endTime}</p>
 							) : (
-								<div className="space-y-4">
-									<div>
-										<p className="text-sm text-slate-400">
-											{new Date(selectedDate + 'T00:00:00').toLocaleDateString('ru-RU', {
-												day: 'numeric',
-												month: 'long',
-												year: 'numeric'
-											})}
-										</p>
-									</div>
-
-									{step === 1 ? (
-										loadingSlots ? (
-											<div className="text-center py-8">
-												<div className="inline-block w-6 h-6 border-4 border-ocean-300 border-t-transparent rounded-full animate-spin"></div>
-											</div>
-										) : daySlots.length === 0 ? (
-											<p className="text-slate-400 text-center py-8 text-sm">Нет доступных слотов на эту дату</p>
-										) : (
-											<>
-												<div className="grid grid-cols-2 gap-2">
-													{daySlots.map((slot, idx) => {
-														const isSelected = selectedSlots.some(s => s.id === slot.id)
-
-														return (
-															<button
-																key={idx}
-																type="button"
-																onClick={() => handleSlotSelect(slot)}
-																className={`
-																px-3 py-2.5 rounded text-sm font-medium transition-all border relative
-																${isSelected
-																		? 'bg-ocean-600 text-white border-ocean-600'
-																		: 'bg-white/5 text-slate-300 border-white/10 hover:bg-white/10 hover:border-white/20'
-																	}
-															`}
-															>
-																{slot.startTime} - {slot.endTime}
-																{isSelected && (
-																	<span className="absolute -top-1 -right-1 w-5 h-5 bg-ocean-400 rounded-full flex items-center justify-center text-xs text-white">
-																		{selectedSlots.findIndex(s => s.id === slot.id) + 1}
-																	</span>
-																)}
-															</button>
-														)
-													})}
-												</div>
-
-												{selectedSlots.length > 0 && (
-													<button
-														type="button"
-														onClick={handleNextStep}
-														className="w-full mt-4 px-4 py-2.5 rounded-lg bg-ocean-600 text-white font-medium text-sm hover:bg-ocean-700 transition-colors"
-													>
-														Продолжить ({selectedSlots.length} {selectedSlots.length === 1 ? 'слот' : selectedSlots.length < 6 ? 'слота' : 'слотов'})
-													</button>
-												)}
-											</>
-										)
-									) : step === 2 ? (
-										<div>
-											<div className="mb-4 p-4 bg-ocean-500/20 rounded border border-ocean-500/30">
-												<p className="text-sm text-slate-400 mb-1">
-													{selectedSlots.length === 1 ? 'Выбранное время' : `Выбрано слотов: ${selectedSlots.length}`}
-												</p>
-												<div className="space-y-1">
-													{selectedSlots.map((slot, idx) => (
-														<p key={idx} className="text-base text-ocean-300 font-medium">
-															{slot.startTime} - {slot.endTime}
-														</p>
-													))}
-												</div>
-											</div>
-
-											<form onSubmit={handleSubmit} className="space-y-4">
-												<div>
-													<label className="block text-sm font-medium text-slate-300 mb-2">
-														ФИО <span className="text-red-400">*</span>
-													</label>
-													<input
-														type="text"
-														value={clientName}
-														onChange={(e) => setClientName(e.target.value)}
-														required
-														className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-ocean-500 focus:border-transparent"
-														placeholder="Ваше имя и фамилия"
-													/>
-												</div>
-
-												<div>
-													<label className="block text-sm font-medium text-slate-300 mb-2">
-														Телефон <span className="text-red-400">*</span>
-													</label>
-													<input
-														type="tel"
-														value={clientPhone}
-														onChange={handlePhoneChange}
-														onBlur={handlePhoneBlur}
-														required
-														className={`w-full px-4 py-2.5 bg-white/5 border ${phoneError ? 'border-red-500' : 'border-white/10'} rounded text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-ocean-500 focus:border-transparent`}
-														placeholder="+7 900 123 45 67"
-													/>
-													{phoneError && (
-														<p className="text-xs text-red-400 mt-1">{phoneError}</p>
-													)}
-												</div>												<div>
-													<label htmlFor="email" className="block text-sm font-medium text-slate-300 mb-2">
-														Email
-													</label>
-													<input
-														type="email"
-														value={clientEmail}
-														onChange={handleEmailChange}
-														className={`w-full px-4 py-2.5 bg-white/5 border ${emailError ? 'border-red-500' : 'border-white/10'} rounded text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-ocean-500 focus:border-transparent`}
-														placeholder="your@email.com (опционально)"
-													/>
-													{emailError && (
-														<p className="text-xs text-red-400 mt-1">{emailError}</p>
-													)}
-												</div>
-
-												<div className="flex gap-2">
-													<button
-														type="button"
-														onClick={handleBackStep}
-														className="px-4 py-2.5 rounded bg-white/5 text-slate-300 font-medium text-sm hover:bg-white/10 transition-colors"
-													>
-														Назад
-													</button>
-													<button
-														type="submit"
-														disabled={bookingLoading || !clientName || !clientPhone || phoneError || emailError}
-														className="flex-1 px-6 py-2.5 rounded bg-ocean-600 text-white font-medium text-sm hover:bg-ocean-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-													>
-														{bookingLoading ? 'Создание записи...' : 'Записаться'}
-													</button>
-												</div>												{/* Локальное отображение ошибки над кнопкой */}
-												{localError && (
-													<div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
-														<div className="flex items-start gap-2">
-															<svg className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-																<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-															</svg>
-															<p className="text-sm text-red-300">{localError}</p>
-														</div>
-													</div>
-												)}
-											</form>
-										</div>
-									) : null}
+								<div className="space-y-1">
+									{selectedSlots.map((slot, idx) => (
+										<p key={idx}>{slot.startTime} - {slot.endTime}</p>
+									))}
 								</div>
 							)}
 						</div>
+						<button
+							onClick={handleReset}
+							className="px-6 py-3 rounded-lg bg-ocean-600 text-white font-medium text-base hover:bg-ocean-700 transition-colors"
+						>
+							Записаться ещё
+						</button>
 					</div>
-				</>
-			)}
-		</div>
+				) : (
+					<>
+						<div className="mb-6 lg:mb-8">
+							<label className="block text-sm font-medium text-slate-300 mb-3">
+								Выберите город
+							</label>
+							<div className="flex flex-wrap gap-2">
+								{cities.map(city => (
+									<button
+										key={city.id}
+										onClick={() => {
+											setSelectedCity(city.id)
+											setSelectedDate(null)
+											setSelectedSlots([])
+											setStep(1)
+										}}
+										className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${selectedCity === city.id
+											? 'bg-ocean-600 text-white'
+											: 'bg-white/5 text-slate-300 hover:bg-white/10'
+											}`}
+									>
+										{city.name}
+									</button>
+								))}
+							</div>
+						</div>
+
+						{/* Двухколоночный layout: календарь слева, слоты/форма справа */}
+						<div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+							{/* ЛЕВАЯ КОЛОНКА: Календарь */}
+							<div className="w-full">
+								<div className="flex items-center justify-between mb-4">
+									<button
+										onClick={() => {
+											const newMonth = new Date(currentMonth)
+											newMonth.setMonth(newMonth.getMonth() - 1)
+											setCurrentMonth(newMonth)
+										}}
+										className="p-2 rounded-lg text-slate-300 hover:bg-white/5 transition-colors flex-shrink-0"
+									>
+										<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+										</svg>
+									</button>
+									<h3 className="text-base lg:text-lg font-medium text-white">
+										{monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
+									</h3>
+									<button
+										onClick={() => {
+											const newMonth = new Date(currentMonth)
+											newMonth.setMonth(newMonth.getMonth() + 1)
+											setCurrentMonth(newMonth)
+										}}
+										className="p-2 rounded-lg text-slate-300 hover:bg-white/5 transition-colors flex-shrink-0"
+									>
+										<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+										</svg>
+									</button>
+								</div>
+
+								<div className="grid grid-cols-7 gap-1.5 mb-2">
+									{dayNames.map(day => (
+										<div key={day} className="text-center text-xs font-medium text-slate-400 py-2">
+											{day}
+										</div>
+									))}
+								</div>
+
+								<div className="grid grid-cols-7 gap-1.5">
+									{generateCalendar().map((day, idx) => {
+										if (!day) {
+											return <div key={`empty-${idx}`} />
+										}
+
+										return (
+											<button
+												key={day.date}
+												onClick={() => day.isAvailable && handleDateSelect(day.date)}
+												disabled={!day.isAvailable}
+												className={`
+													aspect-square rounded text-sm font-medium transition-all
+													${day.isSelected
+														? 'bg-ocean-600 text-white border-2 border-ocean-500'
+														: day.isToday
+															? 'bg-white/5 text-slate-300 border-2 border-white/60'
+															: day.isAvailable
+																? 'bg-green-500/20 text-green-300 hover:bg-green-500/30 border border-green-500/30'
+																: day.isPast
+																	? 'bg-white/5 text-slate-600 cursor-not-allowed border border-white/5'
+																	: 'bg-white/5 text-slate-500 cursor-not-allowed border border-white/5'
+													}
+												`}
+											>
+												{day.day}
+											</button>
+										)
+									})}
+								</div>
+							</div>
+
+							{/* ПРАВАЯ КОЛОНКА: Слоты и форма */}
+							<div className="w-full">
+								{!selectedDate ? (
+									<div className="flex items-center justify-center h-full min-h-[300px] lg:min-h-[400px]">
+										<div className="text-center">
+											<svg className="w-16 h-16 mx-auto mb-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+												<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+											</svg>
+											<p className="text-slate-400 text-sm">Выберите дату в календаре</p>
+										</div>
+									</div>
+								) : (
+									<div className="space-y-4">
+										<div>
+											<p className="text-sm text-slate-400">
+												{new Date(selectedDate + 'T00:00:00').toLocaleDateString('ru-RU', {
+													day: 'numeric',
+													month: 'long',
+													year: 'numeric'
+												})}
+											</p>
+										</div>
+
+										{step === 1 ? (
+											loadingSlots ? (
+												<div className="text-center py-8">
+													<div className="inline-block w-6 h-6 border-4 border-ocean-300 border-t-transparent rounded-full animate-spin"></div>
+												</div>
+											) : daySlots.length === 0 ? (
+												<p className="text-slate-400 text-center py-8 text-sm">Нет доступных слотов на эту дату</p>
+											) : (
+												<>
+													<div className="grid grid-cols-2 gap-2">
+														{daySlots.map((slot, idx) => {
+															const isSelected = selectedSlots.some(s => s.id === slot.id)
+
+															return (
+																<button
+																	key={idx}
+																	type="button"
+																	onClick={() => handleSlotSelect(slot)}
+																	className={`
+																px-3 py-2.5 rounded text-sm font-medium transition-all border relative
+																${isSelected
+																			? 'bg-ocean-600 text-white border-ocean-600'
+																			: 'bg-white/5 text-slate-300 border-white/10 hover:bg-white/10 hover:border-white/20'
+																		}
+															`}
+																>
+																	{slot.startTime} - {slot.endTime}
+																	{isSelected && (
+																		<span className="absolute -top-1 -right-1 w-5 h-5 bg-ocean-400 rounded-full flex items-center justify-center text-xs text-white">
+																			{selectedSlots.findIndex(s => s.id === slot.id) + 1}
+																		</span>
+																	)}
+																</button>
+															)
+														})}
+													</div>
+
+													{selectedSlots.length > 0 && (
+														<button
+															type="button"
+															onClick={handleNextStep}
+															className="w-full mt-4 px-4 py-2.5 rounded-lg bg-ocean-600 text-white font-medium text-sm hover:bg-ocean-700 transition-colors"
+														>
+															Продолжить ({selectedSlots.length} {selectedSlots.length === 1 ? 'слот' : selectedSlots.length < 6 ? 'слота' : 'слотов'})
+														</button>
+													)}
+												</>
+											)
+										) : step === 2 ? (
+											<div>
+												<div className="mb-4 p-4 bg-ocean-500/20 rounded border border-ocean-500/30">
+													<p className="text-sm text-slate-400 mb-1">
+														{selectedSlots.length === 1 ? 'Выбранное время' : `Выбрано слотов: ${selectedSlots.length}`}
+													</p>
+													<div className="space-y-1">
+														{selectedSlots.map((slot, idx) => (
+															<p key={idx} className="text-base text-ocean-300 font-medium">
+																{slot.startTime} - {slot.endTime}
+															</p>
+														))}
+													</div>
+												</div>
+
+												<form onSubmit={handleSubmit} className="space-y-4">
+													<div>
+														<label className="block text-sm font-medium text-slate-300 mb-2">
+															ФИО <span className="text-red-400">*</span>
+														</label>
+														<input
+															type="text"
+															value={clientName}
+															onChange={(e) => setClientName(e.target.value)}
+															required
+															className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-ocean-500 focus:border-transparent"
+															placeholder="Ваше имя и фамилия"
+														/>
+													</div>
+
+													<div>
+														<label className="block text-sm font-medium text-slate-300 mb-2">
+															Телефон <span className="text-red-400">*</span>
+														</label>
+														<input
+															type="tel"
+															value={clientPhone}
+															onChange={handlePhoneChange}
+															onBlur={handlePhoneBlur}
+															required
+															disabled={phoneVerified}
+															className={`w-full px-4 py-2.5 bg-white/5 border ${phoneError ? 'border-red-500' : phoneVerified ? 'border-green-500' : 'border-white/10'} rounded text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-ocean-500 focus:border-transparent disabled:opacity-60`}
+															placeholder="+7 900 123 45 67"
+														/>
+														{phoneError && !codeSent && (
+															<p className="text-xs text-red-400 mt-1">{phoneError}</p>
+														)}
+														{phoneVerified && (
+															<p className="text-xs text-green-400 mt-1 flex items-center gap-1">
+																<svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+																	<path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+																</svg>
+																Телефон подтвержден
+															</p>
+														)}
+													</div>
+
+													{/* Блок подтверждения телефона */}
+													{codeSent && !phoneVerified && (
+														<div className="p-4 bg-ocean-500/10 border border-ocean-500/30 rounded-lg space-y-3">
+															<p className="text-sm text-slate-300">
+																Введите код подтверждения, отправленный на ваш телефон
+															</p>
+															<div>
+																<input
+																	type="text"
+																	value={verificationCode}
+																	onChange={(e) => {
+																		const value = e.target.value.replace(/\D/g, '').slice(0, 6)
+																		setVerificationCode(value)
+																		setCodeError('')
+																	}}
+																	placeholder="000000"
+																	maxLength={6}
+																	className={`w-full px-4 py-2.5 bg-white/5 border ${codeError ? 'border-red-500' : 'border-white/10'} rounded text-white placeholder-slate-500 text-center tracking-widest text-lg font-mono focus:outline-none focus:ring-2 focus:ring-ocean-500 focus:border-transparent`}
+																/>
+																{codeError && (
+																	<p className="text-xs text-red-400 mt-1">{codeError}</p>
+																)}
+															</div>
+															<div className="flex gap-2">
+																<button
+																	type="button"
+																	onClick={handleVerifyCode}
+																	disabled={verifyingCode || verificationCode.length !== 6}
+																	className="flex-1 px-4 py-2 rounded bg-ocean-600 text-white font-medium text-sm hover:bg-ocean-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+																>
+																	{verifyingCode ? 'Проверка...' : 'Подтвердить'}
+																</button>
+																<button
+																	type="button"
+																	onClick={handleResendCode}
+																	disabled={sendingCode || resendTimer > 0}
+																	className="px-4 py-2 rounded bg-white/5 text-slate-300 font-medium text-sm hover:bg-white/10 transition-colors disabled:opacity-50"
+																>
+																	{sendingCode ? 'Отправка...' : resendTimer > 0 ? `Отправить снова (${resendTimer}с)` : 'Отправить снова'}
+																</button>
+															</div>
+														</div>
+													)}
+
+													{/* Кнопка отправки кода (если код еще не отправлен) */}
+													{!codeSent && !phoneVerified && clientPhone && !phoneError && (
+														<button
+															type="button"
+															onClick={handleSendCode}
+															disabled={sendingCode}
+															className="w-full px-4 py-2.5 rounded bg-ocean-500/20 border border-ocean-500/30 text-ocean-300 font-medium text-sm hover:bg-ocean-500/30 transition-colors disabled:opacity-50"
+														>
+															{sendingCode ? 'Отправка кода...' : 'Получить код подтверждения'}
+														</button>
+													)}
+													<div>
+														<label htmlFor="email" className="block text-sm font-medium text-slate-300 mb-2">
+															Email
+														</label>
+														<input
+															type="email"
+															value={clientEmail}
+															onChange={handleEmailChange}
+															className={`w-full px-4 py-2.5 bg-white/5 border ${emailError ? 'border-red-500' : 'border-white/10'} rounded text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-ocean-500 focus:border-transparent`}
+															placeholder="your@email.com (опционально)"
+														/>
+														{emailError && (
+															<p className="text-xs text-red-400 mt-1">{emailError}</p>
+														)}
+													</div>
+
+													<div className="flex gap-2">
+														<button
+															type="button"
+															onClick={handleBackStep}
+															className="px-4 py-2.5 rounded bg-white/5 text-slate-300 font-medium text-sm hover:bg-white/10 transition-colors"
+														>
+															Назад
+														</button>
+														<button
+															type="submit"
+															disabled={bookingLoading || !clientName || !clientPhone || phoneError || emailError || !phoneVerified}
+															className="flex-1 px-6 py-2.5 rounded bg-ocean-600 text-white font-medium text-sm hover:bg-ocean-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+														>
+															{bookingLoading ? 'Создание записи...' : phoneVerified ? 'Записаться' : 'Подтвердите телефон'}
+														</button>
+													</div>												{/* Локальное отображение ошибки над кнопкой */}
+													{localError && (
+														<div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
+															<div className="flex items-start gap-2">
+																<svg className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+																	<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+																</svg>
+																<p className="text-sm text-red-300">{localError}</p>
+															</div>
+														</div>
+													)}
+												</form>
+											</div>
+										) : null}
+									</div>
+								)}
+							</div>
+						</div>
+					</>
+				)}
+			</div>
+		</>
 	)
 }
 
