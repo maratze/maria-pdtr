@@ -164,10 +164,10 @@ export default function AdminBookingsHistory() {
 		if (b[1].length !== a[1].length) {
 			return b[1].length - a[1].length
 		}
-		// Then by earliest booking date (oldest first)
-		const earliestA = Math.min(...a[1].map(b => new Date(b.created_at || 0).getTime()))
-		const earliestB = Math.min(...b[1].map(b => new Date(b.created_at || 0).getTime()))
-		return earliestA - earliestB
+		// Then by latest (most recent) booking date - newest first
+		const latestA = Math.max(...a[1].map(b => new Date(b.created_at || 0).getTime()))
+		const latestB = Math.max(...b[1].map(b => new Date(b.created_at || 0).getTime()))
+		return latestB - latestA
 	})
 
 	return (

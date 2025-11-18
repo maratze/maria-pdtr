@@ -2,6 +2,7 @@
 // Используется для отправки кодов подтверждения телефонов
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.0'
 
 const corsHeaders = {
 	'Access-Control-Allow-Origin': '*',
@@ -34,6 +35,31 @@ serve(async (req) => {
 
 		// Очищаем номер телефона от пробелов и символов
 		const cleanPhone = phone.replace(/[\s\-\(\)]/g, '')
+
+		// Проверяем, не заблокирован ли номер
+		const supabaseUrl = Deno.env.get('SUPABASE_URL')!
+		const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY')!
+		const supabase = createClient(supabaseUrl, supabaseKey)
+
+		const { data: blockedPhone } = await supabase
+			.from('blocked_phones')
+			.select('id')
+			.eq('phone', cleanPhone)
+			.maybeSingle()
+
+		if (blockedPhone) {
+			console.log(`Phone ${cleanPhone} is blocked, rejecting SMS request`)
+			return new Response(
+				JSON.stringify({
+					success: false,
+					message: 'Этот номер телефона заблокирован',
+				}),
+				{
+					status: 403,
+					headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+				}
+			)
+		}
 
 		// Интеграция с SMS.ru
 		const SMS_API_KEY = Deno.env.get('SMS_RU_API_KEY')
