@@ -151,150 +151,6 @@ export async function createBooking(
 }
 
 /**
- * Проверить, заблокирован ли пользователь
- */
-export async function checkIfUserBlocked(
-	clientIP?: string,
-	clientFingerprint?: string,
-	clientPhone?: string,
-	clientEmail?: string
-): Promise<{ blocked: boolean; reason?: string }> {
-	if (!clientIP) {
-		return { blocked: false };
-	}
-
-	try {
-		const { data: rateLimitCheckArray, error: rateLimitError } = await supabase.rpc(
-			'check_rate_limit',
-			{
-				p_ip_address: clientIP,
-				p_client_fingerprint: clientFingerprint || null,
-				p_client_phone: clientPhone || '',
-				p_client_email: clientEmail || '',
-			} as any
-		) as { data: Array<{ allowed: boolean; reason: string }> | null; error: any };
-
-		const rateLimitCheck = rateLimitCheckArray && rateLimitCheckArray.length > 0
-			? rateLimitCheckArray[0]
-			: null;
-
-		if (rateLimitError) {
-			console.error('Rate limit check error:', rateLimitError);
-			return { blocked: false }; // При ошибке не блокируем
-		}
-
-		if (rateLimitCheck && !rateLimitCheck.allowed) {
-			return { blocked: true, reason: rateLimitCheck.reason };
-		}
-
-		return { blocked: false };
-	} catch (error) {
-		console.error('Error checking if user blocked:', error);
-		return { blocked: false }; // При ошибке не блокируем
-	}
-}
-
-/**
- * Логировать подозрительную активность в рамках сессии
- * Логирует если: 
- * - Новый IP
- * - Одинаковый IP, но другой телефон или email (разные люди с одного IP)
- */
-export async function logSuspiciousSessionActivity(
-	clientIP: string,
-	clientFingerprint: string | null,
-	clientName: string,
-	clientPhone: string,
-	clientEmail: string,
-	bookingsCount: number
-): Promise<void> {
-	if (!supabaseAdmin) return;
-
-	try {
-		const oneHourAgo = new Date();
-		oneHourAgo.setHours(oneHourAgo.getHours() - 1);
-
-		// Проверяем комбинацию IP + телефон + email
-		// Если хотя бы телефон или email отличаются - это другой человек, логируем
-		let query = supabaseAdmin
-			.from('booking_attempts')
-			.select('id, client_phone, client_email, total_slots_count')
-			.eq('ip_address', clientIP)
-			.gte('attempt_time', oneHourAgo.toISOString());
-
-		const { data: existingAttempts } = await query as {
-			data: Array<{ id: string; client_phone: string; client_email: string; total_slots_count: number }> | null
-		};
-
-		// Проверяем, есть ли запись с точно такими же данными (IP + телефон + email)
-		if (existingAttempts && existingAttempts.length > 0) {
-			const exactMatch = existingAttempts.find(
-				attempt =>
-					attempt.client_phone === clientPhone &&
-					attempt.client_email === (clientEmail || '')
-			);
-
-			// Если нашли точное совпадение - обновляем существующую запись, увеличивая счётчик
-			if (exactMatch) {
-				const newTotalCount = (exactMatch.total_slots_count || 0) + bookingsCount;
-				const isSuccess = bookingsCount > 0;
-				const logName = isSuccess
-					? clientName
-					: `${clientName} (неудачная попытка)`;
-
-				await (supabaseAdmin as any)
-					.from('booking_attempts')
-					.update({
-						total_slots_count: newTotalCount,
-						client_name: logName,
-						attempt_time: new Date().toISOString(),
-						success: isSuccess
-					})
-					.eq('id', exactMatch.id);
-
-				return;
-			}
-		}
-
-		// Если не нашли точного совпадения - создаём новую запись
-		// (новый IP или тот же IP, но другой телефон/email)
-		const isSuccess = bookingsCount > 0;
-		const logName = isSuccess
-			? clientName
-			: `${clientName} (неудачная попытка)`;
-
-		await supabase.rpc('log_booking_attempt', {
-			p_ip_address: clientIP,
-			p_client_fingerprint: clientFingerprint,
-			p_client_name: logName,
-			p_client_phone: clientPhone,
-			p_client_email: clientEmail,
-			p_success: isSuccess,
-		} as any);
-
-		// Обновляем колонку total_slots_count для только что созданной записи
-		// RPC функция не поддерживает эту колонку, поэтому обновляем отдельно
-		const { data: newAttempt } = await supabaseAdmin
-			.from('booking_attempts')
-			.select('id')
-			.eq('ip_address', clientIP)
-			.eq('client_phone', clientPhone)
-			.order('attempt_time', { ascending: false })
-			.limit(1)
-			.single();
-
-		if (newAttempt) {
-			await (supabaseAdmin as any)
-				.from('booking_attempts')
-				.update({ total_slots_count: bookingsCount })
-				.eq('id', (newAttempt as any).id);
-		}
-	} catch (error) {
-		console.error('Error logging suspicious session activity:', error);
-	}
-}
-
-/**
  * Создать публичное бронирование (для клиентов на сайте)
  * Создает слот если его нет и затем бронирование
  */
@@ -305,26 +161,9 @@ export async function createPublicBooking(
 	endTime: string,
 	clientName: string,
 	clientPhone: string,
-	clientEmail: string,
-	clientIP?: string,
-	clientFingerprint?: string
+	clientEmail: string
 ): Promise<{ success: boolean; booking_id?: string; error?: string }> {
 	try {
-		// ВАЖНО: Проверяем, не заблокирован ли пользователь
-		const blockCheck = await checkIfUserBlocked(
-			clientIP,
-			clientFingerprint,
-			clientPhone,
-			clientEmail
-		);
-
-		if (blockCheck.blocked) {
-			return {
-				success: false,
-				error: blockCheck.reason || 'Бронирование недоступно'
-			};
-		}
-
 		// Проверяем, существует ли слот
 		const { data: existingSlot, error: slotCheckError } = await supabase
 			.from('time_slots')
@@ -373,7 +212,7 @@ export async function createPublicBooking(
 			slotId = newSlot.id;
 		}
 
-		// Создаем бронирование с сохранением IP и fingerprint
+		// Создаем бронирование
 		const { data: booking, error: bookingError } = await supabase
 			.from('bookings')
 			.insert({
@@ -382,8 +221,6 @@ export async function createPublicBooking(
 				client_name: clientName,
 				client_phone: clientPhone,
 				client_email: clientEmail,
-				client_ip: clientIP || null,
-				client_fingerprint: clientFingerprint || null,
 				status: 'pending',
 			} as any)
 			.select('id')

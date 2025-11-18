@@ -1,12 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { getCities } from '../lib/cities'
 import { getPublicActiveSchedulePeriodsByCity } from '../lib/schedule'
-import { getPublicBookingsByCityAndDates, createPublicBooking, logSuspiciousSessionActivity } from '../lib/bookings'
+import { getPublicBookingsByCityAndDates, createPublicBooking } from '../lib/bookings'
 import { getOrCreateSlotsForDate, getAvailableSlotsByCityAndDateRange } from '../lib/timeSlots'
-import {
-	generateClientFingerprint,
-	getClientIP
-} from '../lib/antiSpam'
 import Toast from './Toast'
 
 const BookingWidget = () => {
@@ -26,12 +22,9 @@ const BookingWidget = () => {
 	const [clientName, setClientName] = useState('')
 	const [clientPhone, setClientPhone] = useState('')
 	const [clientEmail, setClientEmail] = useState('')
-	const [clientIP, setClientIP] = useState(null)
-	const [clientFingerprint, setClientFingerprint] = useState(null)
 	const [bookingLoading, setBookingLoading] = useState(false)
 	const [toast, setToast] = useState(null)
 	const [localError, setLocalError] = useState(null)
-	const [sessionBookingsCount, setSessionBookingsCount] = useState(0) // Счётчик бронирований в сессии
 
 	useEffect(() => {
 		async function loadCities() {
@@ -43,17 +36,6 @@ const BookingWidget = () => {
 					setSelectedCity(moscow.id)
 				} else if (citiesData.length > 0) {
 					setSelectedCity(citiesData[0].id)
-				}
-
-				// Инициализируем fingerprint и IP для логирования
-				try {
-					const fingerprint = generateClientFingerprint()
-					setClientFingerprint(fingerprint)
-
-					const ip = await getClientIP()
-					setClientIP(ip)
-				} catch (error) {
-					console.error('Error initializing anti-spam:', error)
 				}
 			} catch (error) {
 				setToast({ message: 'Ошибка загрузки городов', type: 'error' })
@@ -234,9 +216,7 @@ const BookingWidget = () => {
 					slot.endTime,
 					clientName,
 					clientPhone,
-					clientEmail,
-					clientIP,
-					clientFingerprint
+					clientEmail
 				)
 			)
 
@@ -248,36 +228,8 @@ const BookingWidget = () => {
 
 			if (failedResult) {
 				setLocalError(failedResult.error || 'Ошибка создания бронирования')
-
-				// Логируем неудачную попытку
-				if (clientIP) {
-					logSuspiciousSessionActivity(
-						clientIP,
-						clientFingerprint,
-						clientName,
-						clientPhone,
-						clientEmail,
-						0 // 0 слотов = неудача
-					).catch(err => console.error('Logging error:', err))
-				}
 			} else {
 				// Все бронирования успешны
-				const newCount = sessionBookingsCount + selectedSlots.length
-				setSessionBookingsCount(newCount)
-
-				// Логируем успешное бронирование с количеством слотов
-				// Это выполняется асинхронно и не блокирует UI
-				if (clientIP) {
-					logSuspiciousSessionActivity(
-						clientIP,
-						clientFingerprint,
-						clientName,
-						clientPhone,
-						clientEmail,
-						selectedSlots.length // количество забронированных слотов
-					).catch(err => console.error('Logging error:', err))
-				}
-
 				setStep(3)
 				setLocalError(null) // Очищаем ошибку при успехе
 

@@ -17,7 +17,6 @@ import AdminCategories from './pages/AdminCategories'
 import AdminServices from './pages/AdminServices'
 import AdminSchedule from './pages/AdminSchedule'
 import AdminCases from './pages/AdminCases'
-import AdminSecurity from './pages/AdminSecurity'
 import NotFound from './pages/NotFound'
 import './App.css'
 
@@ -106,16 +105,6 @@ function App() {
 					<PrivateRoute>
 						<AdminLayout>
 							<AdminSchedule />
-						</AdminLayout>
-					</PrivateRoute>
-				}
-			/>
-			<Route
-				path="/admin/security"
-				element={
-					<PrivateRoute>
-						<AdminLayout>
-							<AdminSecurity />
 						</AdminLayout>
 					</PrivateRoute>
 				}
