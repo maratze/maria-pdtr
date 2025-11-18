@@ -3,6 +3,7 @@ import { getAllBookings, deleteAllBookings } from '../lib/bookings'
 import type { BookingFull } from '../types/booking'
 import { getBlockedPhones, blockPhone, unblockPhone } from '../lib/blockedPhones'
 import type { BlockedPhone } from '../lib/blockedPhones'
+import Toast from '../components/Toast'
 
 export default function AdminBookingsHistory() {
 	const [bookings, setBookings] = useState<BookingFull[]>([])
@@ -26,6 +27,12 @@ export default function AdminBookingsHistory() {
 
 	// Expandable groups
 	const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set())
+
+	// Toast notifications
+	const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'warning' } | null>(null)
+
+	// Helper function to normalize phone numbers for comparison
+	const normalizePhone = (phone: string) => phone.replace(/\s/g, '')
 
 	useEffect(() => {
 		loadData()
@@ -58,8 +65,9 @@ export default function AdminBookingsHistory() {
 			setShowBlockModal(false)
 			setPhoneToBlock('')
 			setBlockReason('')
+			setToast({ message: 'Номер успешно заблокирован', type: 'success' })
 		} else {
-			alert(result.error || 'Ошибка блокировки')
+			setToast({ message: result.error || 'Ошибка блокировки', type: 'error' })
 		}
 		setProcessing(false)
 	}
@@ -79,8 +87,9 @@ export default function AdminBookingsHistory() {
 			await loadData()
 			setShowUnblockConfirm(false)
 			setPhoneToUnblock(null)
+			setToast({ message: 'Номер успешно разблокирован', type: 'success' })
 		} else {
-			alert(result.error || 'Ошибка разблокировки')
+			setToast({ message: result.error || 'Ошибка разблокировки', type: 'error' })
 		}
 		setProcessing(false)
 	}
@@ -112,9 +121,10 @@ export default function AdminBookingsHistory() {
 			await deleteAllBookings()
 			await loadData()
 			setShowClearHistoryConfirm(false)
+			setToast({ message: 'История успешно очищена', type: 'success' })
 		} catch (error) {
 			console.error('Error clearing history:', error)
-			alert('Ошибка при очистке истории')
+			setToast({ message: 'Ошибка при очистке истории', type: 'error' })
 		} finally {
 			setClearingHistory(false)
 		}
@@ -213,6 +223,7 @@ export default function AdminBookingsHistory() {
 							return new Date(current.created_at || 0) < new Date(earliest.created_at || 0) ? current : earliest
 						})
 						const isExpanded = expandedGroups.has(phone)
+						const isBlocked = blockedPhones.some(blocked => normalizePhone(blocked.phone) === normalizePhone(phone))
 
 						return (
 							<div key={phone} className="bg-white rounded-xl border border-slate-200 overflow-hidden">
@@ -252,15 +263,24 @@ export default function AdminBookingsHistory() {
 											</div>
 										</div>
 									</div>
-									<button
-										onClick={() => openBlockModal(phone)}
-										className="px-3 h-8 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-1.5"
-									>
-										<svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-											<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-										</svg>
-										Заблокировать
-									</button>
+									{isBlocked ? (
+										<div className="px-3 h-8 text-sm text-slate-400 bg-slate-100 rounded-lg flex items-center gap-1.5 cursor-not-allowed">
+											<svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+												<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+											</svg>
+											Заблокирован
+										</div>
+									) : (
+										<button
+											onClick={() => openBlockModal(phone)}
+											className="px-3 h-8 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-1.5"
+										>
+											<svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+												<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+											</svg>
+											Заблокировать
+										</button>
+									)}
 								</div>
 
 								{/* Bookings Table - Collapsible */}
@@ -406,8 +426,12 @@ export default function AdminBookingsHistory() {
 									value={phoneToBlock}
 									onChange={(e) => setPhoneToBlock(e.target.value)}
 									placeholder="+7 999 999 99 99"
-									className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:border-ocean-400 focus:outline-none focus:ring-2 focus:ring-ocean-100 text-slate-900 placeholder-slate-400"
+									disabled={blockedPhones.some(blocked => normalizePhone(blocked.phone) === normalizePhone(phoneToBlock)) && phoneToBlock !== ''}
+									className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:border-ocean-400 focus:outline-none focus:ring-2 focus:ring-ocean-100 text-slate-900 placeholder-slate-400 disabled:bg-slate-50 disabled:text-slate-400"
 								/>
+								{blockedPhones.some(blocked => normalizePhone(blocked.phone) === normalizePhone(phoneToBlock)) && phoneToBlock !== '' && (
+									<p className="text-xs text-amber-600 mt-1">Этот номер уже заблокирован</p>
+								)}
 							</div>
 							<div>
 								<label className="block text-sm font-medium text-slate-700 mb-2">
@@ -430,7 +454,7 @@ export default function AdminBookingsHistory() {
 								</button>
 								<button
 									onClick={handleBlockPhone}
-									disabled={processing || !phoneToBlock}
+									disabled={processing || !phoneToBlock || blockedPhones.some(blocked => normalizePhone(blocked.phone) === normalizePhone(phoneToBlock))}
 									className="flex-1 h-10 px-4 rounded-lg bg-red-600 text-white text-sm font-medium hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 								>
 									{processing ? 'Блокировка...' : 'Заблокировать'}
@@ -509,6 +533,15 @@ export default function AdminBookingsHistory() {
 						</div>
 					</div>
 				</div>
+			)}
+
+			{/* Toast Notifications */}
+			{toast && (
+				<Toast
+					message={toast.message}
+					type={toast.type}
+					onClose={() => setToast(null)}
+				/>
 			)}
 		</div>
 	)
