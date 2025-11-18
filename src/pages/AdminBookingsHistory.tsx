@@ -34,6 +34,16 @@ export default function AdminBookingsHistory() {
 	// Helper function to normalize phone numbers for comparison
 	const normalizePhone = (phone: string) => phone.replace(/\s/g, '')
 
+	// Helper function to format phone number with spaces
+	const formatPhone = (phone: string) => {
+		const cleaned = phone.replace(/\s/g, '')
+		// Format: +7 XXX XXX XX XX
+		if (cleaned.startsWith('+7') && cleaned.length === 12) {
+			return `${cleaned.slice(0, 2)} ${cleaned.slice(2, 5)} ${cleaned.slice(5, 8)} ${cleaned.slice(8, 10)} ${cleaned.slice(10, 12)}`
+		}
+		return phone
+	}
+
 	useEffect(() => {
 		loadData()
 	}, [])
@@ -362,7 +372,7 @@ export default function AdminBookingsHistory() {
 								<tbody className="divide-y divide-slate-200">
 									{blockedPhones.map((blocked) => (
 										<tr key={blocked.id} className="hover:bg-slate-50">
-											<td className="px-4 py-4 text-sm font-medium text-slate-900 font-mono">{blocked.phone}</td>
+											<td className="px-4 py-4 text-sm font-medium text-slate-900 font-mono">{formatPhone(blocked.phone)}</td>
 											<td className="px-4 py-4 text-sm text-slate-700">{blocked.reason || '-'}</td>
 											<td className="px-4 py-4 text-sm text-slate-500">
 												{new Date(blocked.blocked_at).toLocaleDateString('ru-RU', {
