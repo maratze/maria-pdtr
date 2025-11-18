@@ -26,8 +26,9 @@ const BookingWidget = () => {
 	const [toast, setToast] = useState(null)
 	const [localError, setLocalError] = useState(null)
 
-	// Валидация email
+	// Валидация email и телефона
 	const [emailError, setEmailError] = useState('')
+	const [phoneError, setPhoneError] = useState('')
 
 	useEffect(() => {
 		async function loadCities() {
@@ -269,7 +270,16 @@ const BookingWidget = () => {
 		setClientPhone('')
 		setClientEmail('')
 		setEmailError('')
+		setPhoneError('')
 		setLocalError(null) // Очищаем ошибку при сбросе
+	}
+
+	// Валидация полного формата телефона +7 999 999 99 99
+	const validatePhoneNumber = (phone) => {
+		// Удаляем все кроме цифр
+		const cleaned = phone.replace(/\D/g, '')
+		// Проверяем что есть 11 цифр и начинается с 7
+		return cleaned.length === 11 && cleaned[0] === '7'
 	}
 
 	// Форматирование телефона +7 ### ### ## ##
@@ -292,6 +302,17 @@ const BookingWidget = () => {
 	const handlePhoneChange = (e) => {
 		const formatted = formatPhoneNumber(e.target.value)
 		setClientPhone(formatted)
+		// Убираем ошибку при вводе, если пользователь исправляет
+		if (phoneError && validatePhoneNumber(formatted)) {
+			setPhoneError('')
+		}
+	}
+
+	// Валидация телефона при потере фокуса
+	const handlePhoneBlur = () => {
+		if (clientPhone && !validatePhoneNumber(clientPhone)) {
+			setPhoneError('Введите полный номер телефона в формате +7 999 999 99 99')
+		}
 	}
 
 	// Валидация email
@@ -395,7 +416,7 @@ const BookingWidget = () => {
 					</div>
 
 					{/* Двухколоночный layout: календарь слева, слоты/форма справа */}
-					<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+					<div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
 						{/* ЛЕВАЯ КОЛОНКА: Календарь */}
 						<div className="w-full">
 							<div className="flex items-center justify-between mb-4">
@@ -577,13 +598,15 @@ const BookingWidget = () => {
 														type="tel"
 														value={clientPhone}
 														onChange={handlePhoneChange}
+														onBlur={handlePhoneBlur}
 														required
-														className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-ocean-500 focus:border-transparent"
+														className={`w-full px-4 py-2.5 bg-white/5 border ${phoneError ? 'border-red-500' : 'border-white/10'} rounded text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-ocean-500 focus:border-transparent`}
 														placeholder="+7 900 123 45 67"
 													/>
-												</div>
-
-												<div>
+													{phoneError && (
+														<p className="text-xs text-red-400 mt-1">{phoneError}</p>
+													)}
+												</div>												<div>
 													<label htmlFor="email" className="block text-sm font-medium text-slate-300 mb-2">
 														Email
 													</label>
@@ -609,14 +632,12 @@ const BookingWidget = () => {
 													</button>
 													<button
 														type="submit"
-														disabled={bookingLoading || !clientName || !clientPhone || emailError}
+														disabled={bookingLoading || !clientName || !clientPhone || phoneError || emailError}
 														className="flex-1 px-6 py-2.5 rounded bg-ocean-600 text-white font-medium text-sm hover:bg-ocean-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 													>
 														{bookingLoading ? 'Создание записи...' : 'Записаться'}
 													</button>
-												</div>
-
-												{/* Локальное отображение ошибки над кнопкой */}
+												</div>												{/* Локальное отображение ошибки над кнопкой */}
 												{localError && (
 													<div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
 														<div className="flex items-start gap-2">
