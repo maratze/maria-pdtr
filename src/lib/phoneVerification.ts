@@ -1,5 +1,6 @@
 import { supabase } from './supabaseClient'
 import type { PhoneVerificationCode } from '../types/phoneVerification'
+import { isPhoneBlocked } from './blockedPhones'
 
 /**
  * Generate a random 6-digit verification code
@@ -17,6 +18,12 @@ export async function sendVerificationCode(phone: string): Promise<{ success: bo
 	try {
 		// Remove spaces and formatting from phone
 		const cleanPhone = phone.replace(/\s/g, '')
+
+		// Check if phone is blocked
+		const blocked = await isPhoneBlocked(cleanPhone)
+		if (blocked) {
+			return { success: false, message: 'Этот номер телефона заблокирован' }
+		}
 
 		// Generate 6-digit code
 		const code = generateVerificationCode()

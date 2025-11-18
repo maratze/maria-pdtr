@@ -310,6 +310,23 @@ export async function deleteBooking(id: string): Promise<void> {
 }
 
 /**
+ * Удалить все бронирования (для админа)
+ * Очистить историю записей
+ */
+export async function deleteAllBookings(): Promise<void> {
+	if (!supabaseAdmin) {
+		throw new Error('Supabase admin client is not initialized');
+	}
+
+	const { error } = await supabaseAdmin.from('bookings').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+
+	if (error) {
+		console.error('Error deleting all bookings:', error);
+		throw error;
+	}
+}
+
+/**
  * Получить бронирования для конкретного слота
  */
 export async function getBookingsBySlot(

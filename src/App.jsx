@@ -17,6 +17,7 @@ import AdminCategories from './pages/AdminCategories'
 import AdminServices from './pages/AdminServices'
 import AdminSchedule from './pages/AdminSchedule'
 import AdminCases from './pages/AdminCases'
+import AdminBookingsHistory from './pages/AdminBookingsHistory'
 import NotFound from './pages/NotFound'
 import './App.css'
 
@@ -65,6 +66,16 @@ function App() {
 					<PrivateRoute>
 						<AdminLayout>
 							<AdminReviews />
+						</AdminLayout>
+					</PrivateRoute>
+				}
+			/>
+			<Route
+				path="/admin/bookings"
+				element={
+					<PrivateRoute>
+						<AdminLayout>
+							<AdminBookingsHistory />
 						</AdminLayout>
 					</PrivateRoute>
 				}
