@@ -62,6 +62,25 @@ export async function blockPhone(
 	try {
 		const cleanPhone = phone.replace(/\s/g, '')
 
+		// First, delete all bookings for this phone number (try both formats)
+		// Try with spaces removed
+		const { error: deleteError1 } = await supabaseAdmin
+			.from('bookings')
+			.delete()
+			.eq('client_phone', cleanPhone)
+
+		// Try with original format (with spaces)
+		const { error: deleteError2 } = await supabaseAdmin
+			.from('bookings')
+			.delete()
+			.eq('client_phone', phone)
+
+		if (deleteError1 || deleteError2) {
+			console.error('Error deleting bookings:', deleteError1, deleteError2)
+			// Continue with blocking even if deletion fails
+		}
+
+		// Then block the phone number
 		// @ts-ignore - Supabase types not updated
 		const { error } = await supabaseAdmin
 			.from('blocked_phones')
