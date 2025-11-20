@@ -13,6 +13,7 @@ const Testimonials = () => {
 	const [loadingReviews, setLoadingReviews] = useState(true)
 	const [selectedImageReview, setSelectedImageReview] = useState(null) // For gallery popup: { photos: [], index: 0 }
 	const [imageLoading, setImageLoading] = useState(false)
+	const [selectedReview, setSelectedReview] = useState(null) // For full review popup
 
 	// Load categories from database
 	useEffect(() => {
@@ -215,7 +216,20 @@ const Testimonials = () => {
 												</div>
 
 												{/* Message */}
-												<p className="text-[15px] text-slate-700 leading-[18px] mb-4 flex-1">{testimonial.problem}</p>
+												<p className="text-[15px] text-slate-700 leading-[18px] mb-4 flex-1">{testimonial.problem.length > 240 ? testimonial.problem.substring(0, 240) + '...' : testimonial.problem}</p>
+
+												{/* Read More Button */}
+												{testimonial.problem.length > 240 && (
+													<button
+														onClick={() => setSelectedReview(testimonial)}
+														className="inline-flex items-center gap-1 text-ocean-600 hover:text-ocean-700 font-medium text-xs transition-colors duration-200 mb-4"
+													>
+														<svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+															<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+														</svg>
+														Читать полностью
+													</button>
+												)}
 
 												{/* Photos Gallery */}
 												{testimonial.photos && testimonial.photos.length > 0 && (
@@ -322,7 +336,20 @@ const Testimonials = () => {
 												</div>
 
 												{/* Message */}
-												<p className="text-[15px] text-slate-700 leading-[18px] mb-4 flex-1">{testimonial.problem}</p>
+												<p className="text-[15px] text-slate-700 leading-[18px] mb-4 flex-1">{testimonial.problem.length > 240 ? testimonial.problem.substring(0, 240) + '...' : testimonial.problem}</p>
+
+												{/* Read More Button */}
+												{testimonial.problem.length > 240 && (
+													<button
+														onClick={() => setSelectedReview(testimonial)}
+														className="inline-flex items-center gap-1 text-ocean-600 hover:text-ocean-700 font-medium text-sm transition-colors duration-200 mb-4"
+													>
+														<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+															<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+														</svg>
+														Читать полностью
+													</button>
+												)}
 
 												{/* Author & Date - only if name exists */}
 												{testimonial.name && (
@@ -420,6 +447,96 @@ const Testimonials = () => {
 											</div>
 										</>
 									)}
+								</div>
+							</div>
+						)}
+
+						{/* Full Review Modal */}
+						{selectedReview && (
+							<div className="fixed inset-0 bg-black/50 flex items-center justify-center p-2 sm:p-4 z-50" onClick={() => setSelectedReview(null)}>
+								<div
+									className="bg-white rounded-xl sm:rounded-2xl max-w-3xl w-full max-h-[90vh] flex flex-col"
+									onClick={(e) => e.stopPropagation()}
+								>
+									{/* Modal Header - фиксированная шапка */}
+									<div className="flex-shrink-0 bg-white border-b border-gray-200 p-4 sm:p-6 rounded-t-xl sm:rounded-t-2xl">
+										<div className="flex items-start gap-3 sm:gap-4 justify-between">
+											{/* Left: Avatar and Stars */}
+											<div className="flex items-start gap-3 sm:gap-4 flex-1 min-w-0">
+												<div className="flex flex-col items-center flex-shrink-0">
+													<div className="w-12 h-12 sm:w-14 sm:h-14 bg-ocean-100 rounded-full flex items-center justify-center mb-2">
+														<svg className="w-6 h-6 sm:w-8 sm:h-8 text-ocean-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+															<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+														</svg>
+													</div>
+													<div className="flex items-center gap-1">
+														{[...Array(selectedReview.rating)].map((_, i) => (
+															<svg key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" viewBox="0 0 24 24">
+																<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+															</svg>
+														))}
+													</div>
+												</div>
+												<div className="flex-1 min-w-0">
+													<h3 className="text-base sm:text-xl lg:text-2xl font-medium text-slate-700 break-words">
+														{selectedReview.name}
+													</h3>
+													{selectedReview.created_at && (
+														<div className="text-xs sm:text-sm text-slate-500 mt-1">
+															{new Date(selectedReview.created_at).toLocaleDateString('ru-RU', {
+																day: 'numeric',
+																month: 'long',
+																year: 'numeric'
+															})}
+														</div>
+													)}
+												</div>
+											</div>
+											{/* Right: Close button */}
+											<button
+												onClick={() => setSelectedReview(null)}
+												className="flex-shrink-0 p-1.5 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors"
+											>
+												<svg className="w-5 h-5 sm:w-6 sm:h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+													<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+												</svg>
+											</button>
+										</div>
+									</div>
+
+									{/* Modal Content - скроллируемая область */}
+									<div className="flex-1 overflow-auto p-4 sm:p-6 rounded-b-xl sm:rounded-b-2xl">
+										<div className="text-sm sm:text-base text-slate-700 leading-relaxed whitespace-pre-wrap">
+											{selectedReview.problem}
+										</div>
+
+										{/* Photos Gallery in Modal */}
+										{selectedReview.photos && selectedReview.photos.length > 0 && (
+											<div className="mt-6 p-4 rounded-lg bg-slate-50 border border-slate-200">
+												<h4 className="text-sm font-medium text-slate-700 mb-3">Фотографии</h4>
+												<div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+													{selectedReview.photos.map((photo, idx) => (
+														<div
+															key={photo}
+															className="relative group aspect-square cursor-pointer"
+															onClick={() => setSelectedImageReview({ photos: selectedReview.photos, index: idx })}
+														>
+															<img
+																src={photo}
+																alt={`отзыв-${idx}`}
+																className="w-full h-full object-cover rounded-lg border border-slate-200 group-hover:opacity-75 transition-opacity"
+															/>
+															<div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-lg bg-black/50">
+																<svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+																	<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" />
+																</svg>
+															</div>
+														</div>
+													))}
+												</div>
+											</div>
+										)}
+									</div>
 								</div>
 							</div>
 						)}

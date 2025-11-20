@@ -239,7 +239,7 @@ export default function AdminBookingsHistory() {
 							<div key={phone} className="bg-white rounded-xl border border-slate-200 overflow-hidden">
 								{/* Group Header - Clickable */}
 								<div
-									className="w-full bg-slate-50 px-4 py-3 border-b border-slate-200 flex items-center justify-between hover:bg-slate-100 transition-colors cursor-pointer"
+									className="w-full bg-white px-4 py-3 border-b border-slate-200 flex items-center justify-between hover:bg-slate-100 transition-colors cursor-pointer"
 								>
 									<div
 										onClick={() => toggleGroup(phone)}
