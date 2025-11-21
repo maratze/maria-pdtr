@@ -121,10 +121,9 @@ export async function sendVerificationCode(phone: string): Promise<{ success: bo
 		await recordSmsSend(cleanPhone)
 
 		// Call Edge Function to send SMS
-		// const { error: smsError } = await supabase.functions.invoke('send-sms', {
-		// 	body: { phone: cleanPhone, code: code }
-		// })
-		var smsError = true;
+		const { error: smsError } = await supabase.functions.invoke('send-sms', {
+			body: { phone: cleanPhone, code: code }
+		})
 
 		if (smsError) {
 			console.error('Error sending SMS:', smsError)
