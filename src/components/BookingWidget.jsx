@@ -3,7 +3,6 @@ import { getCities } from '../lib/cities'
 import { getPublicActiveSchedulePeriodsByCity } from '../lib/schedule'
 import { getPublicBookingsByCityAndDates, createPublicBooking } from '../lib/bookings'
 import { getOrCreateSlotsForDate, getAvailableSlotsByCityAndDateRange } from '../lib/timeSlots'
-import { sendVerificationCode, verifyCode } from '../lib/phoneVerification'
 import Toast from './Toast'
 
 const BookingWidget = () => {
@@ -31,15 +30,6 @@ const BookingWidget = () => {
 	const [emailError, setEmailError] = useState('')
 	const [phoneError, setPhoneError] = useState('')
 
-	// SMS верификация
-	const [phoneVerified, setPhoneVerified] = useState(false)
-	const [verificationCode, setVerificationCode] = useState('')
-	const [codeSent, setCodeSent] = useState(false)
-	const [sendingCode, setSendingCode] = useState(false)
-	const [verifyingCode, setVerifyingCode] = useState(false)
-	const [codeError, setCodeError] = useState('')
-	const [resendTimer, setResendTimer] = useState(0)
-
 	useEffect(() => {
 		async function loadCities() {
 			try {
@@ -59,13 +49,6 @@ const BookingWidget = () => {
 		}
 		loadCities()
 	}, [])
-
-	useEffect(() => {
-		if (resendTimer > 0) {
-			const timer = setTimeout(() => setResendTimer(resendTimer - 1), 1000)
-			return () => clearTimeout(timer)
-		}
-	}, [resendTimer])
 
 	useEffect(() => {
 		if (!selectedCity) return
@@ -221,10 +204,6 @@ const BookingWidget = () => {
 			setClientName('')
 			setClientPhone('')
 			setClientEmail('')
-			setPhoneVerified(false)
-			setVerificationCode('')
-			setCodeSent(false)
-			setCodeError('')
 		}
 	}
 
@@ -234,21 +213,6 @@ const BookingWidget = () => {
 
 		if (selectedSlots.length === 0 || !clientName || !clientPhone) return
 
-		// Проверяем верификацию телефона
-		if (!phoneVerified) {
-			if (!codeSent) {
-				// Если код еще не отправлен, отправляем его
-				await handleSendCode()
-			}
-			// Останавливаемся здесь, пользователь должен ввести код
-			return
-		}
-
-		// Если телефон подтвержден, выполняем бронирование
-		await handleBooking()
-	}
-
-	const handleBooking = async () => {
 		try {
 			setBookingLoading(true)
 			setLocalError(null)
@@ -326,11 +290,6 @@ const BookingWidget = () => {
 		setEmailError('')
 		setPhoneError('')
 		setLocalError(null) // Очищаем ошибку при сбросе
-		// Сбрасываем состояние верификации
-		setPhoneVerified(false)
-		setVerificationCode('')
-		setCodeSent(false)
-		setCodeError('')
 	}
 
 	// Валидация полного формата телефона +7 999 999 99 99
@@ -384,63 +343,6 @@ const BookingWidget = () => {
 		} else {
 			setEmailError('')
 		}
-	}
-
-	// Отправка SMS кода
-	const handleSendCode = async () => {
-		// Валидация телефона
-		if (!validatePhoneNumber(clientPhone)) {
-			setPhoneError('Введите полный номер телефона в формате +7 999 999 99 99')
-			return
-		}
-
-		setSendingCode(true)
-		setCodeError('')
-
-		const result = await sendVerificationCode(clientPhone)
-
-		if (result.success) {
-			setCodeSent(true)
-			setResendTimer(60)
-			setToast({ message: result.message, type: 'success' })
-		} else {
-			setToast({ message: result.message, type: 'error' })
-		}
-
-		setSendingCode(false)
-	}
-
-	// Повторная отправка кода
-	const handleResendCode = async () => {
-		if (resendTimer > 0) return
-		await handleSendCode()
-	}
-
-	// Проверка введенного кода
-	const handleVerifyCode = async () => {
-		if (verificationCode.length !== 6) {
-			setCodeError('Введите 6-значный код')
-			return
-		}
-
-		setVerifyingCode(true)
-		setCodeError('')
-
-		const result = await verifyCode(clientPhone, verificationCode)
-
-		if (result.success) {
-			setPhoneVerified(true)
-			setToast({ message: result.message, type: 'success' })
-			// Автоматически переходим к бронированию
-			setTimeout(() => {
-				handleBooking()
-			}, 500)
-		} else {
-			setCodeError(result.message)
-			setToast({ message: result.message, type: 'error' })
-		}
-
-		setVerifyingCode(false)
 	}
 
 	const monthNames = [
@@ -729,78 +631,14 @@ const BookingWidget = () => {
 															onChange={handlePhoneChange}
 															onBlur={handlePhoneBlur}
 															required
-															disabled={phoneVerified}
-															className={`w-full px-4 py-2.5 bg-white/5 border ${phoneError ? 'border-red-500' : phoneVerified ? 'border-green-500' : 'border-white/10'} rounded text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-ocean-500 focus:border-transparent disabled:opacity-60`}
+															className={`w-full px-4 py-2.5 bg-white/5 border ${phoneError ? 'border-red-500' : 'border-white/10'} rounded text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-ocean-500 focus:border-transparent`}
 															placeholder="+7 900 123 45 67"
 														/>
-														{phoneError && !codeSent && (
+														{phoneError && (
 															<p className="text-xs text-red-400 mt-1">{phoneError}</p>
-														)}
-														{phoneVerified && (
-															<p className="text-xs text-green-400 mt-1 flex items-center gap-1">
-																<svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-																	<path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-																</svg>
-																Телефон подтвержден
-															</p>
 														)}
 													</div>
 
-													{/* Блок подтверждения телефона */}
-													{codeSent && !phoneVerified && (
-														<div className="p-4 bg-ocean-500/10 border border-ocean-500/30 rounded-lg space-y-3">
-															<p className="text-sm text-slate-300">
-																Введите код подтверждения, отправленный на ваш телефон
-															</p>
-															<div>
-																<input
-																	type="text"
-																	value={verificationCode}
-																	onChange={(e) => {
-																		const value = e.target.value.replace(/\D/g, '').slice(0, 6)
-																		setVerificationCode(value)
-																		setCodeError('')
-																	}}
-																	placeholder="000000"
-																	maxLength={6}
-																	className={`w-full px-4 py-2.5 bg-white/5 border ${codeError ? 'border-red-500' : 'border-white/10'} rounded text-white placeholder-slate-500 text-center tracking-widest text-lg font-mono focus:outline-none focus:ring-2 focus:ring-ocean-500 focus:border-transparent`}
-																/>
-																{codeError && (
-																	<p className="text-xs text-red-400 mt-1">{codeError}</p>
-																)}
-															</div>
-															<div className="flex gap-2">
-																<button
-																	type="button"
-																	onClick={handleVerifyCode}
-																	disabled={verifyingCode || verificationCode.length !== 6}
-																	className="flex-1 px-4 py-2 rounded bg-ocean-600 text-white font-medium text-sm hover:bg-ocean-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-																>
-																	{verifyingCode ? 'Проверка...' : 'Подтвердить'}
-																</button>
-																<button
-																	type="button"
-																	onClick={handleResendCode}
-																	disabled={sendingCode || resendTimer > 0}
-																	className="px-4 py-2 rounded bg-white/5 text-slate-300 font-medium text-sm hover:bg-white/10 transition-colors disabled:opacity-50"
-																>
-																	{sendingCode ? 'Отправка...' : resendTimer > 0 ? `Отправить снова (${resendTimer}с)` : 'Отправить снова'}
-																</button>
-															</div>
-														</div>
-													)}
-
-													{/* Кнопка отправки кода (если код еще не отправлен) */}
-													{!codeSent && !phoneVerified && clientPhone && !phoneError && (
-														<button
-															type="button"
-															onClick={handleSendCode}
-															disabled={sendingCode}
-															className="w-full px-4 py-2.5 rounded bg-ocean-500/20 border border-ocean-500/30 text-ocean-300 font-medium text-sm hover:bg-ocean-500/30 transition-colors disabled:opacity-50"
-														>
-															{sendingCode ? 'Отправка кода...' : 'Получить код подтверждения'}
-														</button>
-													)}
 													<div>
 														<label htmlFor="email" className="block text-sm font-medium text-slate-300 mb-2">
 															Email
@@ -827,10 +665,10 @@ const BookingWidget = () => {
 														</button>
 														<button
 															type="submit"
-															disabled={bookingLoading || !clientName || !clientPhone || phoneError || emailError || !phoneVerified}
+															disabled={bookingLoading || !clientName || !clientPhone || phoneError || emailError}
 															className="flex-1 px-6 py-2.5 rounded bg-ocean-600 text-white font-medium text-sm hover:bg-ocean-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 														>
-															{bookingLoading ? 'Создание записи...' : phoneVerified ? 'Записаться' : 'Подтвердите телефон'}
+															{bookingLoading ? 'Создание записи...' : 'Записаться'}
 														</button>
 													</div>												{/* Локальное отображение ошибки над кнопкой */}
 													{localError && (
