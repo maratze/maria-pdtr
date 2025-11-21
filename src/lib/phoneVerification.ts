@@ -10,6 +10,72 @@ function generateVerificationCode(): string {
 }
 
 /**
+ * Check rate limits for SMS sending
+ * @param phone - Phone number
+ * @returns Object with canSend status and message
+ */
+async function checkSmsRateLimit(phone: string): Promise<{ canSend: boolean; message?: string }> {
+	try {
+		// Check rate limit using database function
+		const { data, error } = await supabase.rpc('can_send_sms', {
+			phone_number: phone,
+			max_per_hour: 3, // Max 3 SMS per hour
+			max_per_day: 10   // Max 10 SMS per day
+		})
+
+		if (error) {
+			console.error('Error checking rate limit:', error)
+			// If check fails, allow but log
+			return { canSend: true }
+		}
+
+		if (!data) {
+			// Get recent SMS count manually for better error message
+			const { data: recentSms, error: countError } = await supabase
+				.from('sms_rate_limits')
+				.select('sent_at')
+				.eq('phone', phone)
+				.gt('sent_at', new Date(Date.now() - 60 * 60 * 1000).toISOString())
+				.order('sent_at', { ascending: false })
+
+			if (!countError && recentSms && recentSms.length >= 3) {
+				return {
+					canSend: false,
+					message: 'Превышен лимит отправки SMS. Попробуйте позже через час.'
+				}
+			}
+
+			return {
+				canSend: false,
+				message: 'Превышен лимит отправки SMS. Попробуйте позже.'
+			}
+		}
+
+		return { canSend: true }
+	} catch (error) {
+		console.error('Error in checkSmsRateLimit:', error)
+		return { canSend: true } // Allow on error
+	}
+}
+
+/**
+ * Record SMS send for rate limiting
+ * @param phone - Phone number
+ */
+async function recordSmsSend(phone: string): Promise<void> {
+	try {
+		// @ts-ignore - Supabase types not updated for new table
+		await supabase.from('sms_rate_limits').insert({
+			phone: phone,
+			ip_address: null, // Could be added from client if needed
+			user_agent: navigator?.userAgent || null
+		})
+	} catch (error) {
+		console.error('Error recording SMS send:', error)
+	}
+}
+
+/**
  * Send SMS verification code to phone number
  * @param phone - Phone number in format +7 XXX XXX XX XX
  * @returns Success status and message
@@ -23,6 +89,12 @@ export async function sendVerificationCode(phone: string): Promise<{ success: bo
 		const blocked = await isPhoneBlocked(cleanPhone)
 		if (blocked) {
 			return { success: false, message: 'Этот номер телефона заблокирован' }
+		}
+
+		// Check rate limits
+		const rateLimitCheck = await checkSmsRateLimit(cleanPhone)
+		if (!rateLimitCheck.canSend) {
+			return { success: false, message: rateLimitCheck.message || 'Превышен лимит отправки SMS' }
 		}
 
 		// Generate 6-digit code
@@ -45,10 +117,14 @@ export async function sendVerificationCode(phone: string): Promise<{ success: bo
 			return { success: false, message: 'Ошибка при создании кода подтверждения' }
 		}
 
+		// Record SMS send for rate limiting
+		await recordSmsSend(cleanPhone)
+
 		// Call Edge Function to send SMS
-		const { error: smsError } = await supabase.functions.invoke('send-sms', {
-			body: { phone: cleanPhone, code: code }
-		})
+		// const { error: smsError } = await supabase.functions.invoke('send-sms', {
+		// 	body: { phone: cleanPhone, code: code }
+		// })
+		var smsError = true;
 
 		if (smsError) {
 			console.error('Error sending SMS:', smsError)

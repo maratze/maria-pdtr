@@ -150,6 +150,41 @@ export async function createBooking(
 	return data as { success: boolean; booking_id?: string; error?: string };
 }
 
+async function checkBookingAbuse(phone: string): Promise<{
+	isSuspicious: boolean;
+	activeBookings: number;
+	todayBookings: number;
+	reason?: string;
+}> {
+	try {
+		const { data, error } = await supabase.rpc('check_booking_abuse', {
+			phone_number: phone,
+			max_active_bookings: 3,  // Max 3 active bookings
+			max_bookings_per_day: 3  // Max 3 bookings per day
+		})
+
+		if (error) {
+			console.error('Error checking booking abuse:', error)
+			return { isSuspicious: false, activeBookings: 0, todayBookings: 0 }
+		}
+
+		if (data && data.length > 0) {
+			const result = data[0]
+			return {
+				isSuspicious: result.is_suspicious,
+				activeBookings: result.active_bookings_count,
+				todayBookings: result.today_bookings_count,
+				reason: result.reason
+			}
+		}
+
+		return { isSuspicious: false, activeBookings: 0, todayBookings: 0 }
+	} catch (error) {
+		console.error('Error in checkBookingAbuse:', error)
+		return { isSuspicious: false, activeBookings: 0, todayBookings: 0 }
+	}
+}
+
 /**
  * Создать публичное бронирование (для клиентов на сайте)
  * Создает слот если его нет и затем бронирование
@@ -164,6 +199,19 @@ export async function createPublicBooking(
 	clientEmail: string
 ): Promise<{ success: boolean; booking_id?: string; error?: string }> {
 	try {
+		// Clean phone for consistency
+		const cleanPhone = clientPhone.replace(/\s/g, '')
+
+		// Check for booking abuse patterns
+		const abuseCheck = await checkBookingAbuse(cleanPhone)
+		if (abuseCheck.isSuspicious) {
+			console.warn(`Suspicious booking activity detected for phone: ${cleanPhone}`, abuseCheck)
+			return {
+				success: false,
+				error: abuseCheck.reason || 'Обнаружена подозрительная активность. Пожалуйста, обратитесь в поддержку.'
+			}
+		}
+
 		// Проверяем, существует ли слот
 		const { data: existingSlot, error: slotCheckError } = await supabase
 			.from('time_slots')

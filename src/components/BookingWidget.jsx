@@ -197,6 +197,11 @@ const BookingWidget = () => {
 			setSelectedSlots(selectedSlots.filter(s => s.id !== slot.id))
 			setLocalError(null) // Очищаем ошибку
 		} else {
+			// Проверяем лимит в 3 слота
+			if (selectedSlots.length >= 3) {
+				setLocalError('Можно выбрать максимум 3 слота за одно бронирование')
+				return
+			}
 			// Добавляем к выбранным
 			setSelectedSlots([...selectedSlots, slot])
 			setLocalError(null) // Очищаем ошибку
@@ -246,6 +251,7 @@ const BookingWidget = () => {
 	const handleBooking = async () => {
 		try {
 			setBookingLoading(true)
+			setLocalError(null)
 
 			// ОПТИМИЗАЦИЯ: Создаём все бронирования параллельно вместо последовательного цикла
 			const bookingPromises = selectedSlots.map(slot =>
@@ -267,7 +273,18 @@ const BookingWidget = () => {
 			const failedResult = results.find(result => !result.success)
 
 			if (failedResult) {
-				setLocalError(failedResult.error || 'Ошибка создания бронирования')
+				// Более понятное сообщение об ошибке
+				let errorMessage = failedResult.error || 'Ошибка создания бронирования'
+
+				// Специальная обработка для подозрительной активности
+				if (errorMessage.includes('подозрительная активность') || errorMessage.includes('Слишком много')) {
+					setToast({
+						message: errorMessage,
+						type: 'error'
+					})
+				}
+
+				setLocalError(errorMessage)
 			} else {
 				// Все бронирования успешны
 				setStep(3)
@@ -291,8 +308,9 @@ const BookingWidget = () => {
 					.catch(err => console.error('Error reloading slots:', err))
 			}
 		} catch (error) {
-			const errorMsg = 'Ошибка создания бронирования'
+			const errorMsg = error?.message || 'Ошибка создания бронирования'
 			setLocalError(errorMsg)
+			setToast({ message: errorMsg, type: 'error' })
 		} finally {
 			setBookingLoading(false)
 		}
@@ -647,6 +665,18 @@ const BookingWidget = () => {
 															)
 														})}
 													</div>
+
+													{/* Отображение ошибки при выборе слотов */}
+													{localError && (
+														<div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
+															<div className="flex items-start gap-2">
+																<svg className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+																	<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+																</svg>
+																<p className="text-sm text-red-300">{localError}</p>
+															</div>
+														</div>
+													)}
 
 													{selectedSlots.length > 0 && (
 														<button
