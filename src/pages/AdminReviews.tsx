@@ -751,7 +751,7 @@ function ReviewTableRow({ review, categories, onApprove, onReject, onDelete, onU
       </td>
 
       {/* Категория */}
-      <td className="px-4 py-4" style={{ minWidth: '270px' }}>
+      <td className="px-4 py-4" style={{ width: '200px', minWidth: '200px', maxWidth: '200px' }}>
         <CategoryDropdown
           categories={categories}
           value={review.category_id || null}
