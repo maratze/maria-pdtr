@@ -15,6 +15,7 @@ export interface Review {
   approved: boolean
   category_id: string | null
   categories?: { name: string } | null
+  ip_address: string | null
   created_at: string
 }
 

@@ -12,18 +12,32 @@ export async function getCategories() {
 }
 
 // Public API: Add a review (will be pending approval)
+// Использует Edge Function для сохранения IP-адреса
 export async function addReview({ name, email, message, rating = 5, photos = [] }: NewReview) {
-  // Используем RPC функцию для обхода RLS проблем
-  const { data, error } = await supabase
-    .rpc('insert_review', {
-      p_name: name,
-      p_email: email,
-      p_message: message,
-      p_rating: rating,
-      p_photos: photos
+  try {
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+    const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+
+    const response = await fetch(`${supabaseUrl}/functions/v1/submit-review`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${anonKey}`,
+        'apikey': anonKey
+      },
+      body: JSON.stringify({ name, email, message, rating, photos })
     })
 
-  return { data: data as Review[] | null, error }
+    const result = await response.json()
+
+    if (!response.ok) {
+      return { data: null, error: new Error(result.error || 'Failed to submit review') }
+    }
+
+    return { data: result.data as Review[] | null, error: null }
+  } catch (err) {
+    return { data: null, error: err as Error }
+  }
 }
 
 // Public API: List approved reviews only

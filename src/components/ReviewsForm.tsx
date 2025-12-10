@@ -166,7 +166,7 @@ export default function ReviewsForm({ onSubmitted }: ReviewsFormProps) {
                 <input
                   type="email"
                   className="w-full px-3 py-2.5 rounded-lg border border-slate-200 focus:border-ocean-600 focus:outline-none focus:ring-2 focus:ring-ocean-600/20 transition-all text-sm h-10"
-                  placeholder="ivan@example.com (опционально)"
+                  placeholder="ivan@example.com"
                   value={email}
                   onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
                 />

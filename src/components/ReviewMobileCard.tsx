@@ -93,6 +93,11 @@ export default function ReviewMobileCard({
 								year: 'numeric'
 							})}
 						</time>
+						{review.ip_address && (
+							<span className="text-xs text-slate-400 font-mono bg-slate-100 px-1.5 py-0.5 rounded mt-1 inline-block">
+								IP: {review.ip_address}
+							</span>
+						)}
 					</div>
 
 					{/* Status */}

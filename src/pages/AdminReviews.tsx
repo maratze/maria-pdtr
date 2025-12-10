@@ -361,6 +361,7 @@ export default function AdminReviews() {
                     <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Категория</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Отзыв</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Фото</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">IP</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Дата</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Статус</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Действия</th>
@@ -964,6 +965,17 @@ function ReviewTableRow({ review, categories, onApprove, onReject, onDelete, onU
               </div>
             </label>
           )
+        )}
+      </td>
+
+      {/* IP */}
+      <td className="px-4 py-4 whitespace-nowrap">
+        {review.ip_address ? (
+          <span className="text-xs text-slate-500 font-mono bg-slate-100 px-2 py-1 rounded">
+            {review.ip_address}
+          </span>
+        ) : (
+          <span className="text-xs text-slate-400">—</span>
         )}
       </td>
 
