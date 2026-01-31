@@ -91,12 +91,14 @@ export default function EditPeriodDialog({
 		})
 	}
 
-	// Генерируем опции времени с шагом в 1 час от 06:00 до 23:00
+	// Генерируем опции времени с шагом в 30 минут от 06:00 до 23:30
 	const generateTimeOptions = () => {
 		const options = []
 		for (let hour = 6; hour <= 23; hour++) {
-			const timeStr = `${hour.toString().padStart(2, '0')}:00`
-			options.push({ id: timeStr, label: timeStr })
+			const timeStr00 = `${hour.toString().padStart(2, '0')}:00`
+			options.push({ id: timeStr00, label: timeStr00 })
+			const timeStr30 = `${hour.toString().padStart(2, '0')}:30`
+			options.push({ id: timeStr30, label: timeStr30 })
 		}
 		return options
 	}

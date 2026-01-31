@@ -42,6 +42,7 @@ export default {
 			},
 			screens: {
 				'xs': '360px',
+				'min-sm': '480px',
 			},
 		},
 	},

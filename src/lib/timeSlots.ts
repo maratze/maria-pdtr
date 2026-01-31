@@ -304,7 +304,7 @@ export async function getOrCreateSlotsForDate(
 				date,
 				(period as any).work_start_time,
 				(period as any).work_end_time,
-				60 // 1 час по умолчанию
+				90 // 1.5 часа по умолчанию
 			);
 
 			// Создаем слоты в БД

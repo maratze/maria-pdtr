@@ -132,7 +132,7 @@ export default function Dropdown<T extends DropdownOption>({
 				<div
 					ref={dropdownRef}
 					data-dropdown-portal
-					className="fixed bg-white border border-slate-200 rounded-lg shadow-lg z-50 overflow-hidden"
+					className="fixed bg-white border border-slate-200 rounded-lg shadow-lg z-50 overflow-hidden max-h-60 overflow-y-auto"
 					style={{
 						top: `${position.top}px`,
 						left: `${position.left}px`,

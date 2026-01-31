@@ -35,10 +35,9 @@ const Contacts = () => {
 					</p>
 				</div>
 
-				{/* Социальные сети */}
 				<div className="flex justify-center gap-6 mb-16">
 					<a
-						href="https://instagram.com"
+						href="https://www.instagram.com/pdtr.moscow?igsh=MXM4cmFvZ3JjNHZvOQ%3D%3D&utm_source=qr"
 						target="_blank"
 						rel="noopener noreferrer"
 						className="w-14 h-14 flex items-center justify-center rounded-full border-2 border-slate-300 text-slate-600 hover:border-pink-500 hover:text-pink-500 hover:shadow-lg transition-all duration-300"
@@ -47,7 +46,7 @@ const Contacts = () => {
 						<FaInstagram className="text-2xl" />
 					</a>
 					<a
-						href="https://t.me"
+						href="https://t.me/maria_pdtr?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5%2C%20%D1%85%D0%BE%D1%87%D1%83%20%D0%B7%D0%B0%D0%BF%D0%B8%D1%81%D0%B0%D1%82%D1%8C%D1%81%D1%8F%20%D0%BD%D0%B0%20%D0%BF%D1%80%D0%B8%D0%B5%D0%BC"
 						target="_blank"
 						rel="noopener noreferrer"
 						className="w-14 h-14 flex items-center justify-center rounded-full border-2 border-slate-300 text-slate-600 hover:border-ocean-500 hover:text-ocean-500 hover:shadow-lg transition-all duration-300"

@@ -85,7 +85,7 @@ function Navigation() {
 					</div>
 
 					{/* Desktop Navigation Links */}
-					<div className="hidden min-[1000px]:flex items-center space-x-4">
+					<div className="hidden min-[1200px]:flex items-center space-x-4">
 						<a href="#about" onClick={(e) => handleSmoothScroll(e, 'about')} className="text-sm text-white hover:text-ocean-300 transition-all duration-300 font-light uppercase tracking-wide">
 							Обо мне
 						</a>
@@ -107,26 +107,29 @@ function Navigation() {
 					</div>
 
 					{/* CTA Buttons - Desktop */}
-					<div className="hidden min-[1000px]:flex gap-3 flex-shrink-0">
+					<div className="hidden min-[1200px]:flex gap-3 flex-shrink-0">
 						<a
-							href="https://t.me/moscow_pdtr"
+							href="https://t.me/maria_pdtr?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5%2C%20%D1%85%D0%BE%D1%87%D1%83%20%D0%B7%D0%B0%D0%BF%D0%B8%D1%81%D0%B0%D1%82%D1%8C%D1%81%D1%8F%20%D0%BD%D0%B0%20%D1%81%D0%B5%D0%B0%D0%BD%D1%81"
+							target="_blank"
+							rel="noopener noreferrer"
+							className="bg-gradient-to-r from-ocean-600 to-ocean-600 text-white px-6 py-3 rounded-full hover:bg-ocean-500 transform transition-all duration-300 text-md flex items-center gap-2 shadow-md hover:shadow-ocean-500/25 font-light"
+						>
+							<FaTelegramPlane className="text-xl" />
+							Заявка на сеанс
+						</a>
+						<a
+							href="https://t.me/maria_pdtr?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5%2C%20%D1%85%D0%BE%D1%87%D1%83%20%D0%B7%D0%B0%D0%BF%D0%B8%D1%81%D0%B0%D1%82%D1%8C%D1%81%D1%8F%20%D0%BD%D0%B0%20%D0%BE%D0%B1%D1%83%D1%87%D0%B5%D0%BD%D0%B8%D0%B5"
 							target="_blank"
 							rel="noopener noreferrer"
 							className="bg-white/10 text-white px-6 py-3 rounded-full hover:bg-white/20 transform transition-all duration-300 text-md flex items-center gap-2 shadow-md font-light"
 						>
 							<FaTelegramPlane className="text-xl" />
-							Telegram
+							Заявка на обучение
 						</a>
-						<button onClick={(e) => handleSmoothScroll(e, 'booking')} className="bg-gradient-to-r from-ocean-600 to-ocean-600 text-white px-6 py-3 rounded-full hover:bg-ocean-500 transform transition-all duration-300 text-md flex items-center gap-2 shadow-md hover:shadow-ocean-500/25 font-light">
-							<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-								<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.4} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-							</svg>
-							Записаться
-						</button>
 					</div>
 
 					{/* Mobile Burger Menu Button */}
-					<div className="min-[1000px]:hidden relative z-50">
+					<div className="min-[1200px]:hidden relative z-50">
 						<button
 							onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
 							className="text-white p-2 rounded-md transition-all duration-300 hover:text-white/70 relative z-50"
@@ -151,7 +154,7 @@ function Navigation() {
 			</div>
 
 			{/* Mobile Menu - Centered Overlay */}
-			<div className={`min-[1000px]:hidden fixed inset-0 z-40 transition-all duration-100 ${isMobileMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`}>
+			<div className={`min-[1200px]:hidden fixed inset-0 z-40 transition-all duration-100 ${isMobileMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`}>
 				<div className="absolute inset-0 bg-slate-900/90 backdrop-blur-md" onClick={() => setIsMobileMenuOpen(false)}></div>
 
 				{/* Menu Content */}
@@ -203,20 +206,26 @@ function Navigation() {
 							</a>
 						</div>
 
-						{/* CTA Button for mobile menu */}
-						<div className="pt-6 flex justify-center">
-							<button
-								onClick={(e) => {
-									handleSmoothScroll(e, 'booking')
-									setIsMobileMenuOpen(false)
-								}}
+						{/* CTA Buttons for mobile menu */}
+						<div className="pt-6 flex flex-col gap-3 items-center">
+							<a
+								href="https://t.me/maria_pdtr?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5%2C%20%D1%85%D0%BE%D1%87%D1%83%20%D0%B7%D0%B0%D0%BF%D0%B8%D1%81%D0%B0%D1%82%D1%8C%D1%81%D1%8F%20%D0%BD%D0%B0%20%D1%81%D0%B5%D0%B0%D0%BD%D1%81"
+								target="_blank"
+								rel="noopener noreferrer"
 								className="bg-ocean-800 text-white px-8 py-3 rounded-full hover:bg-ocean-700 transform transition-all duration-300 text-[13px] flex items-center gap-2 uppercase shadow-md hover:shadow-ocean-500/25"
 							>
-								<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-									<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.4} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-								</svg>
-								Записаться
-							</button>
+								<FaTelegramPlane className="text-xl" />
+								Заявка на сеанс
+							</a>
+							<a
+								href="https://t.me/maria_pdtr?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5%2C%20%D1%85%D0%BE%D1%87%D1%83%20%D0%B7%D0%B0%D0%BF%D0%B8%D1%81%D0%B0%D1%82%D1%8C%D1%81%D1%8F%20%D0%BD%D0%B0%20%D0%BE%D0%B1%D1%83%D1%87%D0%B5%D0%BD%D0%B8%D0%B5"
+								target="_blank"
+								rel="noopener noreferrer"
+								className="bg-white/10 text-white px-8 py-3 rounded-full hover:bg-white/20 transform transition-all duration-300 text-[13px] flex items-center gap-2 uppercase shadow-md"
+							>
+								<FaTelegramPlane className="text-xl" />
+								Заявка на обучение
+							</a>
 						</div>
 					</div>
 				</div>

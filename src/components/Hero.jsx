@@ -38,37 +38,26 @@ function Hero() {
 				</div>
 			</div>
 
-			<div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10 pt-24 sm:pt-32 pb-20">
-				<div className="flex sm:flex-row gap-2 min-[1000px]:hidden mb-4">
-					<button
-						onClick={(e) => {
-							e.preventDefault()
-							const targetElement = document.getElementById('booking')
-							if (targetElement) {
-								const elementPosition = targetElement.getBoundingClientRect().top + window.pageYOffset
-								const offsetPosition = elementPosition
-								window.scrollTo({
-									top: offsetPosition,
-									behavior: 'smooth'
-								})
-							}
-						}}
-						className="bg-gradient-to-r from-ocean-600 to-ocean-600 text-white px-5 py-3 rounded-full hover:bg-ocean-500 transform transition-all duration-300 text-[14px] flex items-center justify-center gap-2 shadow-md hover:shadow-ocean-500/25 font-light"
-					>
-						<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.4} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-						</svg>
-						Записаться
-					</button>
-
+			<div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10 pt-20 min-sm:pt-24 sm:pt-32 pb-20">
+				<div className="flex flex-col min-sm:flex-row gap-2 min-[1200px]:hidden mb-4">
 					<a
-						href="https://t.me/moscow_pdtr"
+						href="https://t.me/maria_pdtr?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5%2C%20%D1%85%D0%BE%D1%87%D1%83%20%D0%B7%D0%B0%D0%BF%D0%B8%D1%81%D0%B0%D1%82%D1%8C%D1%81%D1%8F%20%D0%BD%D0%B0%20%D1%81%D0%B5%D0%B0%D0%BD%D1%81"
 						target="_blank"
 						rel="noopener noreferrer"
-						className="bg-white/10 text-white px-5 py-3 rounded-full hover:bg-white-20 transform transition-all duration-300 text-[14px] flex items-center justify-center gap-2 shadow-md hover:shadow-white-500/25 font-light"
+						className="bg-gradient-to-r from-ocean-600 to-ocean-600 text-white px-5 py-3 rounded-full hover:bg-ocean-500 transform transition-all duration-300 text-base flex items-center justify-center gap-2 shadow-md hover:shadow-ocean-500/25 font-light"
 					>
 						<FaTelegramPlane className="text-xl" />
-						<span>Telegram</span>
+						Заявка на сеанс
+					</a>
+
+					<a
+						href="https://t.me/maria_pdtr?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5%2C%20%D1%85%D0%BE%D1%87%D1%83%20%D0%B7%D0%B0%D0%BF%D0%B8%D1%81%D0%B0%D1%82%D1%8C%D1%81%D1%8F%20%D0%BD%D0%B0%20%D0%BE%D0%B1%D1%83%D1%87%D0%B5%D0%BD%D0%B8%D0%B5"
+						target="_blank"
+						rel="noopener noreferrer"
+						className="bg-white/10 text-white px-5 py-3 rounded-full hover:bg-white-20 transform transition-all duration-300 text-base flex items-center justify-center gap-2 shadow-md hover:shadow-white-500/25 font-light"
+					>
+						<FaTelegramPlane className="text-xl" />
+						<span>Заявка на обучение</span>
 					</a>
 				</div>
 				<div className="relative flex items-baseline justify-self-center md:justify-self-stretch lg:items-center">

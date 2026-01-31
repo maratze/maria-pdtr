@@ -31,12 +31,12 @@ export interface GeneratedSlot {
  * Генерирует слоты времени для периода на основе времени работы
  * @param period - период расписания
  * @param bookings - существующие бронирования для фильтрации
- * @param slotDurationMinutes - длительность слота в минутах (по умолчанию 60)
+ * @param slotDurationMinutes - длительность слота в минутах (по умолчанию 90)
  */
 export function generateSlotsForPeriod(
 	period: SchedulePeriodWithCity,
 	bookings: OptimizedBooking[] = [],
-	slotDurationMinutes: number = 60
+	slotDurationMinutes: number = 90
 ): GeneratedSlot[] {
 	const slots: GeneratedSlot[] = []
 
@@ -171,7 +171,7 @@ export function generateSlotsForDateAndCity(
 			period.work_start_time,
 			period.work_end_time,
 			bookings,
-			60 // 1 час по умолчанию
+			90 // 1.5 часа по умолчанию
 		)
 		allSlots.push(...periodSlots)
 	}

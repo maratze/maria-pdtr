@@ -120,9 +120,9 @@ const Services = () => {
 					)}
 				</div>
 
-				{/* Онлайн запись - показываем всем пользователям */}
+				{/* Онлайн запись - временно скрыто */}
+				{/* 
 				<div className="max-w-6xl mx-auto">
-					{/* Заголовок раздела */}
 					<div id="booking" className="text-center mb-8 sm:mb-10 pt-24">
 						<SectionHeader title="Онлайн запись" isDarkMode={true} />
 						<SectionDescription text="Выберите удобные дату и время для консультации" isDarkMode={true} />
@@ -132,6 +132,7 @@ const Services = () => {
 						<BookingWidget />
 					</div>
 				</div>
+				*/}
 			</div>
 		</section>
 	)
