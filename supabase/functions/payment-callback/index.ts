@@ -9,7 +9,7 @@ import { timingSafeEqual } from 'https://deno.land/std@0.177.0/crypto/timing_saf
 
 // PayKeeper IP ranges — callbacks should only originate from these addresses.
 // Verify with PayKeeper documentation for your account.
-const PAYKEEPER_IPS = ['195.64.93.10', '195.64.93.11', '194.165.28.0', '194.165.28.255']
+const PAYKEEPER_IPS = ['195.64.93.10', '195.64.93.11', '194.165.28.0', '194.165.28.255', '78.155.216.168']
 
 function getClientIp(req: Request): string {
   return (
