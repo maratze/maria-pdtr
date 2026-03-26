@@ -65,8 +65,18 @@ const Contacts = () => {
 					</a>
 				</div>
 
+				{/* Способы оплаты */}
+				<div className="text-center pb-10 border-t border-slate-200 pt-10">
+					<p className="text-sm text-slate-500 mb-4">Принимаем к оплате</p>
+					<img
+						src="/payment-logos.png"
+						alt="МИР, СБП, Visa, Mastercard, PayKeeper"
+						className="mx-auto h-8 object-contain"
+					/>
+				</div>
+
 				{/* Футер с копирайтом и юридической информацией */}
-				<div className="text-center pt-12 border-t border-slate-200">
+				<div className="text-center pt-6 border-t border-slate-200">
 					<p className="text-slate-600 mb-3">
 						© pdtr.moscow 2025. Все права защищены
 					</p>

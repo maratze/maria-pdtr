@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import Logo from './Logo'
-import { FaTelegramPlane } from 'react-icons/fa'
+import { FaTelegramPlane, FaCalendarAlt } from 'react-icons/fa'
 
 function Navigation() {
 	const [isScrolled, setIsScrolled] = useState(false)
@@ -109,13 +109,12 @@ function Navigation() {
 					{/* CTA Buttons - Desktop */}
 					<div className="hidden min-[1200px]:flex gap-3 flex-shrink-0">
 						<a
-							href="https://t.me/maria_pdtr?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5%2C%20%D1%85%D0%BE%D1%87%D1%83%20%D0%B7%D0%B0%D0%BF%D0%B8%D1%81%D0%B0%D1%82%D1%8C%D1%81%D1%8F%20%D0%BD%D0%B0%20%D1%81%D0%B5%D0%B0%D0%BD%D1%81"
-							target="_blank"
-							rel="noopener noreferrer"
+							href="#booking"
+							onClick={(e) => handleSmoothScroll(e, 'booking')}
 							className="bg-gradient-to-r from-ocean-600 to-ocean-600 text-white px-6 py-3 rounded-full hover:bg-ocean-500 transform transition-all duration-300 text-md flex items-center gap-2 shadow-md hover:shadow-ocean-500/25 font-light"
 						>
-							<FaTelegramPlane className="text-xl" />
-							Заявка на сеанс
+							<FaCalendarAlt className="text-base" />
+							Онлайн запись
 						</a>
 						<a
 							href="https://t.me/maria_pdtr?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5%2C%20%D1%85%D0%BE%D1%87%D1%83%20%D0%B7%D0%B0%D0%BF%D0%B8%D1%81%D0%B0%D1%82%D1%8C%D1%81%D1%8F%20%D0%BD%D0%B0%20%D0%BE%D0%B1%D1%83%D1%87%D0%B5%D0%BD%D0%B8%D0%B5"
@@ -209,13 +208,12 @@ function Navigation() {
 						{/* CTA Buttons for mobile menu */}
 						<div className="pt-6 flex flex-col gap-3 items-center">
 							<a
-								href="https://t.me/maria_pdtr?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5%2C%20%D1%85%D0%BE%D1%87%D1%83%20%D0%B7%D0%B0%D0%BF%D0%B8%D1%81%D0%B0%D1%82%D1%8C%D1%81%D1%8F%20%D0%BD%D0%B0%20%D1%81%D0%B5%D0%B0%D0%BD%D1%81"
-								target="_blank"
-								rel="noopener noreferrer"
+								href="#booking"
+								onClick={(e) => { handleSmoothScroll(e, 'booking'); setIsMobileMenuOpen(false); }}
 								className="bg-ocean-800 text-white px-8 py-3 rounded-full hover:bg-ocean-700 transform transition-all duration-300 text-[13px] flex items-center gap-2 uppercase shadow-md hover:shadow-ocean-500/25"
 							>
-								<FaTelegramPlane className="text-xl" />
-								Заявка на сеанс
+								<FaCalendarAlt className="text-base" />
+								Онлайн запись
 							</a>
 							<a
 								href="https://t.me/maria_pdtr?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5%2C%20%D1%85%D0%BE%D1%87%D1%83%20%D0%B7%D0%B0%D0%BF%D0%B8%D1%81%D0%B0%D1%82%D1%8C%D1%81%D1%8F%20%D0%BD%D0%B0%20%D0%BE%D0%B1%D1%83%D1%87%D0%B5%D0%BD%D0%B8%D0%B5"

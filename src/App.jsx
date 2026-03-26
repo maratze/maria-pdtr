@@ -18,6 +18,8 @@ import AdminServices from './pages/AdminServices'
 import AdminSchedule from './pages/AdminSchedule'
 import AdminCases from './pages/AdminCases'
 import AdminBookingsHistory from './pages/AdminBookingsHistory'
+import PaymentSuccess from './pages/PaymentSuccess'
+import PaymentFail from './pages/PaymentFail'
 import NotFound from './pages/NotFound'
 import './App.css'
 
@@ -48,6 +50,10 @@ function App() {
 					</div>
 				}
 			/>
+
+			{/* Payment result pages (standalone, no Navigation) */}
+			<Route path="/payment/success" element={<PaymentSuccess />} />
+			<Route path="/payment/fail"    element={<PaymentFail />} />
 
 			{/* Auth routes without Navigation */}
 			<Route

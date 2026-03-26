@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import { getCities } from '../lib/cities'
 import { getPublicActiveSchedulePeriodsByCity } from '../lib/schedule'
-import { getPublicBookingsByCityAndDates, createPublicBooking } from '../lib/bookings'
+import { getPublicBookingsByCityAndDates } from '../lib/bookings'
 import { getOrCreateSlotsForDate, getAvailableSlotsByCityAndDateRange } from '../lib/timeSlots'
 import Toast from './Toast'
+import { PAYMENT_CONFIG } from '../config/payment'
 
 const BookingWidget = () => {
 	const [cities, setCities] = useState([])
@@ -22,7 +23,8 @@ const BookingWidget = () => {
 	const [clientName, setClientName] = useState('')
 	const [clientPhone, setClientPhone] = useState('')
 	const [clientEmail, setClientEmail] = useState('')
-	const [bookingLoading, setBookingLoading] = useState(false)
+	const [isSubmitting, setIsSubmitting] = useState(false)
+	const [returnedFromPayment, setReturnedFromPayment] = useState(null)
 	const [toast, setToast] = useState(null)
 	const [localError, setLocalError] = useState(null)
 
@@ -209,74 +211,77 @@ const BookingWidget = () => {
 
 	const handleSubmit = async (e) => {
 		e.preventDefault()
-		setLocalError(null) // Очищаем предыдущие ошибки
-
+		if (isSubmitting) return
 		if (selectedSlots.length === 0 || !clientName || !clientPhone) return
 
-		try {
-			setBookingLoading(true)
-			setLocalError(null)
+		setLocalError(null)
+		setIsSubmitting(true)
 
-			// ОПТИМИЗАЦИЯ: Создаём все бронирования параллельно вместо последовательного цикла
-			const bookingPromises = selectedSlots.map(slot =>
-				createPublicBooking(
-					slot.periodId,
-					slot.date,
-					slot.startTime,
-					slot.endTime,
+		try {
+			// Save form data before redirect so user can retry on Back button
+			sessionStorage.setItem('pendingBooking', JSON.stringify({ clientName, clientPhone, clientEmail }))
+
+			const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+			const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+
+			const res = await fetch(`${supabaseUrl}/functions/v1/create-payment`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'apikey': anonKey,
+				},
+				body: JSON.stringify({
+					slots: selectedSlots.map(s => ({
+						periodId: s.periodId,
+						date: s.date,
+						startTime: s.startTime,
+						endTime: s.endTime,
+					})),
 					clientName,
 					clientPhone,
-					clientEmail
-				)
-			)
+					clientEmail,
+				}),
+			})
 
-			// Ждём завершения всех запросов
-			const results = await Promise.all(bookingPromises)
+			const data = await res.json()
 
-			// Проверяем результаты
-			const failedResult = results.find(result => !result.success)
-
-			if (failedResult) {
-				// Более понятное сообщение об ошибке
-				let errorMessage = failedResult.error || 'Ошибка создания бронирования'
-
-				// Специальная обработка для подозрительной активности
-				if (errorMessage.includes('подозрительная активность') || errorMessage.includes('Слишком много')) {
-					setToast({
-						message: errorMessage,
-						type: 'error'
-					})
-				}
-
-				setLocalError(errorMessage)
-			} else {
-				// Все бронирования успешны
-				setStep(3)
-				setLocalError(null) // Очищаем ошибку при успехе
-
-				// Перезагружаем слоты асинхронно, чтобы показать обновлённые данные
-				getOrCreateSlotsForDate(selectedCity, selectedDate)
-					.then(slots => {
-						const formattedSlots = slots
-							.filter(slot => !slot.is_booked) // Показываем только доступные
-							.map(slot => ({
-								id: slot.id,
-								periodId: slot.period_id,
-								date: slot.slot_date,
-								startTime: slot.start_time.slice(0, 5),
-								endTime: slot.end_time.slice(0, 5),
-								isBooked: slot.is_booked,
-							}))
-						setDaySlots(formattedSlots)
-					})
-					.catch(err => console.error('Error reloading slots:', err))
+			if (!res.ok || !data.formAction) {
+				const msg = data.error?.startsWith('slot_unavailable')
+					? 'Слот уже занят. Выберите другое время.'
+					: (!res.ok && res.status >= 500)
+						? 'Ошибка сервера. Попробуйте позже или позвоните нам.'
+						: data.error || 'Не удалось создать платёж. Попробуйте снова.'
+				setLocalError(msg)
+				sessionStorage.removeItem('pendingBooking')
+				setIsSubmitting(false)
+				return
 			}
-		} catch (error) {
-			const errorMsg = error?.message || 'Ошибка создания бронирования'
-			setLocalError(errorMsg)
-			setToast({ message: errorMsg, type: 'error' })
-		} finally {
-			setBookingLoading(false)
+
+			sessionStorage.setItem('bookingIds', (data.bookingIds || []).join(','))
+
+			setToast({ message: `${selectedSlots.length > 1 ? 'Слоты зарезервированы' : 'Слот зарезервирован'} на 15 минут. Завершите оплату вовремя.`, type: 'info' })
+
+			// Submit form to PayKeeper via POST (PayKeeper uses HTML form integration)
+			const form = document.createElement('form')
+			form.method = 'POST'
+			form.action = data.formAction
+			Object.entries(data.formFields).forEach(([key, value]) => {
+				const input = document.createElement('input')
+				input.type = 'hidden'
+				input.name = key
+				input.value = value
+				form.appendChild(input)
+			})
+			document.body.appendChild(form)
+			form.submit()
+
+		} catch (err) {
+			const msg = err?.message?.includes('fetch') || err?.name === 'TypeError'
+				? 'Проверьте интернет-соединение и попробуйте снова.'
+				: 'Не удалось создать платёж. Попробуйте позже или позвоните нам.'
+			setLocalError(msg)
+			sessionStorage.removeItem('pendingBooking')
+			setIsSubmitting(false)
 		}
 	}
 
@@ -345,6 +350,26 @@ const BookingWidget = () => {
 		}
 	}
 
+	useEffect(() => {
+		const payUrl = sessionStorage.getItem('paymentUrl')
+		const saved = sessionStorage.getItem('pendingBooking')
+		if (payUrl && saved) {
+			try {
+				setReturnedFromPayment({ payUrl, ...JSON.parse(saved) })
+			} catch (_) {
+				sessionStorage.removeItem('paymentUrl')
+				sessionStorage.removeItem('pendingBooking')
+			}
+		}
+	}, [])
+
+	const handleCancelReturn = () => {
+		sessionStorage.removeItem('paymentUrl')
+		sessionStorage.removeItem('pendingBooking')
+		sessionStorage.removeItem('bookingId')
+		setReturnedFromPayment(null)
+	}
+
 	const monthNames = [
 		'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
 		'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
@@ -371,44 +396,31 @@ const BookingWidget = () => {
 				/>
 			)}
 
-			<div className="space-y-4 lg:space-y-5">
-				{step === 3 ? (
-					<div className="text-center py-8">
-						<div className="inline-flex items-center justify-center w-16 h-16 bg-green-500/20 rounded-full mb-4">
-							<svg className="w-8 h-8 text-green-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-								<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-							</svg>
-						</div>
-						<h3 className="text-xl lg:text-2xl font-light text-white mb-3">
-							{selectedSlots.length === 1 ? 'Запись успешно создана!' : 'Записи успешно созданы!'}
-						</h3>
-						<p className="text-base text-slate-300 mb-2">
-							{selectedSlots.length > 0 && new Date(selectedSlots[0].date + 'T00:00:00').toLocaleDateString('ru-RU', {
-								day: 'numeric',
-								month: 'long',
-								year: 'numeric'
-							})}
-						</p>
-						<div className="text-lg lg:text-xl text-ocean-300 mb-6">
-							{selectedSlots.length === 1 ? (
-								<p>{selectedSlots[0].startTime} - {selectedSlots[0].endTime}</p>
-							) : (
-								<div className="space-y-1">
-									{selectedSlots.map((slot, idx) => (
-										<p key={idx}>{slot.startTime} - {slot.endTime}</p>
-									))}
-								</div>
-							)}
-						</div>
-						<button
-							onClick={handleReset}
-							className="px-6 py-3 rounded-lg bg-ocean-600 text-white font-medium text-base hover:bg-ocean-700 transition-colors"
+			{/* Back-from-payment detection banner */}
+			{returnedFromPayment && (
+				<div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-lg mb-4">
+					<p className="text-sm text-amber-300 mb-3">
+						Вы вернулись со страницы оплаты. Хотите продолжить оплату?
+					</p>
+					<div className="flex gap-2">
+						<a
+							href={returnedFromPayment.payUrl}
+							className="px-4 py-2 bg-ocean-600 text-white text-sm rounded hover:bg-ocean-700 transition-colors"
 						>
-							Записаться ещё
+							Продолжить оплату
+						</a>
+						<button
+							onClick={handleCancelReturn}
+							className="px-4 py-2 bg-white/10 text-slate-300 text-sm rounded hover:bg-white/20 transition-colors"
+						>
+							Отменить
 						</button>
 					</div>
-				) : (
-					<>
+				</div>
+			)}
+
+			<div className="space-y-4 lg:space-y-5">
+				<>
 						<div className="mb-6 lg:mb-8">
 							<label className="block text-sm font-medium text-slate-300 mb-3">
 								Выберите город
@@ -665,12 +677,14 @@ const BookingWidget = () => {
 														</button>
 														<button
 															type="submit"
-															disabled={bookingLoading || !clientName || !clientPhone || phoneError || emailError}
+															disabled={isSubmitting || !clientName || !clientPhone || phoneError || emailError}
 															className="flex-1 px-6 py-2.5 rounded bg-ocean-600 text-white font-medium text-sm hover:bg-ocean-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 														>
-															{bookingLoading ? 'Создание записи...' : 'Записаться'}
+															{isSubmitting ? 'Подождите...' : `Оплатить ${PAYMENT_CONFIG.prepaymentAmount} ₽`}
 														</button>
-													</div>												{/* Локальное отображение ошибки над кнопкой */}
+													</div>
+												<p className="text-sm text-slate-400 mt-1">Предоплата {PAYMENT_CONFIG.prepaymentAmount} ₽ · Остаток оплачивается на месте</p>
+												{/* Локальное отображение ошибки над кнопкой */}
 													{localError && (
 														<div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
 															<div className="flex items-start gap-2">
@@ -688,8 +702,7 @@ const BookingWidget = () => {
 								)}
 							</div>
 						</div>
-					</>
-				)}
+				</>
 			</div>
 		</>
 	)
