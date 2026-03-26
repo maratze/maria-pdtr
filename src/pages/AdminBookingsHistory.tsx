@@ -172,6 +172,7 @@ export default function AdminBookingsHistory() {
 												<th className="px-4 py-2 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Время</th>
 												<th className="px-4 py-2 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Имя</th>
 												<th className="px-4 py-2 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Email</th>
+												<th className="px-4 py-2 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Оплата</th>
 												<th className="px-4 py-2 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Создано</th>
 											</tr>
 										</thead>
@@ -188,6 +189,26 @@ export default function AdminBookingsHistory() {
 														</td>
 														<td className="px-4 py-3 text-sm font-medium text-slate-900">{booking.client_name}</td>
 														<td className="px-4 py-3 text-sm text-slate-500">{booking.client_email || '-'}</td>
+														<td className="px-4 py-3">
+															{booking.payment_status === 'paid' ? (
+																<span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
+																	<span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+																	Оплачено
+																</span>
+															) : booking.payment_status === 'pending' ? (
+																<span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
+																	<span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+																	Ожидает
+																</span>
+															) : booking.payment_status === 'failed' ? (
+																<span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">
+																	<span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+																	Не оплачено
+																</span>
+															) : (
+																<span className="text-xs text-slate-400">—</span>
+															)}
+														</td>
 														<td className="px-4 py-3 text-sm text-slate-500">
 															{booking.created_at && new Date(booking.created_at).toLocaleDateString('ru-RU', {
 																day: 'numeric',

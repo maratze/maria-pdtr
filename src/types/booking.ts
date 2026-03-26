@@ -59,6 +59,8 @@ export interface TimeSlotWithPeriod extends TimeSlot {
 
 export type BookingStatus = 'pending' | 'confirmed' | 'cancelled' | 'completed'
 
+export type PaymentStatus = 'pending' | 'paid' | 'failed' | 'expired'
+
 export interface Booking {
 	id: string
 	slot_id: string
@@ -67,6 +69,7 @@ export interface Booking {
 	client_phone: string
 	client_email: string
 	status: BookingStatus
+	payment_status?: PaymentStatus
 	notes: string | null
 	created_at?: string
 	updated_at?: string

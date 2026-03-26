@@ -215,11 +215,31 @@ export default function SlotDetailsDialog({ isOpen, slot, onClose, onBookingDele
 															ID: {booking.id.slice(0, 8)}...
 														</p>
 													</div>
-													<span
-														className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${status.color}`}
-													>
-														{status.label}
-													</span>
+													<div className="flex items-center gap-2 flex-wrap justify-end">
+														<span
+															className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${status.color}`}
+														>
+															{status.label}
+														</span>
+														{booking.payment_status === 'paid' && (
+															<span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
+																<span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+																Оплачено
+															</span>
+														)}
+														{booking.payment_status === 'pending' && (
+															<span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
+																<span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+																Ожидает оплаты
+															</span>
+														)}
+														{booking.payment_status === 'failed' && (
+															<span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">
+																<span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+																Не оплачено
+															</span>
+														)}
+													</div>
 												</div>
 
 												{/* Контактная информация */}
