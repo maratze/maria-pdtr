@@ -26,7 +26,7 @@ function formatTime(timeStr: string): string {
 export default function PaymentSuccess() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
-  const bookingId = searchParams.get('booking_id')
+  const bookingId = searchParams.get('booking_ids')?.split(',')[0] ?? searchParams.get('booking_id')
 
   const [status, setStatus]   = useState<Status>('polling')
   const [slot, setSlot]       = useState<SlotInfo | null>(null)
@@ -109,7 +109,7 @@ export default function PaymentSuccess() {
               <p className="font-medium text-slate-800">{formatDate(slot.slot_date)}</p>
               <p className="text-slate-700">{formatTime(slot.start_time)} — {formatTime(slot.end_time)}</p>
             </div>
-            <p className="text-xs text-slate-400 mb-6">Предоплата 500 ₽ принята. Остаток оплачивается на месте.</p>
+            <p className="text-xs text-slate-400 mb-6">Предоплата 1 000 ₽ принята. Остаток оплачивается на месте.</p>
             <button
               onClick={() => navigate('/')}
               className="w-full py-3 px-6 bg-ocean-600 hover:bg-ocean-700 text-white rounded-xl font-medium transition-colors"
